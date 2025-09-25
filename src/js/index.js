@@ -854,11 +854,11 @@ class PetShopApp {
   // Placeholder para outras páginas
   async renderClientes() {
     const content = document.getElementById("content");
-    
+
     try {
       const clients = await store.getClients();
 
-    content.innerHTML = `
+      content.innerHTML = `
       <div class="page-header">
         <div class="page-title">
           <h1>Clientes</h1>
@@ -900,7 +900,7 @@ class PetShopApp {
 
       this.setupClientEvents();
     } catch (error) {
-      console.error('❌ Erro ao carregar clientes:', error);
+      console.error("❌ Erro ao carregar clientes:", error);
       content.innerHTML = `
         <div class="page-header">
           <h1>Clientes</h1>
@@ -1869,17 +1869,17 @@ class PetShopApp {
   // ===== PÁGINA DE SERVIÇOS =====
   async renderServicos() {
     const content = document.getElementById("content");
-    
+
     try {
       const services = await store.getServices();
 
-    // Verificar se é primeira execução (sem serviços)
-    if (services.length === 0) {
-      this.renderServicosOnboarding();
-      return;
-    }
+      // Verificar se é primeira execução (sem serviços)
+      if (services.length === 0) {
+        this.renderServicosOnboarding();
+        return;
+      }
 
-    content.innerHTML = `
+      content.innerHTML = `
       <div class="page-header">
         <div class="page-title">
           <h1>Serviços</h1>
@@ -1916,7 +1916,7 @@ class PetShopApp {
 
       this.setupServiceEvents();
     } catch (error) {
-      console.error('❌ Erro ao carregar serviços:', error);
+      console.error("❌ Erro ao carregar serviços:", error);
       content.innerHTML = `
         <div class="page-header">
           <h1>Serviços</h1>
@@ -2692,11 +2692,11 @@ class PetShopApp {
   // ===== MÉTODOS DE AGENDAMENTOS =====
   async renderAgendamentos() {
     const content = document.getElementById("content");
-    
+
     try {
       const appointments = await store.getAppointments();
 
-    content.innerHTML = `
+      content.innerHTML = `
       <div class="page-header">
         <div class="page-title">
           <h1>Agendamentos</h1>
@@ -2760,7 +2760,7 @@ class PetShopApp {
 
       this.setupAppointmentEvents();
     } catch (error) {
-      console.error('❌ Erro ao carregar agendamentos:', error);
+      console.error("❌ Erro ao carregar agendamentos:", error);
       content.innerHTML = `
         <div class="page-header">
           <h1>Agendamentos</h1>
@@ -2916,11 +2916,11 @@ class PetShopApp {
 
   async renderPets() {
     const content = document.getElementById("content");
-    
+
     try {
       const pets = await store.getPets();
 
-    content.innerHTML = `
+      content.innerHTML = `
       <div class="page-header">
         <div class="page-title">
           <h1>Pets</h1>
@@ -2946,8 +2946,7 @@ class PetShopApp {
         <div class="filter-actions">
           <select id="petClientFilter" class="form-select">
             <option value="">Todos os clientes</option>
-            ${store
-              .getClients()
+            ${(await store.getClients())
               .map(
                 (client) =>
                   `<option value="${client.id}">${client.nomeCompleto}</option>`
@@ -2969,7 +2968,7 @@ class PetShopApp {
 
       this.setupPetEvents();
     } catch (error) {
-      console.error('❌ Erro ao carregar pets:', error);
+      console.error("❌ Erro ao carregar pets:", error);
       content.innerHTML = `
         <div class="page-header">
           <h1>Pets</h1>
