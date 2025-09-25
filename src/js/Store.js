@@ -204,6 +204,11 @@ class Store {
       // Buscar dados diretamente do Firebase
       const items = await window.firebaseService.getAllDocuments(storeName);
       console.log(`✅ ${storeName} carregados da nuvem:`, items.length, 'itens');
+      
+      // Sincronizar com localStorage para manter consistência
+      localStorage.setItem(this.stores[storeName], JSON.stringify(items));
+      console.log(`🔄 ${storeName} sincronizado com localStorage`);
+      
       return items;
     } catch (error) {
       console.error(`❌ Erro ao carregar ${storeName} da nuvem, usando localStorage:`, error);
@@ -651,6 +656,18 @@ class Store {
     return prontuarios
       .filter((p) => p.petId === petId)
       .sort((a, b) => new Date(b.dataConsulta) - new Date(a.dataConsulta));
+  }
+
+  // Função para limpar cache e forçar sincronização
+  async clearCacheAndSync() {
+    console.log("🧹 Limpando cache e forçando sincronização...");
+    
+    // Limpar localStorage
+    Object.values(this.stores).forEach(storeKey => {
+      localStorage.removeItem(storeKey);
+    });
+    
+    console.log("✅ Cache limpo, dados serão recarregados do Firebase");
   }
 
   // Função para limpar dados corrompidos

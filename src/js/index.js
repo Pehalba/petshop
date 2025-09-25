@@ -2933,6 +2933,9 @@ class PetShopApp {
           <button class="btn btn-primary" onclick="app.showPetForm()">
             <i class="icon-plus"></i> Novo Pet
           </button>
+          <button class="btn btn-outline" onclick="app.clearCacheAndReload()" style="margin-left: 10px;">
+            <i class="icon-refresh"></i> Sincronizar Dados
+          </button>
         </div>
       </div>
 
@@ -3156,6 +3159,16 @@ class PetShopApp {
   }
 
   // ===== MÉTODOS DE PETS =====
+  async clearCacheAndReload() {
+    try {
+      await store.clearCacheAndSync();
+      ui.success("Cache limpo! Recarregando dados...");
+      await this.renderPets();
+    } catch (error) {
+      ui.error("Erro ao limpar cache: " + error.message);
+    }
+  }
+
   async showPetForm(petId = null, preSelectedClientId = null) {
     const isEdit = petId !== null;
     const pet = isEdit ? await store.getPet(petId) : null;
