@@ -3454,9 +3454,12 @@ class PetShopApp {
     console.log("🔍 Pet encontrado:", pet);
 
     const client = await store.getClient(pet.clienteId);
+    console.log("🔍 Cliente encontrado:", client);
     const idade = pet.dataNascimento
       ? utils.calculateAge(pet.dataNascimento)
       : pet.idade || "-";
+    console.log("🔍 Idade calculada:", idade);
+    console.log("🔍 Criando conteúdo HTML...");
 
     const content = `
       <div class="detail-container">
