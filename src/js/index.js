@@ -338,10 +338,22 @@ class PetShopApp {
 
     // Renderizar página
     setTimeout(() => {
-      if (this.routes[this.currentPage]) {
-        this.routes[this.currentPage]();
+      try {
+        if (this.routes[this.currentPage]) {
+          this.routes[this.currentPage]();
+        }
+        ui.hideLoading(content);
+      } catch (error) {
+        console.error("Erro ao carregar página:", error);
+        ui.hideLoading(content);
+        content.innerHTML = `
+          <div class="error-state">
+            <h2>Erro ao carregar página</h2>
+            <p>Ocorreu um erro inesperado. Por favor, recarregue a página.</p>
+            <button onclick="location.reload()" class="btn btn-primary">Recarregar</button>
+          </div>
+        `;
       }
-      ui.hideLoading(content);
     }, 100);
   }
 
@@ -639,8 +651,8 @@ class PetShopApp {
     const orders = store.getOrders();
 
     const today = new Date().toISOString().split("T")[0];
-    const todayAppointments = appointments.filter((apt) =>
-      apt.dataHora.startsWith(today)
+    const todayAppointments = appointments.filter(
+      (apt) => apt.dataHoraInicio && apt.dataHoraInicio.startsWith(today)
     );
     const pendingOrders = orders.filter((order) => order.status === "pendente");
 
@@ -734,18 +746,29 @@ class PetShopApp {
     return `
             <div class="appointments-list">
                 ${appointments
-                  .map(
-                    (apt) => `
+                  .map((apt) => {
+                    const client = store.getClient(apt.clienteId);
+                    const pet = apt.petId ? store.getPet(apt.petId) : null;
+                    const time = apt.dataHoraInicio
+                      ? new Date(apt.dataHoraInicio).toLocaleTimeString(
+                          "pt-BR",
+                          { hour: "2-digit", minute: "2-digit" }
+                        )
+                      : "N/A";
+
+                    return `
                     <div class="appointment-item">
-                        <div class="appointment-time">${utils.formatTime(
-                          apt.dataHora
-                        )}</div>
+                        <div class="appointment-time">${time}</div>
                         <div class="appointment-details">
                             <div class="appointment-client">${
-                              apt.clienteNome
+                              client
+                                ? client.nomeCompleto
+                                : "Cliente não encontrado"
                             }</div>
-                            <div class="appointment-pet">${apt.petNome}</div>
-                            <div class="appointment-services">${apt.servicosSelecionados
+                            <div class="appointment-pet">${
+                              pet ? pet.nome : "Sem pet"
+                            }</div>
+                            <div class="appointment-services">${apt.itens
                               .map((s) => s.nome)
                               .join(", ")}</div>
                         </div>
@@ -755,8 +778,8 @@ class PetShopApp {
                     }</span>
                         </div>
                     </div>
-                `
-                  )
+                `;
+                  })
                   .join("")}
             </div>
         `;
@@ -1360,9 +1383,20 @@ class PetShopApp {
       </div>
       <div class="form-row">
         <div class="form-group">
+          <label>Porte</label>
+          <select name="petPorte[]" class="form-select">
+            <option value="">Selecione</option>
+            <option value="pequeno">Pequeno</option>
+            <option value="medio">Médio</option>
+            <option value="grande">Grande</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Data de Nascimento</label>
           <input type="date" name="petDataNascimento[]" class="form-input">
         </div>
+      </div>
+      <div class="form-row">
         <div class="form-group">
           <label>Peso Aproximado (kg)</label>
           <input type="number" name="petPeso[]" class="form-input" step="0.1" min="0">
@@ -1463,6 +1497,7 @@ class PetShopApp {
               especie: formData.getAll("petEspecie[]")[i] || "cão",
               raca: formData.getAll("petRaca[]")[i] || "",
               sexo: formData.getAll("petSexo[]")[i] || "",
+              porte: formData.getAll("petPorte[]")[i] || "",
               dataNascimento: formData.getAll("petDataNascimento[]")[i] || "",
               pesoAproximadoKg:
                 parseFloat(formData.getAll("petPeso[]")[i]) || null,
@@ -2604,6 +2639,217 @@ class PetShopApp {
     }
   }
 
+  // ===== MÉTODOS DE AGENDAMENTOS =====
+  renderAgendamentos() {
+    const content = document.getElementById("content");
+    const appointments = store.getAppointments();
+
+    content.innerHTML = `
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Agendamentos</h1>
+          <p>Gerencie os agendamentos de serviços</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="app.showAppointmentForm()">
+            <i class="icon-plus"></i> Novo Agendamento
+          </button>
+        </div>
+      </div>
+
+      <div class="page-filters">
+        <div class="search-box">
+          <input 
+            type="text" 
+            id="appointmentSearch" 
+            placeholder="Buscar por cliente, pet ou serviço..."
+            class="form-input"
+          >
+          <i class="icon-search"></i>
+        </div>
+        <div class="filter-actions">
+          <select id="appointmentStatusFilter" class="form-select">
+            <option value="">Todos os status</option>
+            <option value="pendente">Pendente</option>
+            <option value="confirmado">Confirmado</option>
+            <option value="em_andamento">Em Andamento</option>
+            <option value="concluido">Concluído</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+          <select id="appointmentPaymentFilter" class="form-select">
+            <option value="">Todos os pagamentos</option>
+            <option value="pago">Pago</option>
+            <option value="nao_pago">Não Pago</option>
+            <option value="previsto">Previsto</option>
+            <option value="parcial">Parcial</option>
+          </select>
+          <input 
+            type="date" 
+            id="appointmentDateFilter" 
+            class="form-input"
+            title="Filtrar por data"
+          >
+        </div>
+      </div>
+
+      <div class="view-tabs">
+        <button class="tab-btn active" onclick="app.switchAppointmentView('list')">
+          <i class="icon-list"></i> Lista
+        </button>
+        <button class="tab-btn" onclick="app.switchAppointmentView('calendar')">
+          <i class="icon-calendar"></i> Calendário
+        </button>
+      </div>
+
+      <div class="data-container">
+        ${this.renderAppointmentsTable(appointments)}
+      </div>
+    `;
+
+    this.setupAppointmentEvents();
+  }
+
+  renderAppointmentsTable(appointments) {
+    if (appointments.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-icon">📅</div>
+          <h3>Nenhum agendamento cadastrado</h3>
+          <p>Comece criando o primeiro agendamento</p>
+          <button class="btn btn-primary" onclick="app.showAppointmentForm()">
+            Criar Primeiro Agendamento
+          </button>
+        </div>
+      `;
+    }
+
+    const tableRows = appointments
+      .map((appointment) => {
+        const client = store.getClient(appointment.clienteId);
+        const pet = appointment.petId ? store.getPet(appointment.petId) : null;
+        const professional = appointment.profissionalId
+          ? store.getProfessional(appointment.profissionalId)
+          : null;
+
+        const statusBadge = this.getStatusBadge(appointment.status);
+        const paymentBadge = this.getPaymentBadge(appointment.pagamento);
+        const servicesText =
+          appointment.itens.length === 1
+            ? appointment.itens[0].nome
+            : `${appointment.itens.length} serviços`;
+
+        return `
+        <tr>
+          <td>
+            <div class="appointment-datetime">
+              <strong>${DateUtils.formatDate(
+                appointment.dataHoraInicio
+              )}</strong>
+              <small>${DateUtils.formatTime(appointment.dataHoraInicio)}</small>
+            </div>
+          </td>
+          <td>
+            <div class="appointment-client">
+              <strong class="clickable-name" onclick="app.viewClient('${
+                appointment.clienteId
+              }')" title="Ver cliente">
+                ${client?.nomeCompleto || "Cliente não encontrado"}
+              </strong>
+              ${pet ? `<small>Pet: ${pet.nome}</small>` : ""}
+            </div>
+          </td>
+          <td>${servicesText}</td>
+          <td>${MoneyUtils.formatBRL(appointment.totalPrevisto)}</td>
+          <td>${professional?.nome || "-"}</td>
+          <td>${statusBadge}</td>
+          <td>${paymentBadge}</td>
+          <td>
+            <div class="data-table-actions">
+              <button class="btn btn-sm btn-outline" onclick="app.viewAppointment('${
+                appointment.id
+              }')" title="Ver detalhes">
+                <i class="icon-eye"></i>
+              </button>
+              <button class="btn btn-sm btn-outline" onclick="app.editAppointment('${
+                appointment.id
+              }')" title="Editar">
+                <i class="icon-edit"></i>
+              </button>
+              ${
+                appointment.pagamento.status !== "pago"
+                  ? `
+                <button class="btn btn-sm btn-success" onclick="app.markAppointmentPaid('${appointment.id}')" title="Marcar como pago">
+                  <i class="icon-check"></i>
+                </button>
+              `
+                  : ""
+              }
+              <button class="btn btn-sm btn-danger" onclick="app.cancelAppointment('${
+                appointment.id
+              }')" title="Cancelar">
+                <i class="icon-x"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+      })
+      .join("");
+
+    return `
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Cliente</th>
+              <th>Serviços</th>
+              <th>Total</th>
+              <th>Profissional</th>
+              <th>Status</th>
+              <th>Pagamento</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  getStatusBadge(status) {
+    const statusConfig = {
+      pendente: { class: "badge-warning", text: "Pendente" },
+      confirmado: { class: "badge-info", text: "Confirmado" },
+      em_andamento: { class: "badge-primary", text: "Em Andamento" },
+      concluido: { class: "badge-success", text: "Concluído" },
+      cancelado: { class: "badge-danger", text: "Cancelado" },
+    };
+
+    const config = statusConfig[status] || {
+      class: "badge-secondary",
+      text: status,
+    };
+    return `<span class="badge ${config.class}">${config.text}</span>`;
+  }
+
+  getPaymentBadge(payment) {
+    const paymentConfig = {
+      pago: { class: "badge-success", text: "Pago" },
+      nao_pago: { class: "badge-danger", text: "Não Pago" },
+      previsto: { class: "badge-warning", text: "Previsto" },
+      parcial: { class: "badge-info", text: "Parcial" },
+    };
+
+    const config = paymentConfig[payment.status] || {
+      class: "badge-secondary",
+      text: payment.status,
+    };
+    return `<span class="badge ${config.class}">${config.text}</span>`;
+  }
+
   renderPets() {
     const content = document.getElementById("content");
     const pets = store.getPets();
@@ -3058,6 +3304,7 @@ class PetShopApp {
       especie: formData.get("especie") || "cão",
       raca: formData.get("raca"),
       sexo: formData.get("sexo"),
+      porte: formData.get("porte"),
       dataNascimento: formData.get("dataNascimento"),
       idade: formData.get("idade"),
       pesoAproximadoKg: parseFloat(formData.get("pesoAproximadoKg")) || null,
@@ -3235,12 +3482,6 @@ class PetShopApp {
     }
   }
 
-  renderAgendamentos() {
-    const content = document.getElementById("content");
-    content.innerHTML =
-      "<h1>Agendamentos</h1><p>Página em desenvolvimento...</p>";
-  }
-
   renderOrdem() {
     const content = document.getElementById("content");
     content.innerHTML =
@@ -3317,6 +3558,1438 @@ class PetShopApp {
         </div>
       </div>
     `;
+  }
+
+  // Formulário de agendamento
+  showAppointmentForm(appointmentId = null) {
+    const isEdit = appointmentId !== null;
+    const appointment = isEdit ? store.getAppointment(appointmentId) : null;
+    const clients = store.getClients();
+    const services = store.getServices();
+    const professionals = store.getProfessionals();
+
+    const content = `
+      <div class="form-container">
+        <div class="form-header">
+          <h2>${isEdit ? "Editar Agendamento" : "Novo Agendamento"}</h2>
+          <button class="btn btn-outline" onclick="app.renderAgendamentos()">
+            <i class="icon-arrow-left"></i> Voltar
+          </button>
+        </div>
+
+        <form id="appointmentForm" data-is-edit="${isEdit}" data-appointment-id="${
+      appointmentId || ""
+    }">
+          <!-- Passo 1: Cliente -->
+          <div class="form-section">
+            <h3>1. Cliente e Pet</h3>
+            <div class="form-row">
+              <div class="form-group required">
+                <label for="clienteId">Cliente *</label>
+                <select id="clienteId" name="clienteId" class="form-select" required>
+                  <option value="">Selecione um cliente</option>
+                  ${clients
+                    .map(
+                      (client) => `
+                    <option value="${client.id}" ${
+                        appointment?.clienteId === client.id ? "selected" : ""
+                      }>
+                      ${client.nomeCompleto}
+                    </option>
+                  `
+                    )
+                    .join("")}
+                </select>
+                <div class="form-help">
+                  <button type="button" class="btn btn-sm btn-outline" onclick="app.showClientFormFromAppointment()">
+                    <i class="icon-plus"></i> Cadastrar novo cliente
+                  </button>
+                </div>
+                <div class="form-error" id="clienteId-error"></div>
+              </div>
+              <div class="form-group">
+                <label for="petId">Pet (opcional)</label>
+                <select id="petId" name="petId" class="form-select">
+                  <option value="">Selecione um pet</option>
+                </select>
+                <div class="form-help">
+                  <button type="button" class="btn btn-sm btn-outline" onclick="app.showPetFormFromAppointment()">
+                    <i class="icon-plus"></i> Cadastrar novo pet
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Passo 2: Serviços -->
+          <div class="form-section">
+            <h3>2. Serviços</h3>
+            <div class="form-group">
+              <label>Selecione os serviços *</label>
+              <div class="services-grid" id="servicesGrid">
+                ${services
+                  .map(
+                    (service) => `
+                  <div class="service-item">
+                    <label class="checkbox-label">
+                      <input 
+                        type="checkbox" 
+                        name="services" 
+                        value="${service.id}"
+                        data-preco="${service.preco}"
+                        data-nome="${service.nome}"
+                        ${
+                          appointment?.itens?.some(
+                            (item) => item.serviceId === service.id
+                          )
+                            ? "checked"
+                            : ""
+                        }
+                      >
+                      <span class="checkmark"></span>
+                      <div class="service-info">
+                        <strong>${service.nome}</strong>
+                        <span class="service-price">${MoneyUtils.formatBRL(
+                          service.preco
+                        )}</span>
+                      </div>
+                    </label>
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+              <div class="form-error" id="services-error"></div>
+            </div>
+            <div class="total-preview" id="totalPreview">
+              <strong>Total: <span id="totalValue">R$ 0,00</span></strong>
+            </div>
+          </div>
+
+          <!-- Passo 3: Data/Hora e Profissional -->
+          <div class="form-section">
+            <h3>3. Data/Hora e Profissional</h3>
+            <div class="form-row">
+              <div class="form-group required">
+                <label for="dataHoraInicio">Data e Hora de Início *</label>
+                <input 
+                  type="datetime-local" 
+                  id="dataHoraInicio" 
+                  name="dataHoraInicio" 
+                  class="form-input" 
+                  value="${
+                    appointment
+                      ? DateUtils.toISOStringDateTime(
+                          appointment.dataHoraInicio
+                        )
+                      : ""
+                  }"
+                  required
+                >
+                <div class="form-error" id="dataHoraInicio-error"></div>
+              </div>
+              <div class="form-group required">
+                <label for="duracaoMin">Duração (minutos) *</label>
+                <input 
+                  type="number" 
+                  id="duracaoMin" 
+                  name="duracaoMin" 
+                  class="form-input" 
+                  value="${appointment?.duracaoMin || 60}"
+                  min="15"
+                  step="15"
+                  required
+                >
+                <div class="form-error" id="duracaoMin-error"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="profissionalId">Profissional (opcional)</label>
+              <select id="profissionalId" name="profissionalId" class="form-select">
+                <option value="">Selecione um profissional</option>
+                ${professionals
+                  .map(
+                    (prof) => `
+                  <option value="${prof.id}" ${
+                      appointment?.profissionalId === prof.id ? "selected" : ""
+                    }>
+                    ${prof.nome}
+                  </option>
+                `
+                  )
+                  .join("")}
+              </select>
+            </div>
+          </div>
+
+          <!-- Passo 4: Pagamento -->
+          <div class="form-section">
+            <h3>4. Pagamento</h3>
+            <div class="form-row">
+              <div class="form-group required">
+                <label for="paymentStatus">Status do Pagamento *</label>
+                <select id="paymentStatus" name="paymentStatus" class="form-select" required>
+                  <option value="nao_pago" ${
+                    appointment?.pagamento?.status === "nao_pago"
+                      ? "selected"
+                      : ""
+                  }>Não Pago</option>
+                  <option value="previsto" ${
+                    appointment?.pagamento?.status === "previsto"
+                      ? "selected"
+                      : ""
+                  }>Será pago em</option>
+                  <option value="pago" ${
+                    appointment?.pagamento?.status === "pago" ? "selected" : ""
+                  }>Pago agora</option>
+                </select>
+              </div>
+              <div class="form-group" id="paymentMethodGroup" style="display: none;">
+                <label for="paymentMethod">Método de Pagamento</label>
+                <select id="paymentMethod" name="paymentMethod" class="form-select">
+                  <option value="">Selecione</option>
+                  <option value="PIX">PIX</option>
+                  <option value="cartao">Cartão</option>
+                  <option value="dinheiro">Dinheiro</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" id="paymentDateGroup" style="display: none;">
+              <label for="paymentDate">Data Prevista de Pagamento</label>
+              <input 
+                type="date" 
+                id="paymentDate" 
+                name="paymentDate" 
+                class="form-input"
+                value="${
+                  appointment?.pagamento?.dataPrevista
+                    ? DateUtils.toISOString(appointment.pagamento.dataPrevista)
+                    : ""
+                }"
+              >
+            </div>
+          </div>
+
+          <!-- Observações -->
+          <div class="form-section">
+            <h3>5. Observações</h3>
+            <div class="form-group">
+              <label for="observacoes">Observações</label>
+              <textarea 
+                id="observacoes" 
+                name="observacoes" 
+                class="form-input" 
+                rows="3"
+                placeholder="Observações sobre o agendamento..."
+              >${appointment?.observacoes || ""}</textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="app.renderAgendamentos()">
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-outline" onclick="app.saveAppointmentAndNew()">
+              Salvar e Novo
+            </button>
+            <button type="submit" class="btn btn-primary">
+              ${isEdit ? "Atualizar" : "Salvar"} Agendamento
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.getElementById("content").innerHTML = content;
+    this.setupAppointmentFormEvents();
+  }
+
+  // Eventos do formulário de agendamento
+  setupAppointmentFormEvents() {
+    const form = document.getElementById("appointmentForm");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const isEdit = form.dataset.isEdit === "true";
+        const appointmentId = form.dataset.appointmentId || null;
+        this.saveAppointment(e, appointmentId);
+      });
+    }
+
+    // Carregar pets quando cliente for selecionado
+    const clienteSelect = document.getElementById("clienteId");
+    if (clienteSelect) {
+      clienteSelect.addEventListener("change", (e) => {
+        this.loadPetsForClient(e.target.value);
+      });
+    }
+
+    // Atualizar total quando serviços forem selecionados
+    const serviceCheckboxes = document.querySelectorAll(
+      'input[name="services"]'
+    );
+    serviceCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        this.updateAppointmentTotal();
+      });
+    });
+
+    // Mostrar/ocultar campos de pagamento
+    const paymentStatusSelect = document.getElementById("paymentStatus");
+    if (paymentStatusSelect) {
+      paymentStatusSelect.addEventListener("change", (e) => {
+        this.togglePaymentFields(e.target.value);
+      });
+    }
+
+    // Inicializar campos de pagamento
+    if (paymentStatusSelect) {
+      this.togglePaymentFields(paymentStatusSelect.value);
+    }
+
+    // Carregar pets se já houver cliente selecionado
+    if (clienteSelect && clienteSelect.value) {
+      this.loadPetsForClient(clienteSelect.value);
+    }
+
+    // Atualizar total inicial
+    this.updateAppointmentTotal();
+  }
+
+  // Carregar pets do cliente selecionado
+  loadPetsForClient(clienteId) {
+    const petSelect = document.getElementById("petId");
+    if (!petSelect || !clienteId) return;
+
+    const pets = store.getPets().filter((pet) => pet.clienteId === clienteId);
+
+    petSelect.innerHTML =
+      '<option value="">Selecione um pet</option>' +
+      pets
+        .map(
+          (pet) =>
+            `<option value="${pet.id}">${pet.nome || "Sem nome"}</option>`
+        )
+        .join("");
+  }
+
+  // Atualizar total do agendamento
+  updateAppointmentTotal() {
+    const serviceCheckboxes = document.querySelectorAll(
+      'input[name="services"]:checked'
+    );
+    let total = 0;
+
+    serviceCheckboxes.forEach((checkbox) => {
+      const preco = parseFloat(checkbox.dataset.preco) || 0;
+      total += preco;
+    });
+
+    const totalElement = document.getElementById("totalValue");
+    if (totalElement) {
+      totalElement.textContent = MoneyUtils.formatBRL(total);
+    }
+  }
+
+  // Mostrar/ocultar campos de pagamento
+  togglePaymentFields(paymentStatus) {
+    const methodGroup = document.getElementById("paymentMethodGroup");
+    const dateGroup = document.getElementById("paymentDateGroup");
+    const methodSelect = document.getElementById("paymentMethod");
+
+    if (methodGroup && dateGroup && methodSelect) {
+      if (paymentStatus === "pago") {
+        methodGroup.style.display = "block";
+        dateGroup.style.display = "none";
+        methodSelect.required = true;
+      } else if (paymentStatus === "previsto") {
+        methodGroup.style.display = "none";
+        dateGroup.style.display = "block";
+        methodSelect.required = false;
+      } else {
+        methodGroup.style.display = "none";
+        dateGroup.style.display = "none";
+        methodSelect.required = false;
+      }
+    }
+  }
+
+  // Salvar agendamento
+  async saveAppointment(event, appointmentId = null) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const selectedServices = Array.from(
+      document.querySelectorAll('input[name="services"]:checked')
+    );
+
+    if (selectedServices.length === 0) {
+      this.showFieldError("services", "Selecione pelo menos um serviço");
+      return;
+    }
+
+    // Calcular total
+    let totalPrevisto = 0;
+    const itens = selectedServices.map((checkbox) => {
+      const serviceId = checkbox.value;
+      const service = store.getService(serviceId);
+      const preco = parseFloat(checkbox.dataset.preco) || 0;
+      totalPrevisto += preco;
+
+      return {
+        serviceId: serviceId,
+        nome: service.nome,
+        precoAplicado: preco,
+        custoAproxAplicado: service.temCusto ? service.custoAproximado : null,
+      };
+    });
+
+    const appointmentData = {
+      clienteId: formData.get("clienteId"),
+      petId: formData.get("petId") || null,
+      itens: itens,
+      totalPrevisto: totalPrevisto,
+      dataHoraInicio: formData.get("dataHoraInicio"),
+      duracaoMin: parseInt(formData.get("duracaoMin")),
+      profissionalId: formData.get("profissionalId") || null,
+      status: "pendente",
+      pagamento: {
+        status: formData.get("paymentStatus"),
+        metodo: formData.get("paymentMethod") || null,
+        dataPrevista: formData.get("paymentDate") || null,
+        dataPago:
+          formData.get("paymentStatus") === "pago"
+            ? new Date().toISOString().split("T")[0]
+            : null,
+        valorPago: formData.get("paymentStatus") === "pago" ? totalPrevisto : 0,
+      },
+      observacoes: formData.get("observacoes") || "",
+    };
+
+    // Validações
+    if (!this.validateAppointment(appointmentData, appointmentId)) {
+      return;
+    }
+
+    try {
+      let savedAppointment;
+      if (appointmentId) {
+        savedAppointment = store.saveAppointment({
+          ...appointmentData,
+          id: appointmentId,
+        });
+      } else {
+        const newAppointmentId = store.generateId("app");
+        savedAppointment = store.saveAppointment({
+          ...appointmentData,
+          id: newAppointmentId,
+        });
+      }
+
+      ui.success(
+        appointmentId
+          ? "Agendamento atualizado com sucesso!"
+          : "Agendamento criado com sucesso!"
+      );
+      this.renderAgendamentos();
+    } catch (error) {
+      ui.error("Erro ao salvar agendamento: " + error.message);
+    }
+  }
+
+  // Validar agendamento
+  validateAppointment(appointmentData, appointmentId = null) {
+    let isValid = true;
+
+    // Limpar erros anteriores
+    document
+      .querySelectorAll(".form-error")
+      .forEach((el) => (el.textContent = ""));
+
+    // Cliente obrigatório
+    if (!appointmentData.clienteId) {
+      this.showFieldError("clienteId", "Cliente é obrigatório");
+      isValid = false;
+    }
+
+    // Data/hora obrigatória
+    if (!appointmentData.dataHoraInicio) {
+      this.showFieldError("dataHoraInicio", "Data e hora são obrigatórias");
+      isValid = false;
+    }
+
+    // Duração obrigatória
+    if (!appointmentData.duracaoMin || appointmentData.duracaoMin <= 0) {
+      this.showFieldError("duracaoMin", "Duração deve ser maior que zero");
+      isValid = false;
+    }
+
+    // Validação de pagamento
+    if (
+      appointmentData.pagamento.status === "pago" &&
+      !appointmentData.pagamento.metodo
+    ) {
+      this.showFieldError(
+        "paymentMethod",
+        "Método de pagamento é obrigatório quando pago"
+      );
+      isValid = false;
+    }
+
+    if (
+      appointmentData.pagamento.status === "previsto" &&
+      !appointmentData.pagamento.dataPrevista
+    ) {
+      this.showFieldError(
+        "paymentDate",
+        "Data prevista é obrigatória quando status é 'Será pago em'"
+      );
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  // Salvar e criar novo
+  async saveAppointmentAndNew() {
+    const form = document.getElementById("appointmentForm");
+    const formData = new FormData(form);
+    const selectedServices = Array.from(
+      document.querySelectorAll('input[name="services"]:checked')
+    );
+
+    if (selectedServices.length === 0) {
+      this.showFieldError("services", "Selecione pelo menos um serviço");
+      return;
+    }
+
+    // Calcular total
+    let totalPrevisto = 0;
+    const itens = selectedServices.map((checkbox) => {
+      const serviceId = checkbox.value;
+      const service = store.getService(serviceId);
+      const preco = parseFloat(checkbox.dataset.preco) || 0;
+      totalPrevisto += preco;
+
+      return {
+        serviceId: serviceId,
+        nome: service.nome,
+        precoAplicado: preco,
+        custoAproxAplicado: service.temCusto ? service.custoAproximado : null,
+      };
+    });
+
+    const appointmentData = {
+      clienteId: formData.get("clienteId"),
+      petId: formData.get("petId") || null,
+      itens: itens,
+      totalPrevisto: totalPrevisto,
+      dataHoraInicio: formData.get("dataHoraInicio"),
+      duracaoMin: parseInt(formData.get("duracaoMin")),
+      profissionalId: formData.get("profissionalId") || null,
+      status: "pendente",
+      pagamento: {
+        status: formData.get("paymentStatus"),
+        metodo: formData.get("paymentMethod") || null,
+        dataPrevista: formData.get("paymentDate") || null,
+        dataPago:
+          formData.get("paymentStatus") === "pago"
+            ? new Date().toISOString().split("T")[0]
+            : null,
+        valorPago: formData.get("paymentStatus") === "pago" ? totalPrevisto : 0,
+      },
+      observacoes: formData.get("observacoes") || "",
+    };
+
+    if (!this.validateAppointment(appointmentData)) {
+      return;
+    }
+
+    try {
+      const newAppointmentId = store.generateId("app");
+      store.saveAppointment({ ...appointmentData, id: newAppointmentId });
+      ui.success("Agendamento criado com sucesso!");
+      this.showAppointmentForm(); // Abrir formulário limpo
+    } catch (error) {
+      ui.error("Erro ao salvar agendamento: " + error.message);
+    }
+  }
+
+  // Ações de agendamento
+  editAppointment(appointmentId) {
+    this.showAppointmentForm(appointmentId);
+  }
+
+  viewAppointment(appointmentId) {
+    const appointment = store.getAppointment(appointmentId);
+    if (!appointment) return;
+
+    const client = store.getClient(appointment.clienteId);
+    const pet = appointment.petId ? store.getPet(appointment.petId) : null;
+    const professional = appointment.profissionalId
+      ? store.getProfessional(appointment.profissionalId)
+      : null;
+
+    const content = `
+      <div class="detail-container">
+        <div class="detail-header">
+          <h2>Detalhes do Agendamento</h2>
+          <button class="btn btn-outline" onclick="app.renderAgendamentos()">
+            <i class="icon-arrow-left"></i> Voltar
+          </button>
+        </div>
+
+        <div class="detail-content">
+          <div class="detail-section">
+            <h3>Informações Gerais</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Data e Hora</label>
+                <p>${DateUtils.formatDateTime(appointment.dataHoraInicio)}</p>
+              </div>
+              <div class="detail-item">
+                <label>Duração</label>
+                <p>${appointment.duracaoMin} minutos</p>
+              </div>
+              <div class="detail-item">
+                <label>Status</label>
+                <p>${this.getStatusBadge(appointment.status)}</p>
+              </div>
+              <div class="detail-item">
+                <label>Pagamento</label>
+                <p>${this.getPaymentBadge(appointment.pagamento)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Cliente e Pet</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Cliente</label>
+                <p>
+                  <span class="clickable-name" onclick="app.viewClient('${
+                    appointment.clienteId
+                  }')" title="Ver cliente">
+                    ${client?.nomeCompleto || "Cliente não encontrado"}
+                  </span>
+                </p>
+              </div>
+              ${
+                pet
+                  ? `
+                <div class="detail-item">
+                  <label>Pet</label>
+                  <p>
+                    <span class="clickable-name" onclick="app.viewPet('${
+                      pet.id
+                    }')" title="Ver pet">
+                      ${pet.nome || "Sem nome"}
+                    </span>
+                  </p>
+                </div>
+              `
+                  : ""
+              }
+              ${
+                professional
+                  ? `
+                <div class="detail-item">
+                  <label>Profissional</label>
+                  <p>${professional.nome}</p>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Serviços</h3>
+            <div class="services-list">
+              ${appointment.itens
+                .map(
+                  (item) => `
+                <div class="service-item">
+                  <div class="service-name">${item.nome}</div>
+                  <div class="service-price">${MoneyUtils.formatBRL(
+                    item.precoAplicado
+                  )}</div>
+                </div>
+              `
+                )
+                .join("")}
+              <div class="service-total">
+                <strong>Total: ${MoneyUtils.formatBRL(
+                  appointment.totalPrevisto
+                )}</strong>
+              </div>
+            </div>
+          </div>
+
+          ${
+            appointment.observacoes
+              ? `
+            <div class="detail-section">
+              <h3>Observações</h3>
+              <p>${appointment.observacoes}</p>
+            </div>
+          `
+              : ""
+          }
+
+          <div class="detail-actions">
+            <button class="btn btn-outline" onclick="app.editAppointment('${appointmentId}')">
+              <i class="icon-edit"></i> Editar
+            </button>
+            ${
+              appointment.pagamento.status !== "pago"
+                ? `
+              <button class="btn btn-success" onclick="app.markAppointmentPaid('${appointmentId}')">
+                <i class="icon-check"></i> Marcar como Pago
+              </button>
+            `
+                : ""
+            }
+            <button class="btn btn-danger" onclick="app.cancelAppointment('${appointmentId}')">
+              <i class="icon-x"></i> Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("content").innerHTML = content;
+  }
+
+  async markAppointmentPaid(appointmentId) {
+    const appointment = store.getAppointment(appointmentId);
+    if (!appointment) return;
+
+    const confirmed = await ui.confirm(
+      `Marcar agendamento como pago?\n\nCliente: ${
+        store.getClient(appointment.clienteId)?.nomeCompleto
+      }\nTotal: ${MoneyUtils.formatBRL(appointment.totalPrevisto)}`,
+      "Confirmar Pagamento",
+      { type: "success" }
+    );
+
+    if (confirmed) {
+      try {
+        const updatedAppointment = {
+          ...appointment,
+          pagamento: {
+            ...appointment.pagamento,
+            status: "pago",
+            dataPago: new Date().toISOString().split("T")[0],
+            valorPago: appointment.totalPrevisto,
+          },
+        };
+
+        store.saveAppointment(updatedAppointment);
+        ui.success("Agendamento marcado como pago!");
+        this.renderAgendamentos();
+      } catch (error) {
+        ui.error("Erro ao marcar como pago: " + error.message);
+      }
+    }
+  }
+
+  async cancelAppointment(appointmentId) {
+    const appointment = store.getAppointment(appointmentId);
+    if (!appointment) return;
+
+    const confirmed = await ui.confirm(
+      `Cancelar agendamento?\n\nCliente: ${
+        store.getClient(appointment.clienteId)?.nomeCompleto
+      }\nData: ${DateUtils.formatDateTime(appointment.dataHoraInicio)}`,
+      "Confirmar Cancelamento",
+      { type: "danger" }
+    );
+
+    if (confirmed) {
+      try {
+        const updatedAppointment = {
+          ...appointment,
+          status: "cancelado",
+        };
+
+        store.saveAppointment(updatedAppointment);
+        ui.success("Agendamento cancelado!");
+        this.renderAgendamentos();
+      } catch (error) {
+        ui.error("Erro ao cancelar agendamento: " + error.message);
+      }
+    }
+  }
+
+  // Eventos de agendamentos
+  setupAppointmentEvents() {
+    // Busca
+    const searchInput = document.getElementById("appointmentSearch");
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        this.filterAppointments();
+      });
+    }
+
+    // Filtros
+    const statusFilter = document.getElementById("appointmentStatusFilter");
+    const paymentFilter = document.getElementById("appointmentPaymentFilter");
+    const dateFilter = document.getElementById("appointmentDateFilter");
+
+    if (statusFilter) {
+      statusFilter.addEventListener("change", () => {
+        this.filterAppointments();
+      });
+    }
+
+    if (paymentFilter) {
+      paymentFilter.addEventListener("change", () => {
+        this.filterAppointments();
+      });
+    }
+
+    if (dateFilter) {
+      dateFilter.addEventListener("change", () => {
+        this.filterAppointments();
+      });
+    }
+  }
+
+  // Filtrar agendamentos
+  filterAppointments() {
+    const appointments = store.getAppointments();
+    const searchTerm =
+      document.getElementById("appointmentSearch")?.value.toLowerCase() || "";
+    const statusFilter =
+      document.getElementById("appointmentStatusFilter")?.value || "";
+    const paymentFilter =
+      document.getElementById("appointmentPaymentFilter")?.value || "";
+    const dateFilter =
+      document.getElementById("appointmentDateFilter")?.value || "";
+
+    const filtered = appointments.filter((appointment) => {
+      const client = store.getClient(appointment.clienteId);
+      const pet = appointment.petId ? store.getPet(appointment.petId) : null;
+
+      // Busca por texto
+      const matchesSearch =
+        !searchTerm ||
+        client?.nomeCompleto?.toLowerCase().includes(searchTerm) ||
+        pet?.nome?.toLowerCase().includes(searchTerm) ||
+        appointment.itens.some((item) =>
+          item.nome.toLowerCase().includes(searchTerm)
+        );
+
+      // Filtro por status
+      const matchesStatus =
+        !statusFilter || appointment.status === statusFilter;
+
+      // Filtro por pagamento
+      const matchesPayment =
+        !paymentFilter || appointment.pagamento.status === paymentFilter;
+
+      // Filtro por data
+      const matchesDate =
+        !dateFilter ||
+        DateUtils.isSameDay(appointment.dataHoraInicio, dateFilter);
+
+      return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+    });
+
+    const container = document.querySelector(".data-container");
+    container.innerHTML = this.renderAppointmentsTable(filtered);
+  }
+
+  // Alternar visualização (lista/calendário)
+  switchAppointmentView(view) {
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    tabButtons.forEach((btn) => btn.classList.remove("active"));
+
+    if (view === "list") {
+      document
+        .querySelector('.tab-btn[onclick*="list"]')
+        .classList.add("active");
+      // Implementar visualização de lista (já implementada)
+    } else if (view === "calendar") {
+      document
+        .querySelector('.tab-btn[onclick*="calendar"]')
+        .classList.add("active");
+      this.renderAppointmentCalendar();
+    }
+  }
+
+  // Renderizar calendário de agendamentos
+  renderAppointmentCalendar() {
+    const appointments = store.getAppointments();
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    const weeks = DateUtils.getWeeksInMonth(today);
+
+    const content = `
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <button class="btn btn-outline" onclick="app.previousMonth()">
+            <i class="icon-arrow-left"></i>
+          </button>
+          <h3>${DateUtils.getMonthName(today)} ${currentYear}</h3>
+          <button class="btn btn-outline" onclick="app.nextMonth()">
+            <i class="icon-arrow-right"></i>
+          </button>
+        </div>
+        
+        <div class="calendar-grid">
+          <div class="calendar-weekdays">
+            <div class="weekday">Dom</div>
+            <div class="weekday">Seg</div>
+            <div class="weekday">Ter</div>
+            <div class="weekday">Qua</div>
+            <div class="weekday">Qui</div>
+            <div class="weekday">Sex</div>
+            <div class="weekday">Sáb</div>
+          </div>
+          
+          <div class="calendar-days">
+            ${weeks
+              .map(
+                (week) => `
+              <div class="calendar-week">
+                ${week
+                  .map((day) => {
+                    if (!day) return '<div class="calendar-day empty"></div>';
+
+                    const dayAppointments = appointments.filter((apt) =>
+                      DateUtils.isSameDay(apt.dataHoraInicio, day)
+                    );
+
+                    const isToday = DateUtils.isSameDay(day, new Date());
+
+                    return `
+                    <div class="calendar-day ${
+                      isToday ? "today" : ""
+                    }" onclick="app.showDayAppointments('${day.toISOString()}')">
+                      <div class="day-number">${day.getDate()}</div>
+                      <div class="day-appointments">
+                        ${dayAppointments
+                          .slice(0, 3)
+                          .map((apt) => {
+                            const client = store.getClient(apt.clienteId);
+                            return `
+                            <div class="appointment-mini ${
+                              apt.status
+                            }" title="${
+                              client?.nomeCompleto
+                            } - ${DateUtils.formatTime(apt.dataHoraInicio)}">
+                              ${DateUtils.formatTime(apt.dataHoraInicio)} ${
+                              client?.nomeCompleto?.split(" ")[0] || ""
+                            }
+                            </div>
+                          `;
+                          })
+                          .join("")}
+                        ${
+                          dayAppointments.length > 3
+                            ? `<div class="more-appointments">+${
+                                dayAppointments.length - 3
+                              } mais</div>`
+                            : ""
+                        }
+                      </div>
+                    </div>
+                  `;
+                  })
+                  .join("")}
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+      </div>
+    `;
+
+    const container = document.querySelector(".data-container");
+    container.innerHTML = content;
+  }
+
+  // Formulário de cliente a partir de agendamento
+  showClientFormFromAppointment() {
+    // Criar modal simples para teste
+    const modal = document.createElement("div");
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1rem;
+    `;
+
+    modal.innerHTML = `
+      <div style="
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 0;
+      ">
+        <div style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        ">
+          <h3 style="margin: 0; color: #111827; font-size: 1.25rem;">Novo Cliente</h3>
+          <button onclick="app.closeModal()" style="
+            background: none;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.5rem;
+            cursor: pointer;
+            color: #6b7280;
+          ">✕</button>
+        </div>
+        
+        <form id="clientFormFromAppointment" style="padding: 1.5rem;">
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Nome Completo *</label>
+            <input 
+              type="text" 
+              id="clientNomeCompleto" 
+              name="nomeCompleto" 
+              required
+              placeholder="Digite o nome completo do cliente"
+              style="
+                width: 100%;
+                padding: 0.75rem;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+                font-size: 1rem;
+                box-sizing: border-box;
+              "
+            >
+            <div id="clientNomeCompleto-error" style="color: #dc2626; font-size: 0.875rem; margin-top: 0.25rem;"></div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">WhatsApp</label>
+              <input 
+                type="text" 
+                id="clientTelefoneWhatsApp" 
+                name="telefoneWhatsApp" 
+                placeholder="(41) 99999-9999"
+                style="
+                  width: 100%;
+                  padding: 0.75rem;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  font-size: 1rem;
+                  box-sizing: border-box;
+                "
+              >
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Email</label>
+              <input 
+                type="email" 
+                id="clientEmail" 
+                name="email" 
+                placeholder="cliente@email.com"
+                style="
+                  width: 100%;
+                  padding: 0.75rem;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  font-size: 1rem;
+                  box-sizing: border-box;
+                "
+              >
+            </div>
+          </div>
+          
+          <div style="display: flex; justify-content: flex-end; gap: 1rem; padding: 1.5rem; border-top: 1px solid #e5e7eb; background-color: #f9fafb;">
+            <button type="button" onclick="app.closeModal()" style="
+              background: none;
+              border: 1px solid #d1d5db;
+              border-radius: 6px;
+              padding: 0.75rem 1.5rem;
+              cursor: pointer;
+              color: #374151;
+            ">Cancelar</button>
+            <button type="submit" style="
+              background: #3b82f6;
+              border: none;
+              border-radius: 6px;
+              padding: 0.75rem 1.5rem;
+              cursor: pointer;
+              color: white;
+              font-weight: 500;
+            ">Salvar e Selecionar</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Configurar eventos do formulário
+    const form = document.getElementById("clientFormFromAppointment");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.saveClientFromAppointment(e);
+      });
+    }
+  }
+
+  // Salvar cliente a partir de agendamento
+  async saveClientFromAppointment(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const clientData = {
+      nomeCompleto: formData.get("nomeCompleto").trim(),
+      telefoneWhatsApp: formData.get("telefoneWhatsApp").trim(),
+      email: formData.get("email").trim(),
+      cpf: formData.get("cpf").trim(),
+      dataNascimento: formData.get("dataNascimento") || null,
+      observacoes: formData.get("observacoes").trim(),
+    };
+
+    // Validações
+    if (!this.validateClientFromAppointment(clientData)) {
+      return;
+    }
+
+    try {
+      const newClientId = store.generateId("cli");
+      const savedClient = store.saveClient({ ...clientData, id: newClientId });
+
+      ui.success("Cliente criado com sucesso!");
+
+      // Fechar modal
+      this.closeModal();
+
+      // Atualizar select de clientes e selecionar o novo cliente
+      this.updateClientSelectAndSelect(newClientId);
+    } catch (error) {
+      ui.error("Erro ao salvar cliente: " + error.message);
+    }
+  }
+
+  // Validar cliente a partir de agendamento
+  validateClientFromAppointment(clientData) {
+    let isValid = true;
+
+    // Limpar erros anteriores
+    document
+      .querySelectorAll("#clientFormFromAppointment .form-error")
+      .forEach((el) => (el.textContent = ""));
+
+    // Nome completo obrigatório
+    if (!clientData.nomeCompleto || clientData.nomeCompleto.length < 3) {
+      this.showFieldError(
+        "clientNomeCompleto",
+        "Nome completo deve ter pelo menos 3 caracteres"
+      );
+      isValid = false;
+    }
+
+    // WhatsApp (se preenchido)
+    if (
+      clientData.telefoneWhatsApp &&
+      !Utils.validatePhone(clientData.telefoneWhatsApp)
+    ) {
+      this.showFieldError("clientTelefoneWhatsApp", "WhatsApp inválido");
+      isValid = false;
+    }
+
+    // Email (se preenchido)
+    if (clientData.email && !Utils.validateEmail(clientData.email)) {
+      this.showFieldError("clientEmail", "Email inválido");
+      isValid = false;
+    }
+
+    // CPF (se preenchido)
+    if (clientData.cpf && !Utils.validateCPF(clientData.cpf)) {
+      this.showFieldError("clientCpf", "CPF inválido");
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  // Atualizar select de clientes e selecionar o novo cliente
+  updateClientSelectAndSelect(clientId) {
+    const clienteSelect = document.getElementById("clienteId");
+    if (!clienteSelect) return;
+
+    // Recarregar lista de clientes
+    const clients = store.getClients();
+
+    // Atualizar options
+    clienteSelect.innerHTML =
+      '<option value="">Selecione um cliente</option>' +
+      clients
+        .map(
+          (client) => `
+        <option value="${client.id}" ${
+            client.id === clientId ? "selected" : ""
+          }>
+          ${client.nomeCompleto}
+        </option>
+      `
+        )
+        .join("");
+
+    // Disparar evento change para carregar pets
+    clienteSelect.dispatchEvent(new Event("change"));
+  }
+
+  // Configurar máscaras do formulário de cliente
+  setupClientFormMasks() {
+    // Máscara do WhatsApp
+    const telefoneInput = document.getElementById("clientTelefoneWhatsApp");
+    if (telefoneInput) {
+      telefoneInput.addEventListener("input", (e) => {
+        e.target.value = Utils.formatPhone(e.target.value);
+      });
+    }
+
+    // Máscara do CPF
+    const cpfInput = document.getElementById("clientCpf");
+    if (cpfInput) {
+      cpfInput.addEventListener("input", (e) => {
+        e.target.value = Utils.formatCPF(e.target.value);
+      });
+    }
+  }
+
+  // Formulário de pet a partir de agendamento
+  showPetFormFromAppointment() {
+    const clienteId = document.getElementById("clienteId")?.value;
+
+    if (!clienteId) {
+      ui.error("Selecione um cliente primeiro");
+      return;
+    }
+
+    const client = store.getClient(clienteId);
+    if (!client) {
+      ui.error("Cliente não encontrado");
+      return;
+    }
+
+    const modalContent = `
+      <div class="modal-header">
+        <h3>Novo Pet - ${client.nomeCompleto}</h3>
+        <button class="btn btn-sm btn-outline" onclick="app.closeModal()">
+          <i class="icon-x"></i>
+        </button>
+      </div>
+      
+      <form id="petFormFromAppointment" data-is-edit="false">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="petNome">Nome do Pet</label>
+            <input 
+              type="text" 
+              id="petNome" 
+              name="nome" 
+              class="form-input" 
+              placeholder="Digite o nome do pet"
+            >
+            <div class="form-error" id="petNome-error"></div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="petEspecie">Espécie</label>
+              <select id="petEspecie" name="especie" class="form-select">
+                <option value="">Selecione</option>
+                <option value="cão">Cão</option>
+                <option value="gato">Gato</option>
+                <option value="outros">Outros</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="petRaca">Raça</label>
+              <input 
+                type="text" 
+                id="petRaca" 
+                name="raca" 
+                class="form-input" 
+                placeholder="Ex: Golden Retriever"
+              >
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="petSexo">Sexo</label>
+              <select id="petSexo" name="sexo" class="form-select">
+                <option value="">Selecione</option>
+                <option value="M">Macho</option>
+                <option value="F">Fêmea</option>
+                <option value="Indef.">Indefinido</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="petPorte">Porte</label>
+              <select id="petPorte" name="porte" class="form-select">
+                <option value="">Selecione</option>
+                <option value="pequeno">Pequeno</option>
+                <option value="medio">Médio</option>
+                <option value="grande">Grande</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="petDataNascimento">Data de Nascimento</label>
+              <input 
+                type="date" 
+                id="petDataNascimento" 
+                name="dataNascimento" 
+                class="form-input"
+              >
+            </div>
+            <div class="form-group">
+              <label for="petPesoAproximadoKg">Peso Aproximado (kg)</label>
+              <input 
+                type="number" 
+                id="petPesoAproximadoKg" 
+                name="pesoAproximadoKg" 
+                class="form-input" 
+                step="0.1"
+                min="0"
+                placeholder="Ex: 15.5"
+              >
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="petObservacoes">Observações</label>
+            <textarea 
+              id="petObservacoes" 
+              name="observacoes" 
+              class="form-input" 
+              rows="3"
+              placeholder="Observações sobre o pet..."
+            ></textarea>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="app.closeModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Salvar e Selecionar
+          </button>
+        </div>
+      </form>
+    `;
+
+    // Criar modal
+    const modal = document.createElement("div");
+    modal.className = "modal-overlay";
+    modal.innerHTML = `
+      <div class="modal">
+        ${modalContent}
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Configurar eventos do formulário
+    const form = document.getElementById("petFormFromAppointment");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      this.savePetFromAppointment(e, clienteId);
+    });
+  }
+
+  // Salvar pet a partir de agendamento
+  async savePetFromAppointment(event, clienteId) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const petData = {
+      clienteId: clienteId,
+      nome: formData.get("nome").trim(),
+      especie: formData.get("especie") || null,
+      raca: formData.get("raca").trim(),
+      sexo: formData.get("sexo") || null,
+      porte: formData.get("porte") || null,
+      dataNascimento: formData.get("dataNascimento") || null,
+      pesoAproximadoKg: formData.get("pesoAproximadoKg")
+        ? parseFloat(formData.get("pesoAproximadoKg"))
+        : null,
+      observacoes: formData.get("observacoes").trim(),
+    };
+
+    try {
+      const newPetId = store.generateId("pet");
+      const savedPet = store.savePet({ ...petData, id: newPetId });
+
+      ui.success("Pet criado com sucesso!");
+
+      // Fechar modal
+      this.closeModal();
+
+      // Atualizar select de pets e selecionar o novo pet
+      this.updatePetSelectAndSelect(newPetId);
+    } catch (error) {
+      ui.error("Erro ao salvar pet: " + error.message);
+    }
+  }
+
+  // Atualizar select de pets e selecionar o novo pet
+  updatePetSelectAndSelect(petId) {
+    const petSelect = document.getElementById("petId");
+    if (!petSelect) return;
+
+    const clienteId = document.getElementById("clienteId")?.value;
+    if (!clienteId) return;
+
+    // Recarregar pets do cliente
+    const pets = store.getPets().filter((pet) => pet.clienteId === clienteId);
+
+    // Atualizar options
+    petSelect.innerHTML =
+      '<option value="">Selecione um pet</option>' +
+      pets
+        .map(
+          (pet) => `
+        <option value="${pet.id}" ${pet.id === petId ? "selected" : ""}>
+          ${pet.nome || "Sem nome"}
+        </option>
+      `
+        )
+        .join("");
+  }
+
+  // Fechar modal
+  closeModal() {
+    const modal = document.querySelector(".modal-overlay");
+    if (modal) {
+      modal.remove();
+    }
   }
 
   // ===== MÉTODOS DE CONFIGURAÇÃO =====

@@ -499,6 +499,40 @@ class Store {
     return `${prefix}_${timestamp}_${random}`;
   }
 
+  // Agendamentos
+  getAppointments() {
+    return this.getAll("appointments");
+  }
+
+  getAppointment(id) {
+    return this.getById("appointments", id);
+  }
+
+  saveAppointment(appointment) {
+    return this.save("appointments", appointment);
+  }
+
+  deleteAppointment(id) {
+    return this.delete("appointments", id);
+  }
+
+  // Profissionais (para agendamentos)
+  getProfessionals() {
+    return this.getAll("professionals");
+  }
+
+  getProfessional(id) {
+    return this.getById("professionals", id);
+  }
+
+  saveProfessional(professional) {
+    return this.save("professionals", professional);
+  }
+
+  deleteProfessional(id) {
+    return this.delete("professionals", id);
+  }
+
   // Função para limpar dados corrompidos
   cleanupCorruptedData() {
     console.log("🧹 Iniciando limpeza de dados corrompidos...");
