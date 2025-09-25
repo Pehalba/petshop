@@ -1551,7 +1551,7 @@ class PetShopApp {
           ? "Cliente atualizado com sucesso!"
           : "Cliente cadastrado com sucesso!"
       );
-      this.viewClient(savedClient.id);
+      await this.viewClient(savedClient.id);
     } catch (error) {
       ui.error("Erro ao salvar cliente: " + error.message);
     }
@@ -1602,8 +1602,8 @@ class PetShopApp {
     }
   }
 
-  viewClient(clientId) {
-    const client = store.getClient(clientId);
+  async viewClient(clientId) {
+    const client = await store.getClient(clientId);
     if (!client) {
       ui.error("Cliente não encontrado");
       return;
@@ -3408,7 +3408,7 @@ class PetShopApp {
       ui.success(
         petId ? "Pet atualizado com sucesso!" : "Pet cadastrado com sucesso!"
       );
-      this.viewPet(savedPet.id);
+      await this.viewPet(savedPet.id);
     } catch (error) {
       ui.error("Erro ao salvar pet: " + error.message);
     }
@@ -3443,14 +3443,14 @@ class PetShopApp {
     return isValid;
   }
 
-  viewPet(petId) {
-    const pet = store.getPet(petId);
+  async viewPet(petId) {
+    const pet = await store.getPet(petId);
     if (!pet) {
       ui.error("Pet não encontrado");
       return;
     }
 
-    const client = store.getClient(pet.clienteId);
+    const client = await store.getClient(pet.clienteId);
     const idade = pet.dataNascimento
       ? utils.calculateAge(pet.dataNascimento)
       : pet.idade || "-";
