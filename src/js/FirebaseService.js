@@ -12,12 +12,13 @@ class FirebaseService {
 
     // Configuração do Firebase (substitua pelos seus valores)
     this.firebaseConfig = {
-      apiKey: "sua-api-key-aqui",
-      authDomain: "seu-projeto.firebaseapp.com",
-      projectId: "seu-projeto-id",
-      storageBucket: "seu-projeto.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef123456",
+      apiKey: "AIzaSyDLRM7XsFM4qM7S4rdl7uO7d-7JlZhJrK8",
+      authDomain: "petshop-8dab6.firebaseapp.com",
+      projectId: "petshop-8dab6",
+      storageBucket: "petshop-8dab6.firebasestorage.app",
+      messagingSenderId: "722294554362",
+      appId: "1:722294554362:web:e786dabe0e224bca8b1343",
+      measurementId: "G-MN4CKNGJWQ"
     };
 
     this.init();
