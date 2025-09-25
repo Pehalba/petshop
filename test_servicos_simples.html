@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Serviços Simples</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .test-result {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Teste da Página de Serviços</h1>
+    <div id="test-results"></div>
+
+    <script>
+      // Teste básico
+      function runTests() {
+        const results = document.getElementById("test-results");
+
+        // Teste 1: Verificar se MoneyUtils existe
+        try {
+          if (typeof MoneyUtils !== "undefined") {
+            results.innerHTML +=
+              '<div class="test-result success">✅ MoneyUtils carregado</div>';
+          } else {
+            results.innerHTML +=
+              '<div class="test-result error">❌ MoneyUtils não encontrado</div>';
+          }
+        } catch (e) {
+          results.innerHTML +=
+            '<div class="test-result error">❌ Erro ao verificar MoneyUtils: ' +
+            e.message +
+            "</div>";
+        }
+
+        // Teste 2: Verificar se Store existe
+        try {
+          if (typeof store !== "undefined") {
+            results.innerHTML +=
+              '<div class="test-result success">✅ Store carregado</div>';
+
+            // Teste 3: Verificar se getServices existe
+            if (typeof store.getServices === "function") {
+              results.innerHTML +=
+                '<div class="test-result success">✅ store.getServices existe</div>';
+
+              // Teste 4: Chamar getServices
+              try {
+                const services = store.getServices();
+                results.innerHTML +=
+                  '<div class="test-result success">✅ getServices retornou: ' +
+                  JSON.stringify(services) +
+                  "</div>";
+              } catch (e) {
+                results.innerHTML +=
+                  '<div class="test-result error">❌ Erro ao chamar getServices: ' +
+                  e.message +
+                  "</div>";
+              }
+            } else {
+              results.innerHTML +=
+                '<div class="test-result error">❌ store.getServices não é uma função</div>';
+            }
+          } else {
+            results.innerHTML +=
+              '<div class="test-result error">❌ Store não encontrado</div>';
+          }
+        } catch (e) {
+          results.innerHTML +=
+            '<div class="test-result error">❌ Erro ao verificar Store: ' +
+            e.message +
+            "</div>";
+        }
+
+        // Teste 5: Verificar se app existe
+        try {
+          if (typeof app !== "undefined") {
+            results.innerHTML +=
+              '<div class="test-result success">✅ App carregado</div>';
+
+            // Teste 6: Verificar se renderServicos existe
+            if (typeof app.renderServicos === "function") {
+              results.innerHTML +=
+                '<div class="test-result success">✅ app.renderServicos existe</div>';
+
+              // Teste 7: Chamar renderServicos
+              try {
+                results.innerHTML +=
+                  '<div class="test-result info">🔄 Chamando app.renderServicos()...</div>';
+                app.renderServicos();
+                results.innerHTML +=
+                  '<div class="test-result success">✅ app.renderServicos() executado com sucesso</div>';
+              } catch (e) {
+                results.innerHTML +=
+                  '<div class="test-result error">❌ Erro ao chamar app.renderServicos: ' +
+                  e.message +
+                  "</div>";
+              }
+            } else {
+              results.innerHTML +=
+                '<div class="test-result error">❌ app.renderServicos não é uma função</div>';
+            }
+          } else {
+            results.innerHTML +=
+              '<div class="test-result error">❌ App não encontrado</div>';
+          }
+        } catch (e) {
+          results.innerHTML +=
+            '<div class="test-result error">❌ Erro ao verificar App: ' +
+            e.message +
+            "</div>";
+        }
+      }
+
+      // Executar testes quando a página carregar
+      window.addEventListener("load", runTests);
+    </script>
+
+    <!-- Carregar os scripts necessários -->
+    <script src="src/js/Utils.js"></script>
+    <script src="src/js/MoneyUtils.js"></script>
+    <script src="src/js/Store.js"></script>
+    <script src="src/js/UI.js"></script>
+    <script src="src/js/index.js"></script>
+  </body>
+</html>

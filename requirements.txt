@@ -1,0 +1,19 @@
+# Sistema Pet Shop - Dependências Python
+# Execute: pip install -r requirements.txt
+
+# Servidor HTTP simples (já incluído no Python padrão)
+# Nenhuma dependência externa necessária
+
+# Para desenvolvimento (opcional)
+# flask==2.3.3
+# django==4.2.7
+# fastapi==0.104.1
+# uvicorn==0.24.0
+
+# Para testes (opcional)
+# pytest==7.4.3
+# selenium==4.15.2
+
+# Para documentação (opcional)
+# sphinx==7.2.6
+# mkdocs==1.5.3
