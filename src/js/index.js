@@ -661,7 +661,9 @@ class PetShopApp {
       const todayAppointments = appointments.filter(
         (apt) => apt.dataHoraInicio && apt.dataHoraInicio.startsWith(today)
       );
-      const pendingOrders = orders.filter((order) => order.status === "pendente");
+      const pendingOrders = orders.filter(
+        (order) => order.status === "pendente"
+      );
 
       content.innerHTML = `
             <div class="page-header">
@@ -744,7 +746,7 @@ class PetShopApp {
             </div>
         `;
     } catch (error) {
-      console.error('❌ Erro ao carregar dashboard:', error);
+      console.error("❌ Erro ao carregar dashboard:", error);
       content.innerHTML = `
         <div class="page-header">
           <h1 class="page-title">Dashboard</h1>
@@ -850,9 +852,11 @@ class PetShopApp {
   }
 
   // Placeholder para outras páginas
-  renderClientes() {
+  async renderClientes() {
     const content = document.getElementById("content");
-    const clients = store.getClients();
+    
+    try {
+      const clients = await store.getClients();
 
     content.innerHTML = `
       <div class="page-header">
@@ -894,7 +898,19 @@ class PetShopApp {
       </div>
     `;
 
-    this.setupClientEvents();
+      this.setupClientEvents();
+    } catch (error) {
+      console.error('❌ Erro ao carregar clientes:', error);
+      content.innerHTML = `
+        <div class="page-header">
+          <h1>Clientes</h1>
+        </div>
+        <div class="error-state">
+          <p>❌ Erro ao carregar clientes. Verifique sua conexão com a internet.</p>
+          <button class="btn btn-primary" onclick="location.reload()">Recarregar Página</button>
+        </div>
+      `;
+    }
   }
 
   renderClientsTable(clients) {
@@ -1851,9 +1867,11 @@ class PetShopApp {
   }
 
   // ===== PÁGINA DE SERVIÇOS =====
-  renderServicos() {
+  async renderServicos() {
     const content = document.getElementById("content");
-    const services = store.getServices();
+    
+    try {
+      const services = await store.getServices();
 
     // Verificar se é primeira execução (sem serviços)
     if (services.length === 0) {
@@ -1896,7 +1914,19 @@ class PetShopApp {
       ${this.renderServicesTable(services)}
     `;
 
-    this.setupServiceEvents();
+      this.setupServiceEvents();
+    } catch (error) {
+      console.error('❌ Erro ao carregar serviços:', error);
+      content.innerHTML = `
+        <div class="page-header">
+          <h1>Serviços</h1>
+        </div>
+        <div class="error-state">
+          <p>❌ Erro ao carregar serviços. Verifique sua conexão com a internet.</p>
+          <button class="btn btn-primary" onclick="location.reload()">Recarregar Página</button>
+        </div>
+      `;
+    }
   }
 
   renderServicosOnboarding() {
@@ -2660,9 +2690,11 @@ class PetShopApp {
   }
 
   // ===== MÉTODOS DE AGENDAMENTOS =====
-  renderAgendamentos() {
+  async renderAgendamentos() {
     const content = document.getElementById("content");
-    const appointments = store.getAppointments();
+    
+    try {
+      const appointments = await store.getAppointments();
 
     content.innerHTML = `
       <div class="page-header">
@@ -2726,7 +2758,19 @@ class PetShopApp {
       </div>
     `;
 
-    this.setupAppointmentEvents();
+      this.setupAppointmentEvents();
+    } catch (error) {
+      console.error('❌ Erro ao carregar agendamentos:', error);
+      content.innerHTML = `
+        <div class="page-header">
+          <h1>Agendamentos</h1>
+        </div>
+        <div class="error-state">
+          <p>❌ Erro ao carregar agendamentos. Verifique sua conexão com a internet.</p>
+          <button class="btn btn-primary" onclick="location.reload()">Recarregar Página</button>
+        </div>
+      `;
+    }
   }
 
   renderAppointmentsTable(appointments) {
@@ -2870,9 +2914,11 @@ class PetShopApp {
     return `<span class="badge ${config.class}">${config.text}</span>`;
   }
 
-  renderPets() {
+  async renderPets() {
     const content = document.getElementById("content");
-    const pets = store.getPets();
+    
+    try {
+      const pets = await store.getPets();
 
     content.innerHTML = `
       <div class="page-header">
@@ -2921,7 +2967,19 @@ class PetShopApp {
       </div>
     `;
 
-    this.setupPetEvents();
+      this.setupPetEvents();
+    } catch (error) {
+      console.error('❌ Erro ao carregar pets:', error);
+      content.innerHTML = `
+        <div class="page-header">
+          <h1>Pets</h1>
+        </div>
+        <div class="error-state">
+          <p>❌ Erro ao carregar pets. Verifique sua conexão com a internet.</p>
+          <button class="btn btn-primary" onclick="location.reload()">Recarregar Página</button>
+        </div>
+      `;
+    }
   }
 
   renderPetsTable(pets) {

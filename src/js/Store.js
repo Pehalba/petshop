@@ -312,12 +312,12 @@ class Store {
 
   // Métodos específicos para cada store
   // Clientes
-  getClients() {
-    return this.getAll("clients");
+  async getClients() {
+    return await this.getAll("clients");
   }
 
-  getClient(id) {
-    return this.getById("clients", id);
+  async getClient(id) {
+    return await this.getById("clients", id);
   }
 
   saveClient(client) {
@@ -346,12 +346,12 @@ class Store {
   }
 
   // Pets
-  getPets() {
-    return this.getAll("pets");
+  async getPets() {
+    return await this.getAll("pets");
   }
 
-  getPet(id) {
-    return this.getById("pets", id);
+  async getPet(id) {
+    return await this.getById("pets", id);
   }
 
   savePet(pet) {
@@ -376,12 +376,12 @@ class Store {
   }
 
   // Serviços
-  getServices() {
-    return this.getAll("services");
+  async getServices() {
+    return await this.getAll("services");
   }
 
-  getService(id) {
-    return this.getById("services", id);
+  async getService(id) {
+    return await this.getById("services", id);
   }
 
   saveService(service) {
@@ -411,12 +411,12 @@ class Store {
   }
 
   // Agendamentos
-  getAppointments() {
-    return this.getAll("appointments");
+  async getAppointments() {
+    return await this.getAll("appointments");
   }
 
-  getAppointment(id) {
-    return this.getById("appointments", id);
+  async getAppointment(id) {
+    return await this.getById("appointments", id);
   }
 
   saveAppointment(appointment) {
@@ -439,12 +439,12 @@ class Store {
   }
 
   // Ordens de Serviço
-  getOrders() {
-    return this.getAll("orders");
+  async getOrders() {
+    return await this.getAll("orders");
   }
 
-  getOrder(id) {
-    return this.getById("orders", id);
+  async getOrder(id) {
+    return await this.getById("orders", id);
   }
 
   saveOrder(order) {
@@ -589,12 +589,12 @@ class Store {
   }
 
   // Agendamentos
-  getAppointments() {
-    return this.getAll("appointments");
+  async getAppointments() {
+    return await this.getAll("appointments");
   }
 
-  getAppointment(id) {
-    return this.getById("appointments", id);
+  async getAppointment(id) {
+    return await this.getById("appointments", id);
   }
 
   saveAppointment(appointment) {
@@ -651,7 +651,7 @@ class Store {
     console.log("🧹 Iniciando limpeza de dados corrompidos...");
 
     // Limpar clientes com ID undefined ou inválido
-    const clients = this.getAll("clients");
+    const clients = this.getAllSync("clients");
     const validClients = clients.filter(
       (client) => client && client.id && client.id !== "undefined"
     );
@@ -669,7 +669,7 @@ class Store {
     }
 
     // Limpar pets com clienteId undefined ou inválido
-    const pets = this.getAll("pets");
+    const pets = this.getAllSync("pets");
     const validPets = pets.filter(
       (pet) =>
         pet &&
