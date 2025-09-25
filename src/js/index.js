@@ -1515,11 +1515,11 @@ class PetShopApp {
       let savedClient;
       if (clientId) {
         // Para atualizar, incluir o ID no objeto
-        savedClient = store.saveClient({ ...clientData, id: clientId });
+        savedClient = await store.saveClient({ ...clientData, id: clientId });
       } else {
         // Para criar novo, gerar ID único
         const newClientId = store.generateId("cli");
-        savedClient = store.saveClient({ ...clientData, id: newClientId });
+        savedClient = await store.saveClient({ ...clientData, id: newClientId });
       }
 
       // Salvar pets se houver
@@ -1541,7 +1541,7 @@ class PetShopApp {
             };
             // Gerar ID único para cada pet
             const newPetId = store.generateId("pet");
-            store.savePet({ ...petData, id: newPetId });
+            await store.savePet({ ...petData, id: newPetId });
           }
         }
       }
@@ -3153,10 +3153,10 @@ class PetShopApp {
   }
 
   // ===== MÉTODOS DE PETS =====
-  showPetForm(petId = null, preSelectedClientId = null) {
+  async showPetForm(petId = null, preSelectedClientId = null) {
     const isEdit = petId !== null;
-    const pet = isEdit ? store.getPet(petId) : null;
-    const clients = store.getClients();
+    const pet = isEdit ? await store.getPet(petId) : null;
+    const clients = await store.getClients();
 
     const content = `
       <div class="form-container">
@@ -3398,11 +3398,11 @@ class PetShopApp {
       let savedPet;
       if (petId) {
         // Para atualizar, incluir o ID no objeto
-        savedPet = store.savePet({ ...petData, id: petId });
+        savedPet = await store.savePet({ ...petData, id: petId });
       } else {
         // Para criar novo, gerar ID único
         const newPetId = store.generateId("pet");
-        savedPet = store.savePet({ ...petData, id: newPetId });
+        savedPet = await store.savePet({ ...petData, id: newPetId });
       }
 
       ui.success(
@@ -5653,7 +5653,7 @@ class PetShopApp {
 
     try {
       const newClientId = store.generateId("cli");
-      const savedClient = store.saveClient({ ...clientData, id: newClientId });
+      const savedClient = await store.saveClient({ ...clientData, id: newClientId });
 
       ui.success("Cliente criado com sucesso!");
 
@@ -5922,7 +5922,7 @@ class PetShopApp {
 
     try {
       const newPetId = store.generateId("pet");
-      const savedPet = store.savePet({ ...petData, id: newPetId });
+      const savedPet = await store.savePet({ ...petData, id: newPetId });
 
       ui.success("Pet criado com sucesso!");
 
