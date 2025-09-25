@@ -2916,9 +2916,12 @@ class PetShopApp {
 
   async renderPets() {
     const content = document.getElementById("content");
+    console.log("🔍 renderPets iniciado");
 
     try {
+      console.log("🔍 Carregando pets...");
       const pets = await store.getPets();
+      console.log("🔍 Pets carregados:", pets.length, "itens");
 
       content.innerHTML = `
       <div class="page-header">

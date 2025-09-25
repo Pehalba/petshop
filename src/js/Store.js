@@ -188,11 +188,16 @@ class Store {
   }
 
   async getAll(storeName) {
+    console.log(`🔍 getAll chamado para: ${storeName}`);
+    
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
+      console.log(`🔍 Firebase não disponível, usando localStorage para: ${storeName}`);
       // Fallback para localStorage se Firebase não estiver pronto
       const data = localStorage.getItem(this.stores[storeName]);
-      return data ? JSON.parse(data) : [];
+      const result = data ? JSON.parse(data) : [];
+      console.log(`🔍 ${storeName} do localStorage:`, result.length, 'itens');
+      return result;
     }
 
     try {
@@ -204,7 +209,9 @@ class Store {
       console.error(`❌ Erro ao carregar ${storeName} da nuvem, usando localStorage:`, error);
       // Fallback para localStorage em caso de erro
       const data = localStorage.getItem(this.stores[storeName]);
-      return data ? JSON.parse(data) : [];
+      const result = data ? JSON.parse(data) : [];
+      console.log(`🔍 ${storeName} do localStorage (fallback):`, result.length, 'itens');
+      return result;
     }
   }
 
