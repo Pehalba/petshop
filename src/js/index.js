@@ -13,6 +13,7 @@ class PetShopApp {
       pets: this.renderPets.bind(this),
       servicos: this.renderServicos.bind(this),
       agendamentos: this.renderAgendamentos.bind(this),
+      prontuarios: this.renderProntuarios.bind(this),
       ordem: this.renderOrdem.bind(this),
       pagamentos: this.renderPagamentos.bind(this),
       relatorios: this.renderRelatorios.bind(this),
@@ -224,9 +225,10 @@ class PetShopApp {
                         <h3>Recursos</h3>
                         <ul class="footer-links">
                             <li><a href="#" data-page="clientes">Clientes</a></li>
-                            <li><a href="#" data-page="pets">Pets</a></li>
-                            <li><a href="#" data-page="servicos">Serviços</a></li>
-                            <li><a href="#" data-page="agendamentos">Agendamentos</a></li>
+            <li><a href="#" data-page="pets">Pets</a></li>
+            <li><a href="#" data-page="servicos">Serviços</a></li>
+            <li><a href="#" data-page="agendamentos">Agendamentos</a></li>
+            <li><a href="#" data-page="prontuarios">Prontuários</a></li>
                         </ul>
                     </div>
                     <div class="footer-section">
@@ -3384,6 +3386,11 @@ class PetShopApp {
           <div class="detail-title">
             <h1>${pet.nome || "Sem nome"}</h1>
             <div class="detail-actions">
+              <button class="btn btn-secondary" onclick="app.showProntuarioFormForPet('${
+                pet.id
+              }')">
+                <i class="icon-plus"></i> Novo Prontuário
+              </button>
               <button class="btn btn-outline" onclick="app.editPet('${
                 pet.id
               }')">
@@ -3449,6 +3456,13 @@ class PetShopApp {
             `
                 : ""
             }
+
+            <div class="detail-card">
+              <h3>Histórico Médico</h3>
+              <div class="prontuarios-history">
+                ${this.renderPetProntuarios(pet.id)}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -4513,6 +4527,894 @@ class PetShopApp {
 
     const container = document.querySelector(".data-container");
     container.innerHTML = content;
+  }
+
+  // ===== PRONTUÁRIOS VETERINÁRIOS =====
+  renderProntuarios() {
+    const content = document.getElementById("content");
+    const prontuarios = store.getProntuarios();
+
+    content.innerHTML = `
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Prontuários Veterinários</h1>
+          <p>Controle dermatológico e histórico médico dos pets</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="app.showProntuarioForm()">
+            <i class="icon-plus"></i> Novo Prontuário
+          </button>
+        </div>
+      </div>
+
+      <div class="page-filters">
+        <div class="search-box">
+          <input 
+            type="text" 
+            id="prontuarioSearch" 
+            placeholder="Buscar por pet, cliente ou diagnóstico..."
+            class="form-input"
+          >
+          <i class="icon-search"></i>
+        </div>
+        <div class="filter-actions">
+          <select id="prontuarioPetFilter" class="form-select">
+            <option value="">Todos os pets</option>
+            ${store
+              .getPets()
+              .map(
+                (pet) => `
+              <option value="${pet.id}">${pet.nome} - ${
+                  store.getClient(pet.clienteId)?.nomeCompleto ||
+                  "Cliente não encontrado"
+                }</option>
+            `
+              )
+              .join("")}
+          </select>
+          <input 
+            type="date" 
+            id="prontuarioDateFilter" 
+            class="form-input"
+            title="Filtrar por data"
+          >
+        </div>
+      </div>
+
+      <div class="data-container">
+        ${this.renderProntuariosTable(prontuarios)}
+      </div>
+    `;
+
+    this.setupProntuarioEvents();
+  }
+
+  renderProntuariosTable(prontuarios) {
+    if (prontuarios.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-icon">🏥</div>
+          <h3>Nenhum prontuário encontrado</h3>
+          <p>Comece criando o primeiro prontuário veterinário para acompanhar a saúde dos pets.</p>
+          <button class="btn btn-primary" onclick="app.showProntuarioForm()">
+            <i class="icon-plus"></i> Criar Primeiro Prontuário
+          </button>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Pet</th>
+              <th>Cliente</th>
+              <th>Diagnóstico</th>
+              <th>Evolução</th>
+              <th>Fotos</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${prontuarios
+              .map((prontuario) => {
+                const pet = store.getPet(prontuario.petId);
+                const client = pet ? store.getClient(pet.clienteId) : null;
+                const evolucaoBadge = this.getEvolucaoBadge(
+                  prontuario.evolucao
+                );
+
+                return `
+                <tr>
+                  <td class="prontuario-date">${new Date(
+                    prontuario.dataConsulta
+                  ).toLocaleDateString("pt-BR")}</td>
+                  <td class="prontuario-pet clickable-name" onclick="app.viewPet('${
+                    prontuario.petId
+                  }')">
+                    ${pet ? pet.nome : "Pet não encontrado"}
+                  </td>
+                  <td class="prontuario-client clickable-name" onclick="app.viewClient('${
+                    client?.id
+                  }')">
+                    ${client ? client.nomeCompleto : "Cliente não encontrado"}
+                  </td>
+                  <td class="prontuario-diagnostico">${
+                    prontuario.diagnostico || "-"
+                  }</td>
+                  <td>${evolucaoBadge}</td>
+                  <td class="prontuario-fotos">
+                    <span class="photo-count">${
+                      prontuario.fotos ? prontuario.fotos.length : 0
+                    } foto(s)</span>
+                  </td>
+                  <td class="table-actions">
+                    <button class="btn btn-sm btn-outline" onclick="app.viewProntuario('${
+                      prontuario.id
+                    }')" title="Ver detalhes">
+                      <i class="icon-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="app.editProntuario('${
+                      prontuario.id
+                    }')" title="Editar">
+                      <i class="icon-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="app.deleteProntuario('${
+                      prontuario.id
+                    }')" title="Excluir">
+                      <i class="icon-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              `;
+              })
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  getEvolucaoBadge(evolucao) {
+    const badges = {
+      pior: '<span class="badge badge-danger">Pior</span>',
+      igual: '<span class="badge badge-warning">Igual</span>',
+      melhor: '<span class="badge badge-success">Melhor</span>',
+      primeira: '<span class="badge badge-info">Primeira consulta</span>',
+    };
+    return badges[evolucao] || '<span class="badge badge-secondary">-</span>';
+  }
+
+  showProntuarioForm(prontuarioId = null) {
+    const content = document.getElementById("content");
+    const prontuario = prontuarioId ? store.getProntuario(prontuarioId) : null;
+    const pets = store.getPets();
+
+    content.innerHTML = `
+      <div class="page-header">
+        <div class="page-title">
+          <h1>${prontuario ? "Editar Prontuário" : "Novo Prontuário"}</h1>
+          <p>Registre a consulta dermatológica do pet</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" onclick="app.renderProntuarios()">
+            <i class="icon-arrow-left"></i> Voltar
+          </button>
+        </div>
+      </div>
+
+      <form id="prontuarioForm" data-is-edit="${!!prontuario}" ${
+      prontuario ? `data-prontuario-id="${prontuario.id}"` : ""
+    }>
+        <div class="form-container">
+          <div class="form-section">
+            <h3>Dados da Consulta</h3>
+            <div class="form-row">
+              <div class="form-group required">
+                <label for="prontuarioPetId">Pet *</label>
+                <select id="prontuarioPetId" name="petId" class="form-select" required>
+                  <option value="">Selecione o pet</option>
+                  ${pets
+                    .map((pet) => {
+                      const client = store.getClient(pet.clienteId);
+                      return `
+                      <option value="${pet.id}" ${
+                        prontuario?.petId === pet.id ? "selected" : ""
+                      }>
+                        ${pet.nome} - ${
+                        client?.nomeCompleto || "Cliente não encontrado"
+                      }
+                      </option>
+                    `;
+                    })
+                    .join("")}
+                </select>
+                <div class="form-error" id="prontuarioPetId-error"></div>
+              </div>
+              <div class="form-group required">
+                <label for="prontuarioDataConsulta">Data da Consulta *</label>
+                <input 
+                  type="date" 
+                  id="prontuarioDataConsulta" 
+                  name="dataConsulta" 
+                  class="form-input" 
+                  value="${
+                    prontuario?.dataConsulta
+                      ? new Date(prontuario.dataConsulta)
+                          .toISOString()
+                          .split("T")[0]
+                      : new Date().toISOString().split("T")[0]
+                  }"
+                  required
+                >
+                <div class="form-error" id="prontuarioDataConsulta-error"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="prontuarioDiagnostico">Diagnóstico</label>
+              <textarea 
+                id="prontuarioDiagnostico" 
+                name="diagnostico" 
+                class="form-input" 
+                rows="3"
+                placeholder="Descreva o diagnóstico dermatológico..."
+              >${prontuario?.diagnostico || ""}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="prontuarioTratamento">Tratamento Prescrito</label>
+              <textarea 
+                id="prontuarioTratamento" 
+                name="tratamento" 
+                class="form-input" 
+                rows="3"
+                placeholder="Descreva o tratamento prescrito..."
+              >${prontuario?.tratamento || ""}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="prontuarioObservacoes">Observações</label>
+              <textarea 
+                id="prontuarioObservacoes" 
+                name="observacoes" 
+                class="form-input" 
+                rows="3"
+                placeholder="Observações adicionais..."
+              >${prontuario?.observacoes || ""}</textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Avaliação de Evolução</h3>
+            <div class="form-group">
+              <label for="prontuarioEvolucao">Como está em relação à última consulta?</label>
+              <select id="prontuarioEvolucao" name="evolucao" class="form-select">
+                <option value="primeira" ${
+                  prontuario?.evolucao === "primeira" ? "selected" : ""
+                }>Primeira consulta</option>
+                <option value="pior" ${
+                  prontuario?.evolucao === "pior" ? "selected" : ""
+                }>Pior que a última</option>
+                <option value="igual" ${
+                  prontuario?.evolucao === "igual" ? "selected" : ""
+                }>Igual à última</option>
+                <option value="melhor" ${
+                  prontuario?.evolucao === "melhor" ? "selected" : ""
+                }>Melhor que a última</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Fotos da Consulta</h3>
+            <div class="form-group">
+              <label for="prontuarioFotos">Adicionar Fotos</label>
+              <input 
+                type="file" 
+                id="prontuarioFotos" 
+                name="fotos" 
+                class="form-input" 
+                multiple 
+                accept="image/*"
+              >
+              <div class="form-help">Selecione uma ou mais fotos da condição dermatológica</div>
+            </div>
+            
+            <div id="fotosPreview" class="fotos-preview">
+              ${
+                prontuario?.fotos
+                  ? this.renderFotosPreview(prontuario.fotos)
+                  : ""
+              }
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="app.renderProntuarios()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              ${prontuario ? "Atualizar Prontuário" : "Salvar Prontuário"}
+            </button>
+          </div>
+        </div>
+      </form>
+    `;
+
+    this.setupProntuarioFormEvents();
+  }
+
+  renderFotosPreview(fotos) {
+    if (!fotos || fotos.length === 0) return "";
+
+    return `
+      <div class="fotos-grid">
+        ${fotos
+          .map(
+            (foto, index) => `
+          <div class="foto-item">
+            <img src="${foto}" alt="Foto ${index + 1}" class="foto-thumbnail">
+            <button type="button" class="btn btn-sm btn-danger foto-remove" onclick="app.removeFoto(${index})">
+              <i class="icon-x"></i>
+            </button>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    `;
+  }
+
+  setupProntuarioFormEvents() {
+    const form = document.getElementById("prontuarioForm");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.saveProntuario(e);
+      });
+    }
+
+    // Preview de fotos
+    const fotoInput = document.getElementById("prontuarioFotos");
+    if (fotoInput) {
+      fotoInput.addEventListener("change", (e) => {
+        this.handleFotoUpload(e);
+      });
+    }
+  }
+
+  handleFotoUpload(event) {
+    const files = Array.from(event.target.files);
+    const preview = document.getElementById("fotosPreview");
+
+    files.forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const fotoItem = document.createElement("div");
+          fotoItem.className = "foto-item";
+          fotoItem.innerHTML = `
+            <img src="${e.target.result}" alt="Nova foto" class="foto-thumbnail">
+            <button type="button" class="btn btn-sm btn-danger foto-remove" onclick="this.parentElement.remove()">
+              <i class="icon-x"></i>
+            </button>
+          `;
+          preview.appendChild(fotoItem);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  async saveProntuario(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const isEdit = event.target.dataset.isEdit === "true";
+    const prontuarioId = event.target.dataset.prontuarioId;
+
+    // Coletar fotos do preview
+    const fotos = [];
+    const fotoItems = document.querySelectorAll(".foto-item img");
+    fotoItems.forEach((img) => {
+      if (img.src.startsWith("data:")) {
+        fotos.push(img.src);
+      }
+    });
+
+    const prontuarioData = {
+      petId: formData.get("petId"),
+      dataConsulta: formData.get("dataConsulta"),
+      diagnostico: formData.get("diagnostico"),
+      tratamento: formData.get("tratamento"),
+      observacoes: formData.get("observacoes"),
+      evolucao: formData.get("evolucao"),
+      fotos: fotos,
+    };
+
+    // Validações
+    if (!this.validateProntuario(prontuarioData)) {
+      return;
+    }
+
+    try {
+      let savedProntuario;
+      if (isEdit) {
+        savedProntuario = store.saveProntuario({
+          ...prontuarioData,
+          id: prontuarioId,
+        });
+      } else {
+        const newProntuarioId = store.generateId("prontuario");
+        savedProntuario = store.saveProntuario({
+          ...prontuarioData,
+          id: newProntuarioId,
+        });
+      }
+
+      ui.success(
+        isEdit
+          ? "Prontuário atualizado com sucesso!"
+          : "Prontuário criado com sucesso!"
+      );
+
+      this.renderProntuarios();
+    } catch (error) {
+      ui.error("Erro ao salvar prontuário: " + error.message);
+    }
+  }
+
+  validateProntuario(prontuarioData) {
+    let isValid = true;
+
+    // Limpar erros anteriores
+    document
+      .querySelectorAll(".form-error")
+      .forEach((el) => (el.textContent = ""));
+
+    // Pet obrigatório
+    if (!prontuarioData.petId) {
+      this.showFieldError("prontuarioPetId", "Selecione um pet");
+      isValid = false;
+    }
+
+    // Data obrigatória
+    if (!prontuarioData.dataConsulta) {
+      this.showFieldError(
+        "prontuarioDataConsulta",
+        "Data da consulta é obrigatória"
+      );
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  viewProntuario(prontuarioId) {
+    const prontuario = store.getProntuario(prontuarioId);
+    if (!prontuario) {
+      ui.error("Prontuário não encontrado");
+      return;
+    }
+
+    const pet = store.getPet(prontuario.petId);
+    const client = pet ? store.getClient(pet.clienteId) : null;
+
+    const content = document.getElementById("content");
+    content.innerHTML = `
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Prontuário Veterinário</h1>
+          <p>Consulta de ${new Date(prontuario.dataConsulta).toLocaleDateString(
+            "pt-BR"
+          )}</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" onclick="app.renderProntuarios()">
+            <i class="icon-arrow-left"></i> Voltar
+          </button>
+          <button class="btn btn-primary" onclick="app.editProntuario('${
+            prontuario.id
+          }')">
+            <i class="icon-edit"></i> Editar
+          </button>
+        </div>
+      </div>
+
+      <div class="prontuario-details">
+        <div class="prontuario-info">
+          <div class="info-section">
+            <h3>Dados da Consulta</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Pet:</label>
+                <span class="clickable-name" onclick="app.viewPet('${
+                  prontuario.petId
+                }')">
+                  ${pet ? pet.nome : "Pet não encontrado"}
+                </span>
+              </div>
+              <div class="info-item">
+                <label>Cliente:</label>
+                <span class="clickable-name" onclick="app.viewClient('${
+                  client?.id
+                }')">
+                  ${client ? client.nomeCompleto : "Cliente não encontrado"}
+                </span>
+              </div>
+              <div class="info-item">
+                <label>Data:</label>
+                <span>${new Date(prontuario.dataConsulta).toLocaleDateString(
+                  "pt-BR"
+                )}</span>
+              </div>
+              <div class="info-item">
+                <label>Evolução:</label>
+                <span>${this.getEvolucaoBadge(prontuario.evolucao)}</span>
+              </div>
+            </div>
+          </div>
+
+          ${
+            prontuario.diagnostico
+              ? `
+            <div class="info-section">
+              <h3>Diagnóstico</h3>
+              <p>${prontuario.diagnostico}</p>
+            </div>
+          `
+              : ""
+          }
+
+          ${
+            prontuario.tratamento
+              ? `
+            <div class="info-section">
+              <h3>Tratamento</h3>
+              <p>${prontuario.tratamento}</p>
+            </div>
+          `
+              : ""
+          }
+
+          ${
+            prontuario.observacoes
+              ? `
+            <div class="info-section">
+              <h3>Observações</h3>
+              <p>${prontuario.observacoes}</p>
+            </div>
+          `
+              : ""
+          }
+
+          ${
+            prontuario.fotos && prontuario.fotos.length > 0
+              ? `
+            <div class="info-section">
+              <h3>Fotos da Consulta</h3>
+              <div class="fotos-gallery">
+                ${prontuario.fotos
+                  .map(
+                    (foto, index) => `
+                  <div class="foto-gallery-item">
+                    <img src="${foto}" alt="Foto ${
+                      index + 1
+                    }" class="foto-gallery-img" onclick="app.openFotoModal('${foto}')">
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `
+              : ""
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  editProntuario(prontuarioId) {
+    this.showProntuarioForm(prontuarioId);
+  }
+
+  deleteProntuario(prontuarioId) {
+    if (confirm("Tem certeza que deseja excluir este prontuário?")) {
+      try {
+        store.deleteProntuario(prontuarioId);
+        ui.success("Prontuário excluído com sucesso!");
+        this.renderProntuarios();
+      } catch (error) {
+        ui.error("Erro ao excluir prontuário: " + error.message);
+      }
+    }
+  }
+
+  setupProntuarioEvents() {
+    // Busca
+    const searchInput = document.getElementById("prontuarioSearch");
+    if (searchInput) {
+      searchInput.addEventListener("input", () => {
+        this.filterProntuarios();
+      });
+    }
+
+    // Filtros
+    const petFilter = document.getElementById("prontuarioPetFilter");
+    if (petFilter) {
+      petFilter.addEventListener("change", () => {
+        this.filterProntuarios();
+      });
+    }
+
+    const dateFilter = document.getElementById("prontuarioDateFilter");
+    if (dateFilter) {
+      dateFilter.addEventListener("change", () => {
+        this.filterProntuarios();
+      });
+    }
+  }
+
+  filterProntuarios() {
+    const searchTerm =
+      document.getElementById("prontuarioSearch")?.value.toLowerCase() || "";
+    const petFilter =
+      document.getElementById("prontuarioPetFilter")?.value || "";
+    const dateFilter =
+      document.getElementById("prontuarioDateFilter")?.value || "";
+
+    let prontuarios = store.getProntuarios();
+
+    // Filtro por busca
+    if (searchTerm) {
+      prontuarios = prontuarios.filter((prontuario) => {
+        const pet = store.getPet(prontuario.petId);
+        const client = pet ? store.getClient(pet.clienteId) : null;
+        return (
+          pet?.nome?.toLowerCase().includes(searchTerm) ||
+          client?.nomeCompleto?.toLowerCase().includes(searchTerm) ||
+          prontuario.diagnostico?.toLowerCase().includes(searchTerm)
+        );
+      });
+    }
+
+    // Filtro por pet
+    if (petFilter) {
+      prontuarios = prontuarios.filter(
+        (prontuario) => prontuario.petId === petFilter
+      );
+    }
+
+    // Filtro por data
+    if (dateFilter) {
+      prontuarios = prontuarios.filter((prontuario) =>
+        prontuario.dataConsulta.startsWith(dateFilter)
+      );
+    }
+
+    const container = document.querySelector(".data-container");
+    container.innerHTML = this.renderProntuariosTable(prontuarios);
+  }
+
+  // Métodos auxiliares para prontuários
+  showProntuarioFormForPet(petId) {
+    const content = document.getElementById("content");
+    const pet = store.getPet(petId);
+    const pets = store.getPets();
+
+    content.innerHTML = `
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Novo Prontuário</h1>
+          <p>Registre a consulta dermatológica de ${pet?.nome || "o pet"}</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" onclick="app.viewPet('${petId}')">
+            <i class="icon-arrow-left"></i> Voltar ao Pet
+          </button>
+        </div>
+      </div>
+
+      <form id="prontuarioForm" data-is-edit="false">
+        <div class="form-container">
+          <div class="form-section">
+            <h3>Dados da Consulta</h3>
+            <div class="form-row">
+              <div class="form-group required">
+                <label for="prontuarioPetId">Pet *</label>
+                <select id="prontuarioPetId" name="petId" class="form-select" required>
+                  <option value="">Selecione o pet</option>
+                  ${pets
+                    .map((p) => {
+                      const client = store.getClient(p.clienteId);
+                      return `
+                      <option value="${p.id}" ${
+                        p.id === petId ? "selected" : ""
+                      }>
+                        ${p.nome} - ${
+                        client?.nomeCompleto || "Cliente não encontrado"
+                      }
+                      </option>
+                    `;
+                    })
+                    .join("")}
+                </select>
+                <div class="form-error" id="prontuarioPetId-error"></div>
+              </div>
+              <div class="form-group required">
+                <label for="prontuarioDataConsulta">Data da Consulta *</label>
+                <input 
+                  type="date" 
+                  id="prontuarioDataConsulta" 
+                  name="dataConsulta" 
+                  class="form-input" 
+                  value="${new Date().toISOString().split("T")[0]}"
+                  required
+                >
+                <div class="form-error" id="prontuarioDataConsulta-error"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="prontuarioDiagnostico">Diagnóstico</label>
+              <textarea 
+                id="prontuarioDiagnostico" 
+                name="diagnostico" 
+                class="form-input" 
+                rows="3"
+                placeholder="Descreva o diagnóstico dermatológico..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="prontuarioTratamento">Tratamento Prescrito</label>
+              <textarea 
+                id="prontuarioTratamento" 
+                name="tratamento" 
+                class="form-input" 
+                rows="3"
+                placeholder="Descreva o tratamento prescrito..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="prontuarioObservacoes">Observações</label>
+              <textarea 
+                id="prontuarioObservacoes" 
+                name="observacoes" 
+                class="form-input" 
+                rows="3"
+                placeholder="Observações adicionais..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Avaliação de Evolução</h3>
+            <div class="form-group">
+              <label for="prontuarioEvolucao">Como está em relação à última consulta?</label>
+              <select id="prontuarioEvolucao" name="evolucao" class="form-select">
+                <option value="primeira">Primeira consulta</option>
+                <option value="pior">Pior que a última</option>
+                <option value="igual">Igual à última</option>
+                <option value="melhor">Melhor que a última</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Fotos da Consulta</h3>
+            <div class="form-group">
+              <label for="prontuarioFotos">Adicionar Fotos</label>
+              <input 
+                type="file" 
+                id="prontuarioFotos" 
+                name="fotos" 
+                class="form-input" 
+                multiple 
+                accept="image/*"
+              >
+              <div class="form-help">Selecione uma ou mais fotos da condição dermatológica</div>
+            </div>
+            
+            <div id="fotosPreview" class="fotos-preview"></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="app.viewPet('${petId}')">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Salvar Prontuário
+            </button>
+          </div>
+        </div>
+      </form>
+    `;
+
+    this.setupProntuarioFormEvents();
+  }
+
+  renderPetProntuarios(petId) {
+    const prontuarios = store.getProntuariosByPet(petId);
+
+    if (prontuarios.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-icon">🏥</div>
+          <p>Nenhum prontuário encontrado</p>
+          <button class="btn btn-primary btn-sm" onclick="app.showProntuarioFormForPet('${petId}')">
+            <i class="icon-plus"></i> Criar Primeiro Prontuário
+          </button>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="prontuarios-list">
+        ${prontuarios
+          .map(
+            (prontuario) => `
+          <div class="prontuario-item">
+            <div class="prontuario-header">
+              <div class="prontuario-date">
+                ${new Date(prontuario.dataConsulta).toLocaleDateString("pt-BR")}
+              </div>
+              <div class="prontuario-evolucao">
+                ${this.getEvolucaoBadge(prontuario.evolucao)}
+              </div>
+            </div>
+            <div class="prontuario-content">
+              ${
+                prontuario.diagnostico
+                  ? `
+                <div class="prontuario-field">
+                  <strong>Diagnóstico:</strong> ${prontuario.diagnostico}
+                </div>
+              `
+                  : ""
+              }
+              ${
+                prontuario.tratamento
+                  ? `
+                <div class="prontuario-field">
+                  <strong>Tratamento:</strong> ${prontuario.tratamento}
+                </div>
+              `
+                  : ""
+              }
+              ${
+                prontuario.fotos && prontuario.fotos.length > 0
+                  ? `
+                <div class="prontuario-field">
+                  <strong>Fotos:</strong> ${prontuario.fotos.length} foto(s)
+                </div>
+              `
+                  : ""
+              }
+            </div>
+            <div class="prontuario-actions">
+              <button class="btn btn-sm btn-outline" onclick="app.viewProntuario('${
+                prontuario.id
+              }')">
+                <i class="icon-eye"></i> Ver
+              </button>
+              <button class="btn btn-sm btn-primary" onclick="app.editProntuario('${
+                prontuario.id
+              }')">
+                <i class="icon-edit"></i> Editar
+              </button>
+            </div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    `;
   }
 
   // Formulário de cliente a partir de agendamento

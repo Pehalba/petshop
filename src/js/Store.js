@@ -17,6 +17,7 @@ class Store {
       professionals: "pet_shop_professionals",
       breeds: "pet_shop_breeds",
       sizes: "pet_shop_sizes",
+      prontuarios: "pet_shop_prontuarios",
     };
 
     this.init();
@@ -531,6 +532,30 @@ class Store {
 
   deleteProfessional(id) {
     return this.delete("professionals", id);
+  }
+
+  // Prontuários veterinários
+  getProntuarios() {
+    return this.getAll("prontuarios");
+  }
+
+  getProntuario(id) {
+    return this.getById("prontuarios", id);
+  }
+
+  saveProntuario(prontuario) {
+    return this.save("prontuarios", prontuario);
+  }
+
+  deleteProntuario(id) {
+    return this.delete("prontuarios", id);
+  }
+
+  getProntuariosByPet(petId) {
+    const prontuarios = this.getAll("prontuarios");
+    return prontuarios
+      .filter((p) => p.petId === petId)
+      .sort((a, b) => new Date(b.dataConsulta) - new Date(a.dataConsulta));
   }
 
   // Função para limpar dados corrompidos
