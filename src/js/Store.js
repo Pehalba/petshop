@@ -185,7 +185,7 @@ class Store {
   async getAll(storeName) {
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
-      throw new Error("Sistema requer conexão com a internet. Verifique sua rede e faça login.");
+      throw new Error("Sistema requer conexão com a internet. Verifique sua rede.");
     }
 
     try {
@@ -202,7 +202,7 @@ class Store {
   async getById(storeName, id) {
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
-      throw new Error("Sistema requer conexão com a internet. Verifique sua rede e faça login.");
+      throw new Error("Sistema requer conexão com a internet. Verifique sua rede.");
     }
 
     try {
@@ -218,7 +218,7 @@ class Store {
   async save(storeName, item) {
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
-      throw new Error("Sistema requer conexão com a internet. Verifique sua rede e faça login.");
+      throw new Error("Sistema requer conexão com a internet. Verifique sua rede.");
     }
 
     try {
@@ -243,7 +243,7 @@ class Store {
   async delete(storeName, id) {
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
-      throw new Error("Sistema requer conexão com a internet. Verifique sua rede e faça login.");
+      throw new Error("Sistema requer conexão com a internet. Verifique sua rede.");
     }
 
     try {

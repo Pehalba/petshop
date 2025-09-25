@@ -172,39 +172,21 @@ class AuthComponent {
     const authButton = document.getElementById("authButton");
     const userInfo = document.getElementById("userInfo");
 
-    if (this.isAuthenticated && this.currentUser) {
-      if (authButton) {
-        authButton.innerHTML = `
-          <i class="icon-user"></i> ${
-            this.currentUser.displayName || this.currentUser.email
-          }
-        `;
-        authButton.onclick = () => this.showUserMenu();
-      }
+    // Sempre mostrar como logado
+    if (authButton) {
+      authButton.innerHTML = `
+        <i class="icon-user"></i> Pet Shop
+      `;
+      authButton.onclick = () => this.showUserMenu();
+    }
 
-      if (userInfo) {
-        userInfo.innerHTML = `
-          <div class="user-info">
-            <span class="user-name">${
-              this.currentUser.displayName || this.currentUser.email
-            }</span>
-            <span class="sync-status online">☁️ Online</span>
-          </div>
-        `;
-      }
-    } else {
-      if (authButton) {
-        authButton.innerHTML = '<i class="icon-login"></i> Entrar';
-        authButton.onclick = () => this.showAuthModal();
-      }
-
-       if (userInfo) {
-         userInfo.innerHTML = `
-           <div class="user-info">
-             <span class="sync-status offline">🔐 Faça login para acessar</span>
-           </div>
-         `;
-       }
+    if (userInfo) {
+      userInfo.innerHTML = `
+        <div class="user-info">
+          <span class="user-name">Pet Shop</span>
+          <span class="sync-status online">☁️ Online</span>
+        </div>
+      `;
     }
   }
 

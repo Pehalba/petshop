@@ -9,6 +9,8 @@ class FirebaseService {
     this.isOnline = navigator.onLine;
     this.syncQueue = [];
     this.listeners = new Map();
+    this.currentUser = null;
+    this.isAuthenticated = false;
 
     // Configuração do Firebase (substitua pelos seus valores)
     this.firebaseConfig = {
@@ -43,6 +45,11 @@ class FirebaseService {
       this.isInitialized = true;
       this.setupOfflineHandling();
       console.log("🔥 Firebase inicializado com sucesso");
+      
+      // Simular usuário logado automaticamente
+      this.currentUser = { uid: 'petshop-owner', email: 'petshop@local.com' };
+      this.isAuthenticated = true;
+      
     } catch (error) {
       console.error("❌ Erro ao inicializar Firebase:", error);
       this.isInitialized = false;
@@ -120,59 +127,34 @@ class FirebaseService {
     });
   }
 
-  // ===== AUTENTICAÇÃO =====
+  // ===== AUTENTICAÇÃO (SIMPLIFICADA) =====
   async signIn(email, password) {
-    if (!this.isInitialized) throw new Error("Firebase não inicializado");
-
-    try {
-      const userCredential = await this.auth.signInWithEmailAndPassword(
-        email,
-        password
-      );
-      console.log("✅ Login realizado:", userCredential.user.email);
-      return userCredential.user;
-    } catch (error) {
-      console.error("❌ Erro no login:", error);
-      throw error;
-    }
+    // Sempre retorna sucesso para simplificar
+    console.log("✅ Acesso liberado automaticamente");
+    return this.currentUser;
   }
 
   async signUp(email, password, displayName) {
-    if (!this.isInitialized) throw new Error("Firebase não inicializado");
-
-    try {
-      const userCredential = await this.auth.createUserWithEmailAndPassword(
-        email,
-        password
-      );
-      await userCredential.user.updateProfile({ displayName });
-      console.log("✅ Usuário criado:", userCredential.user.email);
-      return userCredential.user;
-    } catch (error) {
-      console.error("❌ Erro no registro:", error);
-      throw error;
-    }
+    // Sempre retorna sucesso para simplificar
+    console.log("✅ Acesso liberado automaticamente");
+    return this.currentUser;
   }
 
   async signOut() {
-    if (!this.isInitialized) return;
-
-    try {
-      await this.auth.signOut();
-      console.log("✅ Logout realizado");
-    } catch (error) {
-      console.error("❌ Erro no logout:", error);
-      throw error;
-    }
+    // Não faz nada, sempre mantém acesso
+    console.log("✅ Acesso mantido automaticamente");
   }
 
   getCurrentUser() {
-    return this.auth?.currentUser || null;
+    return this.currentUser;
   }
 
   onAuthStateChanged(callback) {
-    if (!this.isInitialized) return;
-    return this.auth.onAuthStateChanged(callback);
+    // Simula usuário sempre logado
+    if (this.currentUser) {
+      callback(this.currentUser);
+    }
+    return () => {}; // Função vazia para unsubscribe
   }
 
   // ===== FIRESTORE =====
