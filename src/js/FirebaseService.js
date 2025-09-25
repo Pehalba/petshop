@@ -26,16 +26,31 @@ class FirebaseService {
 
   async init() {
     try {
-      // Carregar Firebase dinamicamente
-      if (typeof window !== "undefined") {
-        await this.loadFirebase();
-        this.isInitialized = true;
-        this.setupOfflineHandling();
-        console.log("🔥 Firebase inicializado com sucesso");
+      // Verificar se estamos no navegador
+      if (typeof window === "undefined") {
+        console.warn("⚠️ Firebase não pode ser inicializado fora do navegador");
+        return;
       }
+
+      // Carregar Firebase dinamicamente
+      await this.loadFirebase();
+      
+      // Verificar se o Firebase foi carregado corretamente
+      if (!window.firebase || !window.firebase.apps) {
+        throw new Error("Firebase não foi carregado corretamente");
+      }
+
+      this.isInitialized = true;
+      this.setupOfflineHandling();
+      console.log("🔥 Firebase inicializado com sucesso");
     } catch (error) {
       console.error("❌ Erro ao inicializar Firebase:", error);
       this.isInitialized = false;
+      
+      // Mostrar erro para o usuário
+      if (window.ui) {
+        window.ui.error("❌ Erro ao conectar com a nuvem. Verifique sua conexão com a internet e recarregue a página.");
+      }
     }
   }
 
@@ -43,21 +58,24 @@ class FirebaseService {
     // Carregar Firebase via CDN se não estiver disponível
     if (!window.firebase) {
       await this.loadScript(
-        "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"
+        "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"
       );
       await this.loadScript(
-        "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+        "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"
       );
       await this.loadScript(
-        "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
+        "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"
       );
       await this.loadScript(
-        "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"
+        "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"
       );
     }
 
+    // Aguardar um pouco para garantir que o Firebase carregou
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // Inicializar Firebase
-    if (!window.firebase.apps.length) {
+    if (!window.firebase.apps || window.firebase.apps.length === 0) {
       window.firebase.initializeApp(this.firebaseConfig);
     }
 
@@ -68,10 +86,22 @@ class FirebaseService {
 
   loadScript(src) {
     return new Promise((resolve, reject) => {
+      // Verificar se o script já foi carregado
+      if (document.querySelector(`script[src="${src}"]`)) {
+        resolve();
+        return;
+      }
+
       const script = document.createElement("script");
       script.src = src;
-      script.onload = resolve;
-      script.onerror = reject;
+      script.onload = () => {
+        console.log(`✅ Firebase script carregado: ${src}`);
+        resolve();
+      };
+      script.onerror = (error) => {
+        console.error(`❌ Erro ao carregar Firebase script: ${src}`, error);
+        reject(error);
+      };
       document.head.appendChild(script);
     });
   }
