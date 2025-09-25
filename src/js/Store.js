@@ -182,65 +182,80 @@ class Store {
   }
 
   // Métodos genéricos para todos os stores
-  getAll(storeName) {
-    const data = localStorage.getItem(this.stores[storeName]);
-    return data ? JSON.parse(data) : [];
+  async getAll(storeName) {
+    // Verificar se Firebase está disponível
+    if (!window.firebaseService || !window.firebaseService.isConnected()) {
+      throw new Error("Sistema requer conexão com a internet. Verifique sua rede e faça login.");
+    }
+
+    try {
+      // Buscar dados diretamente do Firebase
+      const items = await window.firebaseService.getAllDocuments(storeName);
+      console.log(`✅ ${storeName} carregados da nuvem:`, items.length, 'itens');
+      return items;
+    } catch (error) {
+      console.error(`❌ Erro ao carregar ${storeName}:`, error);
+      throw error;
+    }
   }
 
-  getById(storeName, id) {
-    const items = this.getAll(storeName);
-    return items.find((item) => item.id === id);
+  async getById(storeName, id) {
+    // Verificar se Firebase está disponível
+    if (!window.firebaseService || !window.firebaseService.isConnected()) {
+      throw new Error("Sistema requer conexão com a internet. Verifique sua rede e faça login.");
+    }
+
+    try {
+      // Buscar item diretamente do Firebase
+      const item = await window.firebaseService.getDocument(storeName, id);
+      return item;
+    } catch (error) {
+      console.error(`❌ Erro ao buscar ${storeName}/${id}:`, error);
+      throw error;
+    }
   }
 
   async save(storeName, item) {
-    const items = this.getAll(storeName);
-    const existingIndex = items.findIndex((i) => i.id === item.id);
+    // Verificar se Firebase está disponível
+    if (!window.firebaseService || !window.firebaseService.isConnected()) {
+      throw new Error("Sistema requer conexão com a internet. Verifique sua rede e faça login.");
+    }
 
-    if (existingIndex >= 0) {
-      items[existingIndex] = { ...item, updatedAt: new Date().toISOString() };
-    } else {
-      items.push({
+    try {
+      // Preparar dados com timestamps
+      const itemData = {
         ...item,
-        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      });
+        createdAt: item.createdAt || new Date().toISOString()
+      };
+
+      // Salvar diretamente no Firebase
+      await window.firebaseService.saveDocument(storeName, item.id, itemData);
+      
+      console.log(`✅ ${storeName} salvo na nuvem:`, item.id);
+      return item;
+    } catch (error) {
+      console.error(`❌ Erro ao salvar ${storeName}:`, error);
+      throw error;
     }
-
-    localStorage.setItem(this.stores[storeName], JSON.stringify(items));
-
-    // Sincronizar com Firebase se disponível
-    if (window.firebaseService && window.firebaseService.isConnected()) {
-      try {
-        const itemToSync =
-          items[existingIndex >= 0 ? existingIndex : items.length - 1];
-        await window.firebaseService.saveDocument(
-          storeName,
-          item.id,
-          itemToSync
-        );
-      } catch (error) {
-        console.warn("⚠️ Erro na sincronização com Firebase:", error);
-      }
-    }
-
-    return item;
   }
 
   async delete(storeName, id) {
-    const items = this.getAll(storeName);
-    const filteredItems = items.filter((item) => item.id !== id);
-    localStorage.setItem(this.stores[storeName], JSON.stringify(filteredItems));
-
-    // Sincronizar com Firebase se disponível
-    if (window.firebaseService && window.firebaseService.isConnected()) {
-      try {
-        await window.firebaseService.deleteDocument(storeName, id);
-      } catch (error) {
-        console.warn("⚠️ Erro na sincronização com Firebase:", error);
-      }
+    // Verificar se Firebase está disponível
+    if (!window.firebaseService || !window.firebaseService.isConnected()) {
+      throw new Error("Sistema requer conexão com a internet. Verifique sua rede e faça login.");
     }
 
-    return true;
+    try {
+      // Excluir diretamente do Firebase
+      await window.firebaseService.deleteDocument(storeName, id);
+      
+      console.log(`✅ ${storeName} excluído da nuvem:`, id);
+      return true;
+    } catch (error) {
+      console.error(`❌ Erro ao excluir ${storeName}:`, error);
+      throw error;
+    }
   }
 
   query(storeName, predicate) {

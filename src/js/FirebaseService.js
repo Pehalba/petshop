@@ -148,9 +148,7 @@ class FirebaseService {
   // ===== FIRESTORE =====
   async saveDocument(collection, docId, data) {
     if (!this.isInitialized) {
-      // Salvar na fila para sincronização posterior
-      this.syncQueue.push({ action: "save", collection, docId, data });
-      return data;
+      throw new Error("Firebase não inicializado. Verifique sua conexão com a internet.");
     }
 
     try {
@@ -165,16 +163,13 @@ class FirebaseService {
       return data;
     } catch (error) {
       console.error(`❌ Erro ao salvar ${collection}/${docId}:`, error);
-      // Adicionar à fila de sincronização
-      this.syncQueue.push({ action: "save", collection, docId, data });
-      throw error;
+      throw new Error("Erro ao salvar na nuvem. Verifique sua conexão com a internet.");
     }
   }
 
   async getDocument(collection, docId) {
     if (!this.isInitialized) {
-      // Retornar do localStorage como fallback
-      return this.getFromLocalStorage(collection, docId);
+      throw new Error("Firebase não inicializado. Verifique sua conexão com a internet.");
     }
 
     try {
@@ -185,14 +180,13 @@ class FirebaseService {
       return null;
     } catch (error) {
       console.error(`❌ Erro ao buscar ${collection}/${docId}:`, error);
-      // Fallback para localStorage
-      return this.getFromLocalStorage(collection, docId);
+      throw new Error("Erro ao buscar dados da nuvem. Verifique sua conexão com a internet.");
     }
   }
 
   async getAllDocuments(collection) {
     if (!this.isInitialized) {
-      return this.getAllFromLocalStorage(collection);
+      throw new Error("Firebase não inicializado. Verifique sua conexão com a internet.");
     }
 
     try {
@@ -200,15 +194,13 @@ class FirebaseService {
       return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
       console.error(`❌ Erro ao buscar todos os ${collection}:`, error);
-      // Fallback para localStorage
-      return this.getAllFromLocalStorage(collection);
+      throw new Error("Erro ao buscar dados da nuvem. Verifique sua conexão com a internet.");
     }
   }
 
   async deleteDocument(collection, docId) {
     if (!this.isInitialized) {
-      this.syncQueue.push({ action: "delete", collection, docId });
-      return true;
+      throw new Error("Firebase não inicializado. Verifique sua conexão com a internet.");
     }
 
     try {
@@ -217,8 +209,7 @@ class FirebaseService {
       return true;
     } catch (error) {
       console.error(`❌ Erro ao excluir ${collection}/${docId}:`, error);
-      this.syncQueue.push({ action: "delete", collection, docId });
-      throw error;
+      throw new Error("Erro ao excluir dados da nuvem. Verifique sua conexão com a internet.");
     }
   }
 
@@ -347,18 +338,14 @@ class FirebaseService {
     }
   }
 
-  // ===== FALLBACK PARA LOCALSTORAGE =====
-  getFromLocalStorage(collection, docId) {
-    const data = localStorage.getItem(`pet_shop_${collection}`);
-    if (!data) return null;
-
-    const items = JSON.parse(data);
-    return items.find((item) => item.id === docId) || null;
-  }
-
-  getAllFromLocalStorage(collection) {
-    const data = localStorage.getItem(`pet_shop_${collection}`);
-    return data ? JSON.parse(data) : [];
+  // ===== VERIFICAÇÃO DE CONECTIVIDADE =====
+  checkConnection() {
+    if (!this.isOnline) {
+      throw new Error("Sem conexão com a internet. Verifique sua rede.");
+    }
+    if (!this.isInitialized) {
+      throw new Error("Sistema não inicializado. Recarregue a página.");
+    }
   }
 
   // ===== UTILITÁRIOS =====

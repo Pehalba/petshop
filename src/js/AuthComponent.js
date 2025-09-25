@@ -86,10 +86,10 @@ class AuthComponent {
               </button>
             </div>
 
-            <div class="auth-help">
-              <p>💡 <strong>Modo Offline:</strong> O sistema funciona mesmo sem internet, mas os dados ficam apenas no seu dispositivo.</p>
-              <p>☁️ <strong>Modo Online:</strong> Com login, seus dados são sincronizados na nuvem e acessíveis de qualquer lugar.</p>
-            </div>
+             <div class="auth-help">
+               <p>☁️ <strong>Sistema Online:</strong> Todos os dados são sincronizados na nuvem e acessíveis de qualquer lugar.</p>
+               <p>🔐 <strong>Seguro:</strong> Seus dados ficam protegidos e privados com login obrigatório.</p>
+             </div>
           </form>
         </div>
       </div>
@@ -198,13 +198,13 @@ class AuthComponent {
         authButton.onclick = () => this.showAuthModal();
       }
 
-      if (userInfo) {
-        userInfo.innerHTML = `
-          <div class="user-info">
-            <span class="sync-status offline">📱 Offline</span>
-          </div>
-        `;
-      }
+       if (userInfo) {
+         userInfo.innerHTML = `
+           <div class="user-info">
+             <span class="sync-status offline">🔐 Faça login para acessar</span>
+           </div>
+         `;
+       }
     }
   }
 

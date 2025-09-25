@@ -181,7 +181,7 @@ class PetShopApp {
                         <span class="search-icon">🔍</span>
                     </div>
                     <div id="userInfo" class="user-info">
-                        <span class="sync-status offline">📱 Offline</span>
+                        <span class="sync-status offline">🔐 Faça login para acessar</span>
                     </div>
                     <button id="authButton" class="btn btn-outline" onclick="authComponent.showAuthModal()">
                         <i class="icon-login"></i> Entrar
