@@ -1,140 +1,190 @@
-# 🐾 Sistema de Gerenciamento para Pet Shop
+# 🐾 Sistema de Gerenciamento Pet Shop
 
-Sistema completo de gerenciamento para pet shops desenvolvido em HTML, CSS e JavaScript puro, espelhando a arquitetura do projeto "Pedidos – Nuvem".
+Sistema completo de gerenciamento para Pet Shop com sincronização na nuvem, desenvolvido em HTML, CSS e JavaScript puro.
 
-## 🚀 Funcionalidades Implementadas
+## 🌐 **Acesso Online**
 
-### ✅ Módulos Principais
-- **Clientes**: CRUD completo com integração WhatsApp
-- **Pets**: Cadastro com porte (Pequeno, Médio, Grande) e histórico
-- **Serviços**: Sistema de variações de preço por porte do pet
-- **Dashboard**: Métricas e visão geral do negócio
+**URL:** https://pehalba.github.io/petshop
 
-### ✅ Recursos Avançados
-- **Variações de Preço**: Serviços com preços diferentes por porte do pet
-- **Integração WhatsApp**: Links diretos para contato com clientes
-- **Validações Inteligentes**: Formulários com validação em tempo real
-- **Interface Responsiva**: Design adaptável para diferentes telas
-- **Persistência Local**: Dados salvos no localStorage
-- **Sistema de Badges**: Visualização clara de status e categorias
+## ✨ **Funcionalidades**
 
-## 🛠️ Tecnologias Utilizadas
+### 📊 **Dashboard**
+- Visão geral do negócio
+- Métricas em tempo real
+- Agendamentos do dia
 
-- **HTML5**: Estrutura semântica e acessível
-- **CSS3**: Design responsivo com variáveis CSS e flexbox/grid
-- **JavaScript ES6+**: Módulos, classes, async/await
-- **LocalStorage**: Persistência de dados no navegador
+### 👥 **Clientes**
+- Cadastro completo de tutores
+- Integração WhatsApp
+- Histórico de pets e serviços
 
-## 📁 Estrutura do Projeto
+### 🐕 **Pets**
+- Cadastro detalhado dos animais
+- Prontuários veterinários
+- Histórico médico com fotos
+- Controle de vacinas e vermífugos
+
+### ✂️ **Serviços**
+- Catálogo de serviços personalizável
+- Preços por porte (Pequeno, Médio, Grande)
+- Controle de custos e margens
+
+### 📅 **Agendamentos**
+- Calendário visual
+- Gestão de horários
+- Controle de profissionais
+- Status de pagamento
+
+### 🏥 **Prontuários Veterinários**
+- Histórico dermatológico
+- Upload de fotos
+- Controle de evolução
+- Relatórios por pet
+
+## ☁️ **Sincronização na Nuvem**
+
+### **Modo Online:**
+- Dados sincronizados automaticamente
+- Acesso de qualquer dispositivo
+- Backup automático na nuvem
+- Fotos armazenadas na nuvem
+
+### **Modo Offline:**
+- Funciona sem internet
+- Dados salvos localmente
+- Sincronização automática quando voltar online
+
+## 🔐 **Autenticação**
+
+- Login/Registro seguro
+- Dados privados por usuário
+- Acesso multiplataforma
+- Sincronização em tempo real
+
+## 🚀 **Como Usar**
+
+### **1. Acesso Rápido:**
+1. Acesse: https://pehalba.github.io/petshop
+2. Clique em **"Entrar"** no canto superior direito
+3. Crie uma conta ou faça login
+4. Comece a usar o sistema!
+
+### **2. Configuração Firebase (Opcional):**
+Para sincronização na nuvem, siga o guia em `FIREBASE_SETUP.md`
+
+### **3. Uso Offline:**
+O sistema funciona perfeitamente sem internet, salvando dados localmente.
+
+## 📱 **Dispositivos Suportados**
+
+- ✅ **Desktop** (Windows, Mac, Linux)
+- ✅ **Tablet** (iPad, Android)
+- ✅ **Mobile** (iPhone, Android)
+- ✅ **Qualquer navegador moderno**
+
+## 🛠️ **Tecnologias**
+
+- **Frontend:** HTML5, CSS3, JavaScript (Vanilla)
+- **Backend:** Firebase (Firestore, Auth, Storage)
+- **Storage:** LocalStorage + Cloud Sync
+- **Deploy:** GitHub Pages
+
+## 📋 **Estrutura do Projeto**
 
 ```
-Sistema_pet/
-├── index.html              # Página principal (SPA)
+/
+├── index.html              # Página principal
 ├── src/
-│   ├── css/
-│   │   ├── main.css        # Estilos principais
-│   │   ├── page.css        # Estilos específicos de páginas
-│   │   └── elements.css    # Componentes e elementos
-│   └── js/
-│       ├── index.js        # Lógica principal da aplicação
-│       ├── Store.js        # Camada de persistência
-│       ├── UI.js           # Componentes de interface
-│       ├── Utils.js        # Utilitários gerais
-│       └── MoneyUtils.js   # Utilitários para formatação monetária
-├── README.md
-└── .gitignore
+│   ├── css/               # Estilos
+│   └── js/                # JavaScript
+│       ├── Store.js       # Persistência de dados
+│       ├── FirebaseService.js # Sincronização na nuvem
+│       ├── AuthComponent.js   # Autenticação
+│       └── index.js       # Lógica principal
+├── FIREBASE_SETUP.md      # Guia de configuração
+└── README.md              # Este arquivo
 ```
 
-## 🎯 Funcionalidades Detalhadas
-
-### Clientes
-- Cadastro completo com dados pessoais e contato
-- Integração WhatsApp com links diretos
-- Vinculação automática com pets
-- Busca e filtros avançados
-- Validação de CPF, telefone e email
-
-### Pets
-- Cadastro com informações detalhadas
-- Sistema de porte (Pequeno, Médio, Grande)
-- Cálculo automático de idade
-- Histórico médico e observações
-- Vinculação com clientes
-
-### Serviços
-- CRUD completo de serviços
-- Sistema de variações de preço por porte
-- Controle de custos e margem
-- Validação de preços únicos
-- Interface intuitiva para configuração
-
-## 🚀 Como Usar
-
-1. **Abrir o sistema**: Abra o arquivo `index.html` no navegador
-2. **Cadastrar clientes**: Comece cadastrando os tutores dos pets
-3. **Cadastrar pets**: Adicione os pets vinculados aos clientes
-4. **Configurar serviços**: Defina os serviços e preços por porte
-5. **Gerenciar**: Use o dashboard para acompanhar o negócio
-
-## 🔧 Instalação
+## 🔧 **Desenvolvimento Local**
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/sistema-pet-shop.git
+git clone https://github.com/Pehalba/petshop.git
+cd petshop
 ```
 
-2. Abra o arquivo `index.html` no navegador
+2. Abra `index.html` no navegador
 
-3. Pronto! O sistema está funcionando localmente
+3. Para desenvolvimento com servidor local:
+```bash
+# Python 3
+python -m http.server 8000
 
-## 📱 Responsividade
+# Node.js
+npx serve .
 
-O sistema foi desenvolvido com foco em responsividade:
-- **Desktop**: Interface completa com todas as funcionalidades
-- **Tablet**: Layout adaptado para telas médias
-- **Mobile**: Interface otimizada para smartphones
+# PHP
+php -S localhost:8000
+```
 
-## 🎨 Design System
+## 📊 **Funcionalidades Avançadas**
 
-- **Cores**: Paleta consistente com variáveis CSS
-- **Tipografia**: Hierarquia clara e legível
-- **Componentes**: Botões, formulários e tabelas padronizados
-- **Ícones**: Sistema de ícones consistente
-- **Espaçamentos**: Grid system para alinhamento
+### **Relatórios:**
+- Faturamento por período
+- Serviços mais vendidos
+- Clientes recorrentes
+- Exportação CSV/Excel
 
-## 🔒 Persistência de Dados
+### **Integrações:**
+- WhatsApp para comunicação
+- Backup/Restore de dados
+- Impressão de recibos
+- Etiquetas para pets
 
-- **LocalStorage**: Dados salvos localmente no navegador
-- **Backup**: Sistema de exportação/importação de dados
-- **Validação**: Dados validados antes de serem salvos
-- **Integridade**: Verificação de consistência dos dados
+### **Gestão:**
+- Múltiplos profissionais
+- Controle de estoque
+- Lembretes automáticos
+- Histórico completo
 
-## 🚧 Próximas Funcionalidades
+## 🆘 **Suporte**
 
-- [ ] Sistema de agendamentos
-- [ ] Ordens de serviço
+### **Problemas Comuns:**
+
+**Sistema não carrega:**
+- Verifique se está acessando a URL correta
+- Limpe o cache do navegador
+- Teste em modo anônimo
+
+**Dados não sincronizam:**
+- Verifique a conexão com internet
+- Faça login novamente
+- Verifique as configurações do Firebase
+
+**Fotos não carregam:**
+- Verifique as permissões do navegador
+- Teste com imagens menores
+- Verifique o espaço de armazenamento
+
+### **Contato:**
+- **GitHub Issues:** https://github.com/Pehalba/petshop/issues
+- **Email:** [Seu email aqui]
+
+## 📈 **Roadmap**
+
+- [ ] App mobile nativo
+- [ ] Integração com sistemas de pagamento
 - [ ] Relatórios avançados
-- [ ] Integração com APIs externas
-- [ ] Sistema de notificações
+- [ ] Notificações push
+- [ ] API para integrações
 
-## 🤝 Contribuição
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
+## 📄 **Licença**
 
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
-## 👨‍💻 Autor
-
-**Pedro Alba**
-- GitHub: [@seu-usuario](https://github.com/seu-usuario)
-- LinkedIn: [Pedro Alba](https://linkedin.com/in/pedro-alba)
-
 ---
 
-⭐ Se este projeto te ajudou, considere dar uma estrela!
+**🎉 Desenvolvido com ❤️ para Pet Shops**
+
+**Versão:** 2.0.0  
+**Última atualização:** Janeiro 2025
