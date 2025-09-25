@@ -3541,7 +3541,7 @@ class PetShopApp {
             <div class="detail-card">
               <h3>Histórico Médico</h3>
               <div class="prontuarios-history">
-                ${this.renderPetProntuarios(pet.id)}
+                ${await this.renderPetProntuarios(pet.id)}
               </div>
             </div>
           </div>
@@ -5421,8 +5421,8 @@ class PetShopApp {
     this.setupProntuarioFormEvents();
   }
 
-  renderPetProntuarios(petId) {
-    const prontuarios = store.getProntuariosByPet(petId);
+  async renderPetProntuarios(petId) {
+    const prontuarios = await store.getProntuariosByPet(petId);
 
     if (prontuarios.length === 0) {
       return `
