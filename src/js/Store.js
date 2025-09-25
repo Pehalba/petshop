@@ -182,10 +182,17 @@ class Store {
   }
 
   // Métodos genéricos para todos os stores
+  getAllSync(storeName) {
+    const data = localStorage.getItem(this.stores[storeName]);
+    return data ? JSON.parse(data) : [];
+  }
+
   async getAll(storeName) {
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
-      throw new Error("Sistema requer conexão com a internet. Verifique sua rede.");
+      // Fallback para localStorage se Firebase não estiver pronto
+      const data = localStorage.getItem(this.stores[storeName]);
+      return data ? JSON.parse(data) : [];
     }
 
     try {
@@ -194,15 +201,19 @@ class Store {
       console.log(`✅ ${storeName} carregados da nuvem:`, items.length, 'itens');
       return items;
     } catch (error) {
-      console.error(`❌ Erro ao carregar ${storeName}:`, error);
-      throw error;
+      console.error(`❌ Erro ao carregar ${storeName} da nuvem, usando localStorage:`, error);
+      // Fallback para localStorage em caso de erro
+      const data = localStorage.getItem(this.stores[storeName]);
+      return data ? JSON.parse(data) : [];
     }
   }
 
   async getById(storeName, id) {
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
-      throw new Error("Sistema requer conexão com a internet. Verifique sua rede.");
+      // Fallback para localStorage se Firebase não estiver pronto
+      const items = this.getAllSync(storeName);
+      return items.find((item) => item.id === id) || null;
     }
 
     try {
@@ -210,40 +221,71 @@ class Store {
       const item = await window.firebaseService.getDocument(storeName, id);
       return item;
     } catch (error) {
-      console.error(`❌ Erro ao buscar ${storeName}/${id}:`, error);
-      throw error;
+      console.error(`❌ Erro ao buscar ${storeName}/${id} da nuvem, usando localStorage:`, error);
+      // Fallback para localStorage em caso de erro
+      const items = this.getAllSync(storeName);
+      return items.find((item) => item.id === id) || null;
     }
   }
 
   async save(storeName, item) {
+    // Preparar dados com timestamps
+    const itemData = {
+      ...item,
+      updatedAt: new Date().toISOString(),
+      createdAt: item.createdAt || new Date().toISOString()
+    };
+
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
-      throw new Error("Sistema requer conexão com a internet. Verifique sua rede.");
+      // Fallback para localStorage se Firebase não estiver pronto
+      const items = this.getAllSync(storeName);
+      const existingIndex = items.findIndex((i) => i.id === item.id);
+
+      if (existingIndex >= 0) {
+        items[existingIndex] = itemData;
+      } else {
+        items.push(itemData);
+      }
+
+      localStorage.setItem(this.stores[storeName], JSON.stringify(items));
+      console.log(`✅ ${storeName} salvo localmente:`, item.id);
+      return item;
     }
 
     try {
-      // Preparar dados com timestamps
-      const itemData = {
-        ...item,
-        updatedAt: new Date().toISOString(),
-        createdAt: item.createdAt || new Date().toISOString()
-      };
-
       // Salvar diretamente no Firebase
       await window.firebaseService.saveDocument(storeName, item.id, itemData);
       
       console.log(`✅ ${storeName} salvo na nuvem:`, item.id);
       return item;
     } catch (error) {
-      console.error(`❌ Erro ao salvar ${storeName}:`, error);
-      throw error;
+      console.error(`❌ Erro ao salvar ${storeName} na nuvem, salvando localmente:`, error);
+      // Fallback para localStorage em caso de erro
+      const items = this.getAllSync(storeName);
+      const existingIndex = items.findIndex((i) => i.id === item.id);
+
+      if (existingIndex >= 0) {
+        items[existingIndex] = itemData;
+      } else {
+        items.push(itemData);
+      }
+
+      localStorage.setItem(this.stores[storeName], JSON.stringify(items));
+      console.log(`✅ ${storeName} salvo localmente:`, item.id);
+      return item;
     }
   }
 
   async delete(storeName, id) {
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
-      throw new Error("Sistema requer conexão com a internet. Verifique sua rede.");
+      // Fallback para localStorage se Firebase não estiver pronto
+      const items = this.getAllSync(storeName);
+      const filteredItems = items.filter((item) => item.id !== id);
+      localStorage.setItem(this.stores[storeName], JSON.stringify(filteredItems));
+      console.log(`✅ ${storeName} excluído localmente:`, id);
+      return true;
     }
 
     try {
@@ -253,13 +295,18 @@ class Store {
       console.log(`✅ ${storeName} excluído da nuvem:`, id);
       return true;
     } catch (error) {
-      console.error(`❌ Erro ao excluir ${storeName}:`, error);
-      throw error;
+      console.error(`❌ Erro ao excluir ${storeName} da nuvem, excluindo localmente:`, error);
+      // Fallback para localStorage em caso de erro
+      const items = this.getAllSync(storeName);
+      const filteredItems = items.filter((item) => item.id !== id);
+      localStorage.setItem(this.stores[storeName], JSON.stringify(filteredItems));
+      console.log(`✅ ${storeName} excluído localmente:`, id);
+      return true;
     }
   }
 
   query(storeName, predicate) {
-    const items = this.getAll(storeName);
+    const items = this.getAllSync(storeName);
     return items.filter(predicate);
   }
 

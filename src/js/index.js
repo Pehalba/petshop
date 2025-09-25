@@ -646,23 +646,24 @@ class PetShopApp {
   }
 
   // ===== PÁGINAS =====
-  renderDashboard() {
+  async renderDashboard() {
     const content = document.getElementById("content");
     if (!content) return;
 
-    const clients = store.getClients();
-    const pets = store.getPets();
-    const services = store.getServices();
-    const appointments = store.getAppointments();
-    const orders = store.getOrders();
+    try {
+      const clients = await store.getClients();
+      const pets = await store.getPets();
+      const services = await store.getServices();
+      const appointments = await store.getAppointments();
+      const orders = await store.getOrders();
 
-    const today = new Date().toISOString().split("T")[0];
-    const todayAppointments = appointments.filter(
-      (apt) => apt.dataHoraInicio && apt.dataHoraInicio.startsWith(today)
-    );
-    const pendingOrders = orders.filter((order) => order.status === "pendente");
+      const today = new Date().toISOString().split("T")[0];
+      const todayAppointments = appointments.filter(
+        (apt) => apt.dataHoraInicio && apt.dataHoraInicio.startsWith(today)
+      );
+      const pendingOrders = orders.filter((order) => order.status === "pendente");
 
-    content.innerHTML = `
+      content.innerHTML = `
             <div class="page-header">
                 <h1 class="page-title">Dashboard</h1>
                 <p class="page-subtitle">Visão geral do seu pet shop</p>
@@ -742,6 +743,19 @@ class PetShopApp {
                 </div>
             </div>
         `;
+    } catch (error) {
+      console.error('❌ Erro ao carregar dashboard:', error);
+      content.innerHTML = `
+        <div class="page-header">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Erro ao carregar dados</p>
+        </div>
+        <div class="error-state">
+          <p>❌ Erro ao carregar o dashboard. Verifique sua conexão com a internet.</p>
+          <button class="btn btn-primary" onclick="location.reload()">Recarregar Página</button>
+        </div>
+      `;
+    }
   }
 
   renderTodayAppointments(appointments) {
