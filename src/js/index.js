@@ -180,6 +180,12 @@ class PetShopApp {
                         <input type="text" class="search-input" placeholder="Buscar..." id="global-search">
                         <span class="search-icon">🔍</span>
                     </div>
+                    <div id="userInfo" class="user-info">
+                        <span class="sync-status offline">📱 Offline</span>
+                    </div>
+                    <button id="authButton" class="btn btn-outline" onclick="authComponent.showAuthModal()">
+                        <i class="icon-login"></i> Entrar
+                    </button>
                     <div class="header-profile">
                         <button class="profile-button" id="profile-menu">
                             <div class="profile-avatar">👤</div>

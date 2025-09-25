@@ -192,7 +192,7 @@ class Store {
     return items.find((item) => item.id === id);
   }
 
-  save(storeName, item) {
+  async save(storeName, item) {
     const items = this.getAll(storeName);
     const existingIndex = items.findIndex((i) => i.id === item.id);
 
@@ -207,13 +207,39 @@ class Store {
     }
 
     localStorage.setItem(this.stores[storeName], JSON.stringify(items));
+
+    // Sincronizar com Firebase se disponível
+    if (window.firebaseService && window.firebaseService.isConnected()) {
+      try {
+        const itemToSync =
+          items[existingIndex >= 0 ? existingIndex : items.length - 1];
+        await window.firebaseService.saveDocument(
+          storeName,
+          item.id,
+          itemToSync
+        );
+      } catch (error) {
+        console.warn("⚠️ Erro na sincronização com Firebase:", error);
+      }
+    }
+
     return item;
   }
 
-  delete(storeName, id) {
+  async delete(storeName, id) {
     const items = this.getAll(storeName);
     const filteredItems = items.filter((item) => item.id !== id);
     localStorage.setItem(this.stores[storeName], JSON.stringify(filteredItems));
+
+    // Sincronizar com Firebase se disponível
+    if (window.firebaseService && window.firebaseService.isConnected()) {
+      try {
+        await window.firebaseService.deleteDocument(storeName, id);
+      } catch (error) {
+        console.warn("⚠️ Erro na sincronização com Firebase:", error);
+      }
+    }
+
     return true;
   }
 

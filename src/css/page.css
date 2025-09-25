@@ -1566,6 +1566,126 @@
   font-size: 0.8rem;
 }
 
+/* ===== AUTENTICAÇÃO ===== */
+.auth-modal {
+  max-width: 400px;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--gray-600);
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  color: var(--primary-600);
+  border-bottom-color: var(--primary-600);
+}
+
+.tab-btn:hover {
+  color: var(--primary-600);
+}
+
+.auth-form {
+  margin-top: 1rem;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.auth-help {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  color: var(--gray-600);
+}
+
+.auth-help p {
+  margin: 0.5rem 0;
+}
+
+.user-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  padding: 0.5rem 0;
+  min-width: 150px;
+  z-index: 1000;
+}
+
+.user-menu-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gray-700);
+  transition: background-color 0.2s ease;
+}
+
+.user-menu-item:hover {
+  background: var(--gray-50);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-name {
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+.sync-status {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+}
+
+.sync-status.online {
+  background: var(--success-100);
+  color: var(--success-700);
+}
+
+.sync-status.offline {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.sync-status-info {
+  text-align: left;
+}
+
+.sync-status-info h4 {
+  margin: 0 0 1rem 0;
+  color: var(--gray-900);
+}
+
+.sync-status-info p {
+  margin: 0.5rem 0;
+  color: var(--gray-700);
+}
+
 /* ===== MODAL ===== */
 .modal-overlay {
   position: fixed !important;
