@@ -639,8 +639,8 @@ class Store {
     return this.delete("prontuarios", id);
   }
 
-  getProntuariosByPet(petId) {
-    const prontuarios = this.getAll("prontuarios");
+  async getProntuariosByPet(petId) {
+    const prontuarios = await this.getAll("prontuarios");
     return prontuarios
       .filter((p) => p.petId === petId)
       .sort((a, b) => new Date(b.dataConsulta) - new Date(a.dataConsulta));
