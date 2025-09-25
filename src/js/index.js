@@ -3408,6 +3408,7 @@ class PetShopApp {
       ui.success(
         petId ? "Pet atualizado com sucesso!" : "Pet cadastrado com sucesso!"
       );
+      console.log("🔍 Redirecionando para pet:", savedPet.id);
       await this.viewPet(savedPet.id);
     } catch (error) {
       ui.error("Erro ao salvar pet: " + error.message);
@@ -3444,11 +3445,13 @@ class PetShopApp {
   }
 
   async viewPet(petId) {
+    console.log("🔍 viewPet chamado com ID:", petId);
     const pet = await store.getPet(petId);
     if (!pet) {
       ui.error("Pet não encontrado");
       return;
     }
+    console.log("🔍 Pet encontrado:", pet);
 
     const client = await store.getClient(pet.clienteId);
     const idade = pet.dataNascimento
@@ -3543,6 +3546,7 @@ class PetShopApp {
       </div>
     `;
 
+    console.log("🔍 Renderizando página de detalhes do pet");
     document.getElementById("content").innerHTML = content;
   }
 
