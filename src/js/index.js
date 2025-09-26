@@ -2768,9 +2768,6 @@ class PetShopApp {
         const pet = appointment.petId
           ? await store.getPet(appointment.petId)
           : null;
-        const professional = appointment.profissionalId
-          ? await store.getProfessional(appointment.profissionalId)
-          : null;
 
         const statusBadge = this.getStatusBadge(appointment.status);
         const paymentBadge = this.getPaymentBadge(appointment.pagamento || {});
@@ -2807,7 +2804,6 @@ class PetShopApp {
           </td>
           <td>${servicesText}</td>
           <td>${MoneyUtils.formatBRL(appointment.totalPrevisto)}</td>
-          <td>${professional?.nome || "-"}</td>
           <td>${statusBadge}</td>
           <td>${paymentBadge}</td>
           <td>
@@ -2857,7 +2853,6 @@ class PetShopApp {
               <th>Cliente</th>
               <th>Serviços</th>
               <th>Total</th>
-              <th>Profissional</th>
               <th>Status</th>
               <th>Pagamento</th>
               <th class="actions-column">Ações</th>

@@ -272,25 +272,18 @@
   max-width: 80px;
 }
 
-.data-table th:nth-child(5), /* Profissional */
+.data-table th:nth-child(5), /* Status */
 .data-table td:nth-child(5) {
-  width: 100px;
-  min-width: 100px;
-  max-width: 100px;
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
 }
 
-.data-table th:nth-child(6), /* Status */
+.data-table th:nth-child(6), /* Pagamento */
 .data-table td:nth-child(6) {
-  width: 100px;
-  min-width: 100px;
-  max-width: 100px;
-}
-
-.data-table th:nth-child(7), /* Pagamento */
-.data-table td:nth-child(7) {
-  width: 100px;
-  min-width: 100px;
-  max-width: 100px;
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
 }
 
 /* Truncar texto longo nas colunas */
@@ -1014,9 +1007,9 @@
 
 /* Coluna de ações */
 .actions-column {
-  width: 450px;
-  min-width: 450px;
-  max-width: 450px;
+  width: 500px;
+  min-width: 500px;
+  max-width: 500px;
 }
 
 /* ===== INFORMAÇÕES DO CLIENTE ===== */
