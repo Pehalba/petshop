@@ -186,6 +186,27 @@ class Store {
     return data ? JSON.parse(data) : [];
   }
 
+  // Limpar campos undefined (Firebase não aceita)
+  cleanUndefinedFields(obj) {
+    if (obj === null || obj === undefined) return obj;
+    
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.cleanUndefinedFields(item));
+    }
+    
+    if (typeof obj === 'object') {
+      const cleaned = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (value !== undefined) {
+          cleaned[key] = this.cleanUndefinedFields(value);
+        }
+      }
+      return cleaned;
+    }
+    
+    return obj;
+  }
+
   async getAll(storeName) {
     console.log(`🔍 getAll chamado para: ${storeName}`);
     
@@ -246,6 +267,9 @@ class Store {
       updatedAt: new Date().toISOString(),
       createdAt: item.createdAt || new Date().toISOString()
     };
+
+    // Limpar campos undefined (Firebase não aceita)
+    this.cleanUndefinedFields(itemData);
 
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
