@@ -2684,6 +2684,18 @@ class PetShopApp {
 
     const tableRows = await Promise.all(
       appointments.map(async (appointment) => {
+        // Corrigir agendamentos antigos que não têm nome nos itens
+        if (appointment.itens && appointment.itens.length > 0) {
+          for (let item of appointment.itens) {
+            if (!item.nome && item.serviceId) {
+              const service = await store.getService(item.serviceId);
+              if (service) {
+                item.nome = service.nome;
+              }
+            }
+          }
+        }
+
         const client = await store.getClient(appointment.clienteId);
         const pet = appointment.petId ? await store.getPet(appointment.petId) : null;
         const professional = appointment.profissionalId
@@ -2697,7 +2709,7 @@ class PetShopApp {
         
         const servicesText =
           appointment.itens.length === 1
-            ? appointment.itens[0].nome
+            ? appointment.itens[0].nome || "Serviço sem nome"
             : `${appointment.itens.length} serviços`;
 
         return `
