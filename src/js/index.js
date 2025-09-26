@@ -2755,7 +2755,7 @@ class PetShopApp {
                 <i class="icon-edit"></i>
               </button>
               ${
-                appointment.pagamento.status !== "pago"
+                appointment.pagamento && appointment.pagamento.status !== "pago"
                   ? `
                 <button class="btn btn-sm btn-success" onclick="app.markAppointmentPaid('${appointment.id}')" title="Marcar como pago">
                   <i class="icon-check"></i>
