@@ -299,14 +299,7 @@ class Calendar {
     return months[month - 1];
   }
 
-  // Métodos públicos
-  renderMonth(year, month) {
-    this.renderMonth(year, month);
-  }
-
-  selectDay(dateStr) {
-    this.selectDay(dateStr);
-  }
+  // Métodos públicos já implementados acima
 
   disableNavPrev() {
     const prevBtn = this.container.querySelector('.cal-prev');
