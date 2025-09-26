@@ -2482,7 +2482,7 @@ class PetShopApp {
 
     try {
       const newServiceId = store.generateId("srv");
-      store.saveService({ ...serviceData, id: newServiceId });
+      await store.saveService({ ...serviceData, id: newServiceId });
 
       ui.success("Serviço cadastrado com sucesso!");
       this.showServiceForm(); // Abrir formulário limpo
@@ -4532,13 +4532,13 @@ Entre em contato conosco para agendar o reforço!`;
     try {
       let savedAppointment;
       if (appointmentId) {
-        savedAppointment = store.saveAppointment({
+        savedAppointment = await store.saveAppointment({
           ...appointmentData,
           id: appointmentId,
         });
       } else {
         const newAppointmentId = store.generateId("app");
-        savedAppointment = store.saveAppointment({
+        savedAppointment = await store.saveAppointment({
           ...appointmentData,
           id: newAppointmentId,
         });
@@ -4675,9 +4675,9 @@ Entre em contato conosco para agendar o reforço!`;
 
     try {
       const newAppointmentId = store.generateId("app");
-      store.saveAppointment({ ...appointmentData, id: newAppointmentId });
+      await store.saveAppointment({ ...appointmentData, id: newAppointmentId });
       ui.success("Agendamento criado com sucesso!");
-      this.showAppointmentForm(); // Abrir formulário limpo
+      await this.showAppointmentForm(); // Abrir formulário limpo
     } catch (error) {
       ui.error("Erro ao salvar agendamento: " + error.message);
     }
@@ -4693,7 +4693,9 @@ Entre em contato conosco para agendar o reforço!`;
     if (!appointment) return;
 
     const client = await store.getClient(appointment.clienteId);
-    const pet = appointment.petId ? await store.getPet(appointment.petId) : null;
+    const pet = appointment.petId
+      ? await store.getPet(appointment.petId)
+      : null;
     const professional = appointment.profissionalId
       ? await store.getProfessional(appointment.profissionalId)
       : null;
@@ -4854,9 +4856,9 @@ Entre em contato conosco para agendar o reforço!`;
           },
         };
 
-        store.saveAppointment(updatedAppointment);
+        await store.saveAppointment(updatedAppointment);
         ui.success("Agendamento marcado como pago!");
-        this.renderAgendamentos();
+        await this.renderAgendamentos();
       } catch (error) {
         ui.error("Erro ao marcar como pago: " + error.message);
       }
@@ -4882,9 +4884,9 @@ Entre em contato conosco para agendar o reforço!`;
           status: "cancelado",
         };
 
-        store.saveAppointment(updatedAppointment);
+        await store.saveAppointment(updatedAppointment);
         ui.success("Agendamento cancelado!");
-        this.renderAgendamentos();
+        await this.renderAgendamentos();
       } catch (error) {
         ui.error("Erro ao cancelar agendamento: " + error.message);
       }
@@ -5243,7 +5245,9 @@ Entre em contato conosco para agendar o reforço!`;
 
   async showProntuarioForm(prontuarioId = null) {
     const content = document.getElementById("content");
-    const prontuario = prontuarioId ? await store.getProntuario(prontuarioId) : null;
+    const prontuario = prontuarioId
+      ? await store.getProntuario(prontuarioId)
+      : null;
     const pets = await store.getPets();
 
     content.innerHTML = `
@@ -6419,7 +6423,7 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // Atualizar select de pets e selecionar o novo pet
-  updatePetSelectAndSelect(petId) {
+  async updatePetSelectAndSelect(petId) {
     const petSelect = document.getElementById("petId");
     if (!petSelect) return;
 
@@ -6427,7 +6431,9 @@ Entre em contato conosco para agendar o reforço!`;
     if (!clienteId) return;
 
     // Recarregar pets do cliente
-    const pets = (await store.getPets()).filter((pet) => pet.clienteId === clienteId);
+    const pets = (await store.getPets()).filter(
+      (pet) => pet.clienteId === clienteId
+    );
 
     // Atualizar options
     petSelect.innerHTML =
