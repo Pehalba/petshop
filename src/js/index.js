@@ -4156,11 +4156,11 @@ Entre em contato conosco para agendar o reforço!`;
     `;
 
     document.getElementById("content").innerHTML = content;
-    this.setupAppointmentFormEvents();
+    await this.setupAppointmentFormEvents();
   }
 
   // Eventos do formulário de agendamento
-  setupAppointmentFormEvents() {
+  async setupAppointmentFormEvents() {
     const form = document.getElementById("appointmentForm");
     if (form) {
       form.addEventListener("submit", (e) => {
