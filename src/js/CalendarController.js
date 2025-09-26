@@ -130,11 +130,10 @@ class CalendarController {
     if (!this.dayListContainer) return;
 
     try {
-      // Calcular range do dia
-      const date = new Date(dateStr + 'T00:00:00');
-      const startOfDay = new Date(date);
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
+      // Calcular range do dia sem problemas de fuso horário
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+      const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
 
       const from = startOfDay.toISOString();
       const to = endOfDay.toISOString();
@@ -172,8 +171,9 @@ class CalendarController {
       const pets = await this.store.getPets();
       const vaccines = [];
 
-      // Converter dateStr para Date
-      const targetDate = new Date(dateStr + 'T00:00:00');
+      // Converter dateStr para Date sem problemas de fuso horário
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const targetDate = new Date(year, month - 1, day);
 
       pets.forEach(pet => {
         if (pet.vacinas && Array.isArray(pet.vacinas)) {
@@ -204,7 +204,9 @@ class CalendarController {
   }
 
   async renderDayList(dateStr, appointments, vaccines = []) {
-    const date = new Date(dateStr);
+    // Criar data sem problemas de fuso horário
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     const formattedDate = date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
