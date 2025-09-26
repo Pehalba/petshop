@@ -612,14 +612,6 @@ class PetShopApp {
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h3>Calendário de Agendamentos</h3>
-                </div>
-                <div class="card-body">
-                    ${this.renderDashboardCalendar(appointments)}
-                </div>
-            </div>
         `;
     } catch (error) {
       console.error("❌ Erro ao carregar dashboard:", error);
@@ -749,69 +741,6 @@ class PetShopApp {
     `;
   }
 
-  renderDashboardCalendar(appointments) {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    
-    const monthNames = [
-      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-    ];
-    
-    // Dias da semana abreviados
-    const weekDays = ["D", "S", "T", "Q", "Q", "S", "S"];
-    
-    // Primeiro dia do mês
-    const firstDay = new Date(currentYear, currentMonth, 1);
-    // Último dia do mês
-    const lastDay = new Date(currentYear, currentMonth + 1, 0);
-    
-    // Calcular quantos dias do mês anterior precisamos mostrar
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
-    
-    let calendarHTML = `
-      <div class="calendar-header">
-        <h4>${monthNames[currentMonth]} ${currentYear}</h4>
-      </div>
-      <div class="calendar-grid">
-        <div class="calendar-weekdays">
-          ${weekDays.map(day => `<div class="calendar-weekday">${day}</div>`).join('')}
-        </div>
-        <div class="calendar-days">
-    `;
-    
-    // Gerar 42 dias (6 semanas)
-    for (let i = 0; i < 42; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(startDate.getDate() + i);
-      
-      const isCurrentMonth = currentDate.getMonth() === currentMonth;
-      const isToday = currentDate.toDateString() === today.toDateString();
-      
-      // Buscar agendamentos para este dia
-      const dayAppointments = appointments.filter(apt => {
-        if (!apt.dataHoraInicio) return false;
-        const aptDate = new Date(apt.dataHoraInicio);
-        return aptDate.toDateString() === currentDate.toDateString();
-      });
-      
-      calendarHTML += `
-        <div class="calendar-day ${isCurrentMonth ? 'current-month' : 'other-month'} ${isToday ? 'today' : ''}">
-          <span class="calendar-day-number">${currentDate.getDate()}</span>
-          ${dayAppointments.length > 0 ? '<div class="calendar-dot"></div>' : ''}
-        </div>
-      `;
-    }
-    
-    calendarHTML += `
-        </div>
-      </div>
-    `;
-    
-    return calendarHTML;
-  }
 
   // Placeholder para outras páginas
   async renderClientes() {
