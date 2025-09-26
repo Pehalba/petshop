@@ -1541,11 +1541,24 @@ class PetShopApp {
       topButton.onclick = () => this.addPetVaccine(petIndex);
       topButton.innerHTML = `<i class="icon-plus"></i> Adicionar 1ª Vacina`;
       container.appendChild(topButton);
-    } else if (addButton) {
-      // Se há vacinas, atualizar o botão existente
-      addButton.innerHTML = `<i class="icon-plus"></i> Adicionar ${
-        vaccineCount + 1
-      }ª Vacina`;
+    } else {
+      // Se há vacinas, garantir que há um botão
+      if (addButton) {
+        // Atualizar botão existente
+        addButton.innerHTML = `<i class="icon-plus"></i> Adicionar ${
+          vaccineCount + 1
+        }ª Vacina`;
+      } else {
+        // Criar novo botão no final
+        const newButton = document.createElement("button");
+        newButton.type = "button";
+        newButton.className = "btn btn-outline add-pet-vaccine-button";
+        newButton.onclick = () => this.addPetVaccine(petIndex);
+        newButton.innerHTML = `<i class="icon-plus"></i> Adicionar ${
+          vaccineCount + 1
+        }ª Vacina`;
+        container.appendChild(newButton);
+      }
     }
   }
 
@@ -3456,11 +3469,24 @@ class PetShopApp {
       topButton.onclick = () => this.addVaccine();
       topButton.innerHTML = `<i class="icon-plus"></i> Adicionar 1ª Vacina`;
       container.appendChild(topButton);
-    } else if (addButton) {
-      // Se há vacinas, atualizar o botão existente
-      addButton.innerHTML = `<i class="icon-plus"></i> Adicionar ${
-        vaccineCount + 1
-      }ª Vacina`;
+    } else {
+      // Se há vacinas, garantir que há um botão
+      if (addButton) {
+        // Atualizar botão existente
+        addButton.innerHTML = `<i class="icon-plus"></i> Adicionar ${
+          vaccineCount + 1
+        }ª Vacina`;
+      } else {
+        // Criar novo botão no final
+        const newButton = document.createElement("button");
+        newButton.type = "button";
+        newButton.className = "btn btn-outline add-vaccine-button";
+        newButton.onclick = () => this.addVaccine();
+        newButton.innerHTML = `<i class="icon-plus"></i> Adicionar ${
+          vaccineCount + 1
+        }ª Vacina`;
+        container.appendChild(newButton);
+      }
     }
   }
 
