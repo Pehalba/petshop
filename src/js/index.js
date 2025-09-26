@@ -27,7 +27,7 @@ class PetShopApp {
     this.setupFooter();
     this.setupNavigation();
     this.cleanupCorruptedData();
-    await this.fixExistingVaccineDates();
+    
 
     // Processar hash da URL
     this.processHash();
@@ -637,13 +637,16 @@ class PetShopApp {
         this.initCalendar();
         
         // Forçar limpeza de cache se existe
-        setTimeout(() => {
+        setTimeout(async () => {
+          // Corrigir dados após Firebase sincronizar
+          await this.fixExistingVaccineDates();
+          
           if (window.calendarController) {
             console.log('🔄 Forçando atualização do calendário no dashboard');
             window.calendarController.clearCache();
             window.calendarController.refresh();
           }
-        }, 1000);
+        }, 2000);
       }, 100);
     } catch (error) {
       console.error("❌ Erro ao carregar dashboard:", error);
@@ -6948,6 +6951,12 @@ Entre em contato conosco para agendar o reforço!`;
           if (hasChanges) {
             console.log(`💾 Salvando pet ${pet.nome} com dados corrigidos`);
             await store.savePet(pet);
+            
+            // Forçar sincronização com localStorage
+            const updatedPets = await store.getPets();
+            localStorage.setItem('pets', JSON.stringify(updatedPets));
+            console.log(`🔄 Pet ${pet.nome} sincronizado com localStorage`);
+            
             hasChanges = false; // Reset para próximo pet
           }
         }
