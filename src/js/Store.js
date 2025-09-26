@@ -207,6 +207,35 @@ class Store {
     return obj;
   }
 
+  // Mesclar dados do Firebase com dados locais, priorizando dados locais mais recentes
+  mergeItems(firebaseItems, localItems) {
+    const merged = [...firebaseItems];
+    
+    // Adicionar ou atualizar itens locais que não existem no Firebase ou são mais recentes
+    localItems.forEach(localItem => {
+      const existingIndex = merged.findIndex(item => item.id === localItem.id);
+      
+      if (existingIndex >= 0) {
+        // Item existe no Firebase, verificar qual é mais recente
+        const firebaseItem = merged[existingIndex];
+        const localUpdatedAt = new Date(localItem.updatedAt || localItem.createdAt || 0);
+        const firebaseUpdatedAt = new Date(firebaseItem.updatedAt || firebaseItem.createdAt || 0);
+        
+        if (localUpdatedAt > firebaseUpdatedAt) {
+          // Dados locais são mais recentes, usar dados locais
+          merged[existingIndex] = localItem;
+          console.log(`🔄 Usando dados locais mais recentes para ${localItem.id}`);
+        }
+      } else {
+        // Item não existe no Firebase, adicionar
+        merged.push(localItem);
+        console.log(`➕ Adicionando item local ${localItem.id} que não existe no Firebase`);
+      }
+    });
+    
+    return merged;
+  }
+
   async getAll(storeName) {
     console.log(`🔍 getAll chamado para: ${storeName}`);
     
@@ -222,14 +251,21 @@ class Store {
 
     try {
       // Buscar dados diretamente do Firebase
-      const items = await window.firebaseService.getAllDocuments(storeName);
-      console.log(`✅ ${storeName} carregados da nuvem:`, items.length, 'itens');
+      const firebaseItems = await window.firebaseService.getAllDocuments(storeName);
+      console.log(`✅ ${storeName} carregados da nuvem:`, firebaseItems.length, 'itens');
+      
+      // Buscar dados locais para comparação
+      const localData = localStorage.getItem(this.stores[storeName]);
+      const localItems = localData ? JSON.parse(localData) : [];
+      
+      // Mesclar dados: priorizar dados locais mais recentes
+      const mergedItems = this.mergeItems(firebaseItems, localItems);
       
       // Sincronizar com localStorage para manter consistência
-      localStorage.setItem(this.stores[storeName], JSON.stringify(items));
+      localStorage.setItem(this.stores[storeName], JSON.stringify(mergedItems));
       console.log(`🔄 ${storeName} sincronizado com localStorage`);
       
-      return items;
+      return mergedItems;
     } catch (error) {
       console.error(`❌ Erro ao carregar ${storeName} da nuvem, usando localStorage:`, error);
       // Fallback para localStorage em caso de erro
