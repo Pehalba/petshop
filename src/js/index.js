@@ -1478,33 +1478,53 @@ class PetShopApp {
 
     const vaccineItem = document.createElement("div");
     vaccineItem.className = "pet-vaccine-item";
+    vaccineItem.setAttribute("data-vaccine-index", vaccineIndex);
     vaccineItem.innerHTML = this.renderPetVaccineItem(vaccineIndex, petIndex);
 
     container.appendChild(vaccineItem);
 
-    // Calcular número da próxima vacina
-    const nextVaccineNumber = currentVaccineCount + 2;
+    // Re-numerar todas as vacinas para garantir sequência correta
+    this.renumberPetVaccines(petIndex);
     
-    // Adicionar botão no final do formulário da vacina
-    vaccineItem.innerHTML += `
-      <div class="pet-vaccine-form-footer">
-        <button type="button" class="btn btn-outline add-pet-vaccine-button" onclick="app.addPetVaccine(${petIndex})">
-          <i class="icon-plus"></i> Adicionar ${nextVaccineNumber}ª Vacina
-        </button>
-      </div>
-    `;
+    // Atualizar botão
+    this.updateAddPetVaccineButton(petIndex);
   }
 
   // Remover vacina de pet no formulário de cliente
   removePetVaccine(petIndex, vaccineIndex) {
     const container = document.getElementById(`petVaccinesContainer${petIndex}`);
-    const vaccineItem = container.querySelector(`[data-pet-vaccine-index="${vaccineIndex}"]`);
+    const vaccineItem = container.querySelector(`[data-vaccine-index="${vaccineIndex}"]`);
 
     if (vaccineItem) {
       vaccineItem.remove();
     }
 
+    // Re-numerar todas as vacinas após remoção
+    this.renumberPetVaccines(petIndex);
     this.updateAddPetVaccineButton(petIndex);
+  }
+
+  // Re-numerar todas as vacinas de pet para manter sequência correta
+  renumberPetVaccines(petIndex) {
+    const container = document.getElementById(`petVaccinesContainer${petIndex}`);
+    const vaccineItems = container.querySelectorAll(".pet-vaccine-item");
+    
+    vaccineItems.forEach((item, index) => {
+      // Atualizar data-vaccine-index
+      item.setAttribute("data-vaccine-index", index);
+      
+      // Atualizar o título da vacina
+      const title = item.querySelector("h5");
+      if (title) {
+        title.textContent = `Vacina ${index + 1}`;
+      }
+      
+      // Atualizar o onclick do botão remover
+      const removeButton = item.querySelector(".btn-danger");
+      if (removeButton) {
+        removeButton.setAttribute("onclick", `app.removePetVaccine(${petIndex}, ${index})`);
+      }
+    });
   }
 
   // Atualizar botão de adicionar vacina para pet
@@ -3375,21 +3395,16 @@ class PetShopApp {
 
     const vaccineItem = document.createElement("div");
     vaccineItem.className = "vaccine-item";
+    vaccineItem.setAttribute("data-vaccine-index", vaccineIndex);
     vaccineItem.innerHTML = this.renderVaccineItem(null, vaccineIndex);
 
     container.appendChild(vaccineItem);
 
-    // Calcular número da próxima vacina
-    const nextVaccineNumber = currentVaccineCount + 2;
+    // Re-numerar todas as vacinas para garantir sequência correta
+    this.renumberVaccines();
     
-    // Adicionar botão no final do formulário da vacina
-    vaccineItem.innerHTML += `
-      <div class="vaccine-form-footer">
-        <button type="button" class="btn btn-outline add-vaccine-button" onclick="app.addVaccine()">
-          <i class="icon-plus"></i> Adicionar ${nextVaccineNumber}ª Vacina
-        </button>
-      </div>
-    `;
+    // Atualizar botão
+    this.updateAddVaccineButton();
   }
 
   removeVaccine(index) {
@@ -3402,7 +3417,32 @@ class PetShopApp {
       vaccineItem.remove();
     }
 
+    // Re-numerar todas as vacinas após remoção
+    this.renumberVaccines();
     this.updateAddVaccineButton();
+  }
+
+  // Re-numerar todas as vacinas para manter sequência correta
+  renumberVaccines() {
+    const container = document.getElementById("vaccinesContainer");
+    const vaccineItems = container.querySelectorAll(".vaccine-item");
+    
+    vaccineItems.forEach((item, index) => {
+      // Atualizar data-vaccine-index
+      item.setAttribute("data-vaccine-index", index);
+      
+      // Atualizar o título da vacina
+      const title = item.querySelector("h5");
+      if (title) {
+        title.textContent = `Vacina ${index + 1}`;
+      }
+      
+      // Atualizar o onclick do botão remover
+      const removeButton = item.querySelector(".btn-danger");
+      if (removeButton) {
+        removeButton.setAttribute("onclick", `app.removeVaccine(${index})`);
+      }
+    });
   }
 
   // Atualizar botão de adicionar vacina
