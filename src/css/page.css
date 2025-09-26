@@ -243,6 +243,71 @@
   min-width: 1000px;
 }
 
+/* Otimizar colunas da tabela de agendamentos */
+.data-table th:nth-child(1), /* Data/Hora */
+.data-table td:nth-child(1) {
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+}
+
+.data-table th:nth-child(2), /* Cliente */
+.data-table td:nth-child(2) {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+}
+
+.data-table th:nth-child(3), /* Serviços */
+.data-table td:nth-child(3) {
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+}
+
+.data-table th:nth-child(4), /* Total */
+.data-table td:nth-child(4) {
+  width: 80px;
+  min-width: 80px;
+  max-width: 80px;
+}
+
+.data-table th:nth-child(5), /* Profissional */
+.data-table td:nth-child(5) {
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+}
+
+.data-table th:nth-child(6), /* Status */
+.data-table td:nth-child(6) {
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+}
+
+.data-table th:nth-child(7), /* Pagamento */
+.data-table td:nth-child(7) {
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+}
+
+/* Truncar texto longo nas colunas */
+.data-table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: var(--spacing-2);
+}
+
+/* Exceção para coluna de ações - não truncar */
+.data-table td:last-child {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
 /* Status badges */
 .status-badge {
   display: inline-flex;
@@ -949,9 +1014,9 @@
 
 /* Coluna de ações */
 .actions-column {
-  width: 400px;
-  min-width: 400px;
-  max-width: 400px;
+  width: 450px;
+  min-width: 450px;
+  max-width: 450px;
 }
 
 /* ===== INFORMAÇÕES DO CLIENTE ===== */
