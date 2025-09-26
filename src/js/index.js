@@ -2362,7 +2362,7 @@ class PetShopApp {
     };
 
     // Validações
-    if (!this.validateService(serviceData, serviceId)) {
+    if (!(await this.validateService(serviceData, serviceId))) {
       return;
     }
 
@@ -2414,7 +2414,7 @@ class PetShopApp {
           : null,
     };
 
-    if (!this.validateService(serviceData)) {
+    if (!(await this.validateService(serviceData))) {
       return;
     }
 
@@ -2430,7 +2430,7 @@ class PetShopApp {
   }
 
   // Validar serviço
-  validateService(serviceData, serviceId = null) {
+  async validateService(serviceData, serviceId = null) {
     let isValid = true;
 
     // Limpar erros anteriores
@@ -2481,7 +2481,7 @@ class PetShopApp {
 
     // Verificar nome único
     if (serviceData.nome) {
-      const existingServices = store.getServices();
+      const existingServices = await store.getServices();
       const duplicateService = existingServices.find(
         (s) =>
           s.id !== serviceId &&
