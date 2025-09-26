@@ -87,6 +87,7 @@ class CalendarController {
           countMap[dateStr] = { appointments: 0, vaccines: 0 };
         }
         countMap[dateStr].vaccines++;
+        console.log(`📅 Vacina agrupada no dia: ${dateStr} (data original: ${vaccine.proximaDose})`);
       });
 
       // Cachear resultado
@@ -104,6 +105,8 @@ class CalendarController {
       // Buscar todos os pets
       const pets = await this.store.getPets();
       const vaccines = [];
+      
+      console.log(`🔍 Buscando vacinas para ${year}-${month}`);
 
       // Calcular range do mês
       const startDate = new Date(year, month - 1, 1);
@@ -131,6 +134,7 @@ class CalendarController {
               
               // Verificar se a dose está no mês
               if (doseDate >= startDate && doseDate <= endDate) {
+                console.log(`💉 Vacina encontrada: ${vaccine.nomeVacina} - Pet: ${pet.nome} - Data original: ${vaccine.proximaDose} - Data processada: ${doseDate.toDateString()}`);
                 vaccines.push({
                   ...vaccine,
                   petId: pet.id,
