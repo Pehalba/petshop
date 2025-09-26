@@ -3722,16 +3722,10 @@ Entre em contato conosco para agendar o reforço!`;
               <select id="petStatusVacinal" name="statusVacinal" class="form-select" onchange="app.toggleVaccineSection()">
                 <option value="nao_vacinado" ${
                   pet?.statusVacinal === "nao_vacinado" ? "selected" : ""
-                }>Não vacinado ainda</option>
-                <option value="sem_registro" ${
-                  pet?.statusVacinal === "sem_registro" ? "selected" : ""
-                }>Sem registro informado</option>
+                }>Não vacinado</option>
                 <option value="registrar_agora" ${
                   pet?.statusVacinal === "registrar_agora" ? "selected" : ""
-                }>Registrar vacinas agora</option>
-                <option value="registrar_depois" ${
-                  pet?.statusVacinal === "registrar_depois" ? "selected" : ""
-                }>Vou registrar depois</option>
+                }>Registrar vacina</option>
               </select>
             </div>
             

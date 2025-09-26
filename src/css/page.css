@@ -295,7 +295,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: var(--spacing-2);
+  padding: var(--spacing-2) !important;
   text-align: left;
 }
 
@@ -305,12 +305,13 @@
   overflow: visible;
   text-overflow: unset;
   text-align: center;
+  padding: var(--spacing-2) !important;
 }
 
 /* Centralizar cabeçalhos da tabela */
 .data-table th {
   text-align: center;
-  padding: var(--spacing-2);
+  padding: var(--spacing-2) !important;
   font-weight: 600;
 }
 
