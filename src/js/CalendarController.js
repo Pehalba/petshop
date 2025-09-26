@@ -153,7 +153,7 @@ class CalendarController {
       });
 
       // Renderizar lista do dia
-      this.renderDayList(dateStr, appointments, vaccines);
+      await this.renderDayList(dateStr, appointments, vaccines);
       
     } catch (error) {
       console.error('Erro ao carregar dados do dia:', error);
@@ -203,7 +203,7 @@ class CalendarController {
     }
   }
 
-  renderDayList(dateStr, appointments, vaccines = []) {
+  async renderDayList(dateStr, appointments, vaccines = []) {
     const date = new Date(dateStr);
     const formattedDate = date.toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -225,8 +225,12 @@ class CalendarController {
       return;
     }
 
-    const appointmentsHtml = appointments.map(appointment => this.renderAppointmentCard(appointment)).join('');
-    const vaccinesHtml = vaccines.map(vaccine => this.renderVaccineCard(vaccine)).join('');
+    const appointmentsHtml = await Promise.all(
+      appointments.map(appointment => this.renderAppointmentCard(appointment))
+    );
+    const vaccinesHtml = await Promise.all(
+      vaccines.map(vaccine => this.renderVaccineCard(vaccine))
+    );
     
     let title = `${formattedDate} — `;
     let titleParts = [];
@@ -246,7 +250,7 @@ class CalendarController {
             <h5>📅 Agendamentos</h5>
           </div>
           <div class="appointments-list">
-            ${appointmentsHtml}
+            ${appointmentsHtml.join('')}
           </div>
         ` : ''}
         ${vaccines.length > 0 ? `
@@ -254,7 +258,7 @@ class CalendarController {
             <h5>💉 Vacinas</h5>
           </div>
           <div class="vaccines-list">
-            ${vaccinesHtml}
+            ${vaccinesHtml.join('')}
           </div>
         ` : ''}
       </div>
