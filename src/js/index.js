@@ -2692,6 +2692,9 @@ class PetShopApp {
 
         const statusBadge = this.getStatusBadge(appointment.status);
         const paymentBadge = this.getPaymentBadge(appointment.pagamento);
+        console.log("🔍 Dados do agendamento:", appointment);
+        console.log("🔍 Itens do agendamento:", appointment.itens);
+        
         const servicesText =
           appointment.itens.length === 1
             ? appointment.itens[0].nome
@@ -4296,6 +4299,10 @@ Entre em contato conosco para agendar o reforço!`;
       const preco = parseFloat(checkbox.dataset.preco) || 0;
       totalPrevisto += preco;
 
+      console.log("🔍 Serviço encontrado:", service);
+      console.log("🔍 ServiceId:", serviceId);
+      console.log("🔍 Preço:", preco);
+
       return {
         serviceId: serviceId,
         nome: service?.nome || "Serviço não encontrado",
@@ -4303,6 +4310,8 @@ Entre em contato conosco para agendar o reforço!`;
         custoAproxAplicado: service?.temCusto ? service.custoAproximado : null,
       };
     }));
+
+    console.log("🔍 Itens processados:", itens);
 
     const appointmentData = {
       clienteId: formData.get("clienteId"),
@@ -4433,6 +4442,10 @@ Entre em contato conosco para agendar o reforço!`;
       const preco = parseFloat(checkbox.dataset.preco) || 0;
       totalPrevisto += preco;
 
+      console.log("🔍 Serviço encontrado:", service);
+      console.log("🔍 ServiceId:", serviceId);
+      console.log("🔍 Preço:", preco);
+
       return {
         serviceId: serviceId,
         nome: service?.nome || "Serviço não encontrado",
@@ -4440,6 +4453,8 @@ Entre em contato conosco para agendar o reforço!`;
         custoAproxAplicado: service?.temCusto ? service.custoAproximado : null,
       };
     }));
+
+    console.log("🔍 Itens processados:", itens);
 
     const appointmentData = {
       clienteId: formData.get("clienteId"),
