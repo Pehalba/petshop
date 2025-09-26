@@ -754,13 +754,14 @@ class PetShopApp {
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
     
-    // Primeiro dia do mês
-    const firstDay = new Date(currentYear, currentMonth, 1);
-    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    // Primeiro dia do mês atual
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+    // Último dia do mês atual
+    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
     
-    // Calcular o primeiro dia da semana do calendário (domingo da semana que contém o dia 1)
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    // Calcular o primeiro domingo da semana que contém o dia 1 do mês
+    const firstSunday = new Date(firstDayOfMonth);
+    firstSunday.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
     
     const monthNames = [
       "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -780,11 +781,11 @@ class PetShopApp {
         <div class="calendar-days">
     `;
     
-    // Gerar 6 semanas (42 dias) do calendário
+    // Gerar 6 semanas (42 dias) começando do primeiro domingo
     for (let week = 0; week < 6; week++) {
-      for (let day = 0; day < 7; day++) {
-        const currentDate = new Date(startDate);
-        currentDate.setDate(startDate.getDate() + (week * 7) + day);
+      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+        const currentDate = new Date(firstSunday);
+        currentDate.setDate(firstSunday.getDate() + (week * 7) + dayOfWeek);
         
         const isCurrentMonth = currentDate.getMonth() === currentMonth;
         const isToday = currentDate.toDateString() === today.toDateString();
