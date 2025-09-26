@@ -163,23 +163,15 @@
   min-width: 14px;
 }
 
-/* Estados de contagem - aplicar apenas a agendamentos */
-.cal-day.has-1 .cal-count.appointments {
-  background: #28a745;
+/* Cores simplificadas */
+.cal-count.appointments {
+  background: #28a745 !important; /* Sempre verde */
+  color: white;
 }
 
-.cal-day.has-2-3 .cal-count.appointments {
-  background: #ffc107;
-  color: #212529;
-}
-
-.cal-day.has-4plus .cal-count.appointments {
-  background: #dc3545;
-}
-
-/* Vacinas mantêm cor verde */
 .cal-count.vaccines {
-  background: #28a745 !important;
+  background: #ffc107 !important; /* Sempre amarelo */
+  color: #212529;
 }
 
 /* Lista do dia */

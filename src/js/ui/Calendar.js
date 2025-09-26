@@ -179,12 +179,7 @@ class Calendar {
       dayEl.setAttribute('aria-label', ariaText);
     }
 
-    // Aplicar classes de contagem
-    if (totalCount > 0) {
-      if (totalCount === 1) dayEl.classList.add('has-1');
-      else if (totalCount <= 3) dayEl.classList.add('has-2-3');
-      else dayEl.classList.add('has-4plus');
-    }
+    // Não precisamos mais de classes de contagem - cores fixas
 
     return dayEl;
   }
@@ -228,8 +223,7 @@ class Calendar {
       const vaccinesCount = typeof dayData === 'number' ? 0 : (dayData.vaccines || 0);
       const totalCount = appointmentsCount + vaccinesCount;
 
-      // Remover classes de contagem anteriores
-      dayEl.classList.remove('has-1', 'has-2-3', 'has-4plus');
+      // Não precisamos mais remover classes de contagem
 
       // Remover contadores antigos
       const oldCounts = dayEl.querySelectorAll('.cal-count');
@@ -250,12 +244,7 @@ class Calendar {
         dayEl.appendChild(vaccineEl);
       }
 
-      // Aplicar classes de contagem total
-      if (totalCount > 0) {
-        if (totalCount === 1) dayEl.classList.add('has-1');
-        else if (totalCount <= 3) dayEl.classList.add('has-2-3');
-        else dayEl.classList.add('has-4plus');
-      }
+      // Cores fixas aplicadas via CSS - não precisamos de classes
     });
   }
 
