@@ -4174,8 +4174,8 @@ Entre em contato conosco para agendar o reforço!`;
     // Carregar pets quando cliente for selecionado
     const clienteSelect = document.getElementById("clienteId");
     if (clienteSelect) {
-      clienteSelect.addEventListener("change", (e) => {
-        this.loadPetsForClient(e.target.value);
+      clienteSelect.addEventListener("change", async (e) => {
+        await this.loadPetsForClient(e.target.value);
       });
     }
 
@@ -4204,7 +4204,7 @@ Entre em contato conosco para agendar o reforço!`;
 
     // Carregar pets se já houver cliente selecionado
     if (clienteSelect && clienteSelect.value) {
-      this.loadPetsForClient(clienteSelect.value);
+      await this.loadPetsForClient(clienteSelect.value);
     }
 
     // Atualizar total inicial
@@ -4212,15 +4212,16 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // Carregar pets do cliente selecionado
-  loadPetsForClient(clienteId) {
+  async loadPetsForClient(clienteId) {
     const petSelect = document.getElementById("petId");
     if (!petSelect || !clienteId) return;
 
-    const pets = store.getPets().filter((pet) => pet.clienteId === clienteId);
+    const pets = await store.getPets();
+    const clientPets = pets.filter((pet) => pet.clienteId === clienteId);
 
     petSelect.innerHTML =
       '<option value="">Selecione um pet</option>' +
-      pets
+      clientPets
         .map(
           (pet) =>
             `<option value="${pet.id}">${pet.nome || "Sem nome"}</option>`
