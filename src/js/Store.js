@@ -11,8 +11,6 @@ class Store {
       pets: "pet_shop_pets",
       services: "pet_shop_services",
       appointments: "pet_shop_appointments",
-      orders: "pet_shop_orders",
-      payments: "pet_shop_payments",
       settings: "pet_shop_settings",
       professionals: "pet_shop_professionals",
       breeds: "pet_shop_breeds",
@@ -451,43 +449,7 @@ class Store {
     );
   }
 
-  // Ordens de Serviço
-  async getOrders() {
-    return await this.getAll("orders");
-  }
 
-  async getOrder(id) {
-    return await this.getById("orders", id);
-  }
-
-  saveOrder(order) {
-    return this.save("orders", order);
-  }
-
-  deleteOrder(id) {
-    return this.delete("orders", id);
-  }
-
-  // Pagamentos
-  getPayments() {
-    return this.getAll("payments");
-  }
-
-  getPayment(id) {
-    return this.getById("payments", id);
-  }
-
-  savePayment(payment) {
-    return this.save("payments", payment);
-  }
-
-  deletePayment(id) {
-    return this.delete("payments", id);
-  }
-
-  getPaymentsByOrder(orderId) {
-    return this.query("payments", (payment) => payment.ordemId === orderId);
-  }
 
   // Configurações
   getSettings() {

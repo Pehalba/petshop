@@ -1,24 +1,6 @@
 /* ===== PÁGINAS ESPECÍFICAS ===== */
 
 /* Dashboard */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: var(--spacing-6);
-  margin-bottom: var(--spacing-8);
-}
-
-.dashboard-main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-6);
-}
-
-.dashboard-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-6);
-}
 
 /* Cards de resumo */
 .summary-cards {
@@ -261,9 +243,6 @@
 
 /* Responsividade */
 @media (max-width: 1024px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
 
   .form-row-3 {
     grid-template-columns: repeat(2, 1fr);

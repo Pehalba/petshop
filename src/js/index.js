@@ -14,8 +14,6 @@ class PetShopApp {
       servicos: this.renderServicos.bind(this),
       agendamentos: this.renderAgendamentos.bind(this),
       prontuarios: this.renderProntuarios.bind(this),
-      ordem: this.renderOrdem.bind(this),
-      pagamentos: this.renderPagamentos.bind(this),
       relatorios: this.renderRelatorios.bind(this),
       configuracoes: this.renderConfiguracoes.bind(this),
     };
@@ -655,14 +653,10 @@ class PetShopApp {
       const pets = await store.getPets();
       const services = await store.getServices();
       const appointments = await store.getAppointments();
-      const orders = await store.getOrders();
 
       const today = new Date().toISOString().split("T")[0];
       const todayAppointments = appointments.filter(
         (apt) => apt.dataHoraInicio && apt.dataHoraInicio.startsWith(today)
-      );
-      const pendingOrders = orders.filter(
-        (order) => order.status === "pendente"
       );
 
       content.innerHTML = `
@@ -721,27 +715,12 @@ class PetShopApp {
                 </div>
             </div>
 
-            <div class="dashboard-grid">
-                <div class="dashboard-main">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Agendamentos de Hoje</h3>
-                        </div>
-                        <div class="card-body">
-                            ${this.renderTodayAppointments(todayAppointments)}
-                        </div>
-                    </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Agendamentos de Hoje</h3>
                 </div>
-                
-                <div class="dashboard-sidebar">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Atividades Recentes</h3>
-                        </div>
-                        <div class="card-body">
-                            ${this.renderRecentActivities()}
-                        </div>
-                    </div>
+                <div class="card-body">
+                    ${this.renderTodayAppointments(todayAppointments)}
                 </div>
             </div>
         `;
@@ -807,49 +786,6 @@ class PetShopApp {
         `;
   }
 
-  renderRecentActivities() {
-    // Simular atividades recentes
-    const activities = [
-      {
-        type: "client",
-        message: "Novo cliente cadastrado",
-        time: "2 min atrás",
-      },
-      {
-        type: "pet",
-        message: "Pet adicionado ao sistema",
-        time: "5 min atrás",
-      },
-      {
-        type: "appointment",
-        message: "Agendamento confirmado",
-        time: "10 min atrás",
-      },
-      {
-        type: "order",
-        message: "Ordem de serviço finalizada",
-        time: "15 min atrás",
-      },
-    ];
-
-    return `
-            <div class="activity-list">
-                ${activities
-                  .map(
-                    (activity) => `
-                    <div class="activity-item">
-                        <div class="activity-icon activity-icon-${activity.type}">📝</div>
-                        <div class="activity-content">
-                            <div class="activity-message">${activity.message}</div>
-                            <div class="activity-time">${activity.time}</div>
-                        </div>
-                    </div>
-                `
-                  )
-                  .join("")}
-            </div>
-        `;
-  }
 
   // Placeholder para outras páginas
   async renderClientes() {
@@ -3955,17 +3891,6 @@ Entre em contato conosco para agendar o reforço!`;
     }
   }
 
-  renderOrdem() {
-    const content = document.getElementById("content");
-    content.innerHTML =
-      "<h1>Ordem de Serviço</h1><p>Página em desenvolvimento...</p>";
-  }
-
-  renderPagamentos() {
-    const content = document.getElementById("content");
-    content.innerHTML =
-      "<h1>Pagamentos</h1><p>Página em desenvolvimento...</p>";
-  }
 
   renderRelatorios() {
     const content = document.getElementById("content");
