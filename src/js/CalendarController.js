@@ -67,10 +67,21 @@ class CalendarController {
         countMap[dateStr].appointments++;
       });
 
-      // Agrupar vacinas por dia
+      // Agrupar vacinas por dia - evitar problemas de fuso horário
       vaccines.forEach(vaccine => {
-        const vaccineDate = new Date(vaccine.proximaDose);
-        const dateStr = vaccineDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        // Se proximaDose já está no formato YYYY-MM-DD, usar diretamente
+        let dateStr;
+        if (vaccine.proximaDose.includes('T')) {
+          // Se tem horário, extrair apenas a data
+          dateStr = vaccine.proximaDose.split('T')[0];
+        } else if (vaccine.proximaDose.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          // Se já está no formato YYYY-MM-DD
+          dateStr = vaccine.proximaDose;
+        } else {
+          // Fallback: tentar converter
+          const vaccineDate = new Date(vaccine.proximaDose);
+          dateStr = vaccineDate.toISOString().split('T')[0];
+        }
         
         if (!countMap[dateStr]) {
           countMap[dateStr] = { appointments: 0, vaccines: 0 };
@@ -102,7 +113,21 @@ class CalendarController {
         if (pet.vacinas && Array.isArray(pet.vacinas)) {
           pet.vacinas.forEach(vaccine => {
             if (vaccine.proximaDose) {
-              const doseDate = new Date(vaccine.proximaDose);
+              // Criar data sem problemas de fuso horário
+              let doseDate;
+              if (vaccine.proximaDose.includes('T')) {
+                // Se tem horário, extrair apenas a data
+                const dateOnly = vaccine.proximaDose.split('T')[0];
+                const [year, month, day] = dateOnly.split('-').map(Number);
+                doseDate = new Date(year, month - 1, day);
+              } else if (vaccine.proximaDose.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Se já está no formato YYYY-MM-DD
+                const [year, month, day] = vaccine.proximaDose.split('-').map(Number);
+                doseDate = new Date(year, month - 1, day);
+              } else {
+                // Fallback: tentar converter
+                doseDate = new Date(vaccine.proximaDose);
+              }
               
               // Verificar se a dose está no mês
               if (doseDate >= startDate && doseDate <= endDate) {
@@ -179,10 +204,24 @@ class CalendarController {
         if (pet.vacinas && Array.isArray(pet.vacinas)) {
           pet.vacinas.forEach(vaccine => {
             if (vaccine.proximaDose) {
-              const doseDate = new Date(vaccine.proximaDose);
+              // Criar data sem problemas de fuso horário
+              let doseDate;
+              if (vaccine.proximaDose.includes('T')) {
+                // Se tem horário, extrair apenas a data
+                const dateOnly = vaccine.proximaDose.split('T')[0];
+                const [year, month, day] = dateOnly.split('-').map(Number);
+                doseDate = new Date(year, month - 1, day);
+              } else if (vaccine.proximaDose.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Se já está no formato YYYY-MM-DD
+                const [year, month, day] = vaccine.proximaDose.split('-').map(Number);
+                doseDate = new Date(year, month - 1, day);
+              } else {
+                // Fallback: tentar converter
+                doseDate = new Date(vaccine.proximaDose);
+              }
               
-              // Verificar se a dose é no dia específico
-              if (doseDate.toDateString() === targetDate.toDateString()) {
+              // Verificar se a dose é no dia específico (comparar datas diretamente)
+              if (doseDate.getTime() === targetDate.getTime()) {
                 vaccines.push({
                   ...vaccine,
                   petId: pet.id,
