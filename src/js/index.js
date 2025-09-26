@@ -2649,7 +2649,7 @@ class PetShopApp {
       </div>
 
       <div class="data-container">
-        ${this.renderAppointmentsTable(appointments)}
+        ${await this.renderAppointmentsTable(appointments)}
       </div>
     `;
 
@@ -2771,7 +2771,7 @@ class PetShopApp {
             </tr>
           </thead>
           <tbody>
-            ${tableRows}
+            ${tableRows.join("")}
           </tbody>
         </table>
       </div>
