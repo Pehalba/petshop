@@ -138,10 +138,6 @@
 
 .cal-count {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
-  background: #dc3545;
-  color: white;
   font-size: 10px;
   font-weight: 600;
   padding: 2px 4px;
@@ -149,20 +145,41 @@
   min-width: 16px;
   text-align: center;
   line-height: 1;
+  color: white;
 }
 
-/* Estados de contagem */
-.cal-day.has-1 .cal-count {
+.cal-count.appointments {
+  bottom: 4px;
+  right: 4px;
+  background: #dc3545;
+}
+
+.cal-count.vaccines {
+  bottom: 4px;
+  left: 4px;
+  background: #28a745;
+  font-size: 8px;
+  padding: 1px 2px;
+  min-width: 14px;
+}
+
+/* Estados de contagem - aplicar apenas a agendamentos */
+.cal-day.has-1 .cal-count.appointments {
   background: #28a745;
 }
 
-.cal-day.has-2-3 .cal-count {
+.cal-day.has-2-3 .cal-count.appointments {
   background: #ffc107;
   color: #212529;
 }
 
-.cal-day.has-4plus .cal-count {
+.cal-day.has-4plus .cal-count.appointments {
   background: #dc3545;
+}
+
+/* Vacinas mantêm cor verde */
+.cal-count.vaccines {
+  background: #28a745 !important;
 }
 
 /* Lista do dia */
@@ -171,6 +188,19 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+}
+
+.section-header {
+  background: #f8f9fa;
+  padding: 12px 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.section-header h5 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
 }
 
 .day-list h4 {
@@ -295,6 +325,96 @@
   padding: 40px 20px;
   text-align: center;
   color: #dc3545;
+}
+
+/* Cards de vacinas */
+.vaccines-list {
+  background: #f8fffe;
+}
+
+.vaccine-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s ease;
+}
+
+.vaccine-card:hover {
+  background: #f0fdfc;
+}
+
+.vaccine-card:last-child {
+  border-bottom: none;
+}
+
+.vaccine-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.vaccine-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.vaccine-client {
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #212529;
+}
+
+.vaccine-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #28a745;
+  margin-bottom: 6px;
+}
+
+.vaccine-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vaccine-badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vaccine-badge.vaccine-due {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.vaccine-badge.vaccine-overdue {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.vaccine-notes {
+  font-size: 11px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.vaccine-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.vaccine-card.error {
+  background: #f8d7da;
+  border-left: 3px solid #dc3545;
 }
 
 /* Responsivo */

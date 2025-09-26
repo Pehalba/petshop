@@ -145,22 +145,44 @@ class Calendar {
     }
 
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const count = this.counts[dateStr] || 0;
+    const dayData = this.counts[dateStr] || { appointments: 0, vaccines: 0 };
+    
+    // Compatibilidade com formato antigo (número simples)
+    const appointmentsCount = typeof dayData === 'number' ? dayData : (dayData.appointments || 0);
+    const vaccinesCount = typeof dayData === 'number' ? 0 : (dayData.vaccines || 0);
+    const totalCount = appointmentsCount + vaccinesCount;
+
+    let countsHtml = '';
+    if (appointmentsCount > 0) {
+      countsHtml += `<span class="cal-count appointments">${appointmentsCount}</span>`;
+    }
+    if (vaccinesCount > 0) {
+      countsHtml += `<span class="cal-count vaccines">💉</span>`;
+    }
 
     dayEl.innerHTML = `
       <span class="cal-day-number">${day}</span>
-      ${count > 0 ? `<span class="cal-count">${count}</span>` : ''}
+      ${countsHtml}
     `;
 
     if (!isOtherMonth) {
       dayEl.addEventListener('click', () => this.selectDay(dateStr));
-      dayEl.setAttribute('aria-label', `${day} de ${this.getMonthName(month)} de ${year}${count > 0 ? ` — ${count} serviços` : ''}`);
+      
+      // Criar texto para aria-label
+      let ariaText = `${day} de ${this.getMonthName(month)} de ${year}`;
+      if (totalCount > 0) {
+        let items = [];
+        if (appointmentsCount > 0) items.push(`${appointmentsCount} ${appointmentsCount === 1 ? 'serviço' : 'serviços'}`);
+        if (vaccinesCount > 0) items.push(`${vaccinesCount} ${vaccinesCount === 1 ? 'vacina' : 'vacinas'}`);
+        ariaText += ` — ${items.join(' e ')}`;
+      }
+      dayEl.setAttribute('aria-label', ariaText);
     }
 
     // Aplicar classes de contagem
-    if (count > 0) {
-      if (count === 1) dayEl.classList.add('has-1');
-      else if (count <= 3) dayEl.classList.add('has-2-3');
+    if (totalCount > 0) {
+      if (totalCount === 1) dayEl.classList.add('has-1');
+      else if (totalCount <= 3) dayEl.classList.add('has-2-3');
       else dayEl.classList.add('has-4plus');
     }
 
@@ -199,26 +221,40 @@ class Calendar {
       const month = this.currentMonth;
       const year = this.currentYear;
       const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-      const count = this.counts[dateStr] || 0;
+      const dayData = this.counts[dateStr] || { appointments: 0, vaccines: 0 };
+      
+      // Compatibilidade com formato antigo
+      const appointmentsCount = typeof dayData === 'number' ? dayData : (dayData.appointments || 0);
+      const vaccinesCount = typeof dayData === 'number' ? 0 : (dayData.vaccines || 0);
+      const totalCount = appointmentsCount + vaccinesCount;
 
       // Remover classes de contagem anteriores
       dayEl.classList.remove('has-1', 'has-2-3', 'has-4plus');
 
-      // Atualizar contador
-      const countEl = dayEl.querySelector('.cal-count');
-      if (count > 0) {
-        if (!countEl) {
-          dayEl.innerHTML += `<span class="cal-count">${count}</span>`;
-        } else {
-          countEl.textContent = count;
-        }
+      // Remover contadores antigos
+      const oldCounts = dayEl.querySelectorAll('.cal-count');
+      oldCounts.forEach(el => el.remove());
 
-        // Aplicar classes de contagem
-        if (count === 1) dayEl.classList.add('has-1');
-        else if (count <= 3) dayEl.classList.add('has-2-3');
+      // Adicionar novos contadores
+      if (appointmentsCount > 0) {
+        const appointmentEl = document.createElement('span');
+        appointmentEl.className = 'cal-count appointments';
+        appointmentEl.textContent = appointmentsCount;
+        dayEl.appendChild(appointmentEl);
+      }
+
+      if (vaccinesCount > 0) {
+        const vaccineEl = document.createElement('span');
+        vaccineEl.className = 'cal-count vaccines';
+        vaccineEl.textContent = '💉';
+        dayEl.appendChild(vaccineEl);
+      }
+
+      // Aplicar classes de contagem total
+      if (totalCount > 0) {
+        if (totalCount === 1) dayEl.classList.add('has-1');
+        else if (totalCount <= 3) dayEl.classList.add('has-2-3');
         else dayEl.classList.add('has-4plus');
-      } else if (countEl) {
-        countEl.remove();
       }
     });
   }

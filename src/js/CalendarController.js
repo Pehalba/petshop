@@ -52,16 +52,30 @@ class CalendarController {
       // Buscar agendamentos do mês
       const appointments = await this.store.getAppointmentsByDateRange(from, to);
       
-      // Agrupar por dia
+      // Buscar vacinas vencendo no mês
+      const vaccines = await this.getVaccinesDueInMonth(year, month);
+      
+      // Agrupar agendamentos por dia
       const countMap = {};
       appointments.forEach(appointment => {
         const appointmentDate = new Date(appointment.dataHoraInicio);
         const dateStr = appointmentDate.toISOString().split('T')[0]; // YYYY-MM-DD
         
         if (!countMap[dateStr]) {
-          countMap[dateStr] = 0;
+          countMap[dateStr] = { appointments: 0, vaccines: 0 };
         }
-        countMap[dateStr]++;
+        countMap[dateStr].appointments++;
+      });
+
+      // Agrupar vacinas por dia
+      vaccines.forEach(vaccine => {
+        const vaccineDate = new Date(vaccine.proximaDose);
+        const dateStr = vaccineDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        
+        if (!countMap[dateStr]) {
+          countMap[dateStr] = { appointments: 0, vaccines: 0 };
+        }
+        countMap[dateStr].vaccines++;
       });
 
       // Cachear resultado
@@ -71,6 +85,44 @@ class CalendarController {
     } catch (error) {
       console.error('Erro ao buscar contagens do mês:', error);
       return {};
+    }
+  }
+
+  async getVaccinesDueInMonth(year, month) {
+    try {
+      // Buscar todos os pets
+      const pets = await this.store.getPets();
+      const vaccines = [];
+
+      // Calcular range do mês
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0, 23, 59, 59);
+
+      pets.forEach(pet => {
+        if (pet.vacinas && Array.isArray(pet.vacinas)) {
+          pet.vacinas.forEach(vaccine => {
+            if (vaccine.proximaDose) {
+              const doseDate = new Date(vaccine.proximaDose);
+              
+              // Verificar se a dose está no mês
+              if (doseDate >= startDate && doseDate <= endDate) {
+                vaccines.push({
+                  ...vaccine,
+                  petId: pet.id,
+                  petNome: pet.nome,
+                  clienteId: pet.clienteId,
+                  proximaDose: vaccine.proximaDose
+                });
+              }
+            }
+          });
+        }
+      });
+
+      return vaccines;
+    } catch (error) {
+      console.error('Erro ao buscar vacinas do mês:', error);
+      return [];
     }
   }
 
@@ -90,7 +142,10 @@ class CalendarController {
       // Buscar agendamentos do dia
       const appointments = await this.store.getAppointmentsByDateRange(from, to);
       
-      // Ordenar por hora
+      // Buscar vacinas do dia
+      const vaccines = await this.getVaccinesDueOnDay(dateStr);
+      
+      // Ordenar agendamentos por hora
       appointments.sort((a, b) => {
         const timeA = new Date(a.dataHoraInicio).getTime();
         const timeB = new Date(b.dataHoraInicio).getTime();
@@ -98,20 +153,57 @@ class CalendarController {
       });
 
       // Renderizar lista do dia
-      this.renderDayList(dateStr, appointments);
+      this.renderDayList(dateStr, appointments, vaccines);
       
     } catch (error) {
-      console.error('Erro ao carregar agendamentos do dia:', error);
+      console.error('Erro ao carregar dados do dia:', error);
       this.dayListContainer.innerHTML = `
         <div class="day-list-error">
-          <p>❌ Erro ao carregar agendamentos</p>
+          <p>❌ Erro ao carregar dados do dia</p>
           <p>Verifique sua conexão com a internet</p>
         </div>
       `;
     }
   }
 
-  renderDayList(dateStr, appointments) {
+  async getVaccinesDueOnDay(dateStr) {
+    try {
+      // Buscar todos os pets
+      const pets = await this.store.getPets();
+      const vaccines = [];
+
+      // Converter dateStr para Date
+      const targetDate = new Date(dateStr + 'T00:00:00');
+
+      pets.forEach(pet => {
+        if (pet.vacinas && Array.isArray(pet.vacinas)) {
+          pet.vacinas.forEach(vaccine => {
+            if (vaccine.proximaDose) {
+              const doseDate = new Date(vaccine.proximaDose);
+              
+              // Verificar se a dose é no dia específico
+              if (doseDate.toDateString() === targetDate.toDateString()) {
+                vaccines.push({
+                  ...vaccine,
+                  petId: pet.id,
+                  petNome: pet.nome,
+                  clienteId: pet.clienteId,
+                  proximaDose: vaccine.proximaDose
+                });
+              }
+            }
+          });
+        }
+      });
+
+      return vaccines;
+    } catch (error) {
+      console.error('Erro ao buscar vacinas do dia:', error);
+      return [];
+    }
+  }
+
+  renderDayList(dateStr, appointments, vaccines = []) {
     const date = new Date(dateStr);
     const formattedDate = date.toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -119,12 +211,14 @@ class CalendarController {
       year: 'numeric'
     });
 
-    if (appointments.length === 0) {
+    const totalCount = appointments.length + vaccines.length;
+    
+    if (totalCount === 0) {
       this.dayListContainer.innerHTML = `
         <div class="day-list">
           <h4>${formattedDate} — Sem compromissos</h4>
           <div class="empty-day">
-            <p>Nenhum agendamento para este dia</p>
+            <p>Nenhum agendamento ou vacina para este dia</p>
           </div>
         </div>
       `;
@@ -132,13 +226,37 @@ class CalendarController {
     }
 
     const appointmentsHtml = appointments.map(appointment => this.renderAppointmentCard(appointment)).join('');
+    const vaccinesHtml = vaccines.map(vaccine => this.renderVaccineCard(vaccine)).join('');
+    
+    let title = `${formattedDate} — `;
+    let titleParts = [];
+    if (appointments.length > 0) {
+      titleParts.push(`${appointments.length} ${appointments.length === 1 ? 'serviço' : 'serviços'}`);
+    }
+    if (vaccines.length > 0) {
+      titleParts.push(`${vaccines.length} ${vaccines.length === 1 ? 'vacina' : 'vacinas'}`);
+    }
+    title += titleParts.join(' • ');
     
     this.dayListContainer.innerHTML = `
       <div class="day-list">
-        <h4>${formattedDate} — ${appointments.length} ${appointments.length === 1 ? 'serviço' : 'serviços'}</h4>
-        <div class="appointments-list">
-          ${appointmentsHtml}
-        </div>
+        <h4>${title}</h4>
+        ${appointments.length > 0 ? `
+          <div class="section-header">
+            <h5>📅 Agendamentos</h5>
+          </div>
+          <div class="appointments-list">
+            ${appointmentsHtml}
+          </div>
+        ` : ''}
+        ${vaccines.length > 0 ? `
+          <div class="section-header">
+            <h5>💉 Vacinas</h5>
+          </div>
+          <div class="vaccines-list">
+            ${vaccinesHtml}
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -198,6 +316,62 @@ class CalendarController {
           <div class="appointment-details">
             <div class="appointment-client">Erro ao carregar agendamento</div>
             <div class="appointment-services">ID: ${appointment.id}</div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  async renderVaccineCard(vaccine) {
+    try {
+      const client = await this.store.getClient(vaccine.clienteId);
+      const pet = await this.store.getPet(vaccine.petId);
+      
+      const dueDate = new Date(vaccine.proximaDose);
+      const today = new Date();
+      const isOverdue = dueDate < today;
+      const statusClass = isOverdue ? 'vaccine-overdue' : 'vaccine-due';
+      const statusText = isOverdue ? 'Atrasada' : 'Prevista';
+      
+      const clientName = client ? client.nomeCompleto : 'Cliente não encontrado';
+      const petName = pet ? pet.nome : 'Pet não encontrado';
+
+      return `
+        <div class="vaccine-card">
+          <div class="vaccine-icon">💉</div>
+          <div class="vaccine-details">
+            <div class="vaccine-client">
+              <strong>${clientName}</strong> • ${petName}
+            </div>
+            <div class="vaccine-name">${vaccine.nomeVacina}</div>
+            <div class="vaccine-meta">
+              <span class="vaccine-badge ${statusClass}">${statusText}</span>
+              ${vaccine.observacoes ? `<span class="vaccine-notes">${vaccine.observacoes}</span>` : ''}
+            </div>
+          </div>
+          <div class="vaccine-actions">
+            <button class="btn btn-sm btn-outline" onclick="app.viewPet('${vaccine.petId}')" title="Ver pet">
+              <i class="icon-eye"></i>
+            </button>
+            ${client && client.telefoneWhatsApp ? `
+              <button class="btn btn-sm btn-info" onclick="app.sendVaccineWhatsApp('${vaccine.clienteId}', '${vaccine.nomeVacina}', '${vaccine.proximaDose}')" title="Enviar WhatsApp">
+                <i class="icon-message-circle"></i>
+              </button>
+            ` : ''}
+            <button class="btn btn-sm btn-success" onclick="app.createVaccineAppointment('${vaccine.petId}', '${vaccine.nomeVacina}')" title="Agendar aplicação">
+              <i class="icon-calendar"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    } catch (error) {
+      console.error('Erro ao renderizar card da vacina:', error);
+      return `
+        <div class="vaccine-card error">
+          <div class="vaccine-icon">💉</div>
+          <div class="vaccine-details">
+            <div class="vaccine-client">Erro ao carregar vacina</div>
+            <div class="vaccine-name">${vaccine.nomeVacina || 'Vacina desconhecida'}</div>
           </div>
         </div>
       `;
