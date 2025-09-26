@@ -228,11 +228,12 @@
 
 .data-table-actions {
   display: flex;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
   flex-wrap: nowrap;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   white-space: nowrap;
+  padding: var(--spacing-1);
 }
 
 .data-table-body {
@@ -249,6 +250,7 @@
   width: 120px;
   min-width: 120px;
   max-width: 120px;
+  padding: var(--spacing-2) var(--spacing-2);
 }
 
 .data-table th:nth-child(2), /* Cliente */
@@ -256,6 +258,7 @@
   width: 150px;
   min-width: 150px;
   max-width: 150px;
+  padding: var(--spacing-2) var(--spacing-2);
 }
 
 .data-table th:nth-child(3), /* Serviços */
@@ -263,6 +266,7 @@
   width: 120px;
   min-width: 120px;
   max-width: 120px;
+  padding: var(--spacing-2) var(--spacing-2);
 }
 
 .data-table th:nth-child(4), /* Total */
@@ -270,6 +274,8 @@
   width: 80px;
   min-width: 80px;
   max-width: 80px;
+  padding: var(--spacing-2) var(--spacing-2);
+  text-align: center;
 }
 
 .data-table th:nth-child(5), /* Status */
@@ -277,6 +283,8 @@
   width: 120px;
   min-width: 120px;
   max-width: 120px;
+  padding: var(--spacing-2) var(--spacing-2);
+  text-align: center;
 }
 
 .data-table th:nth-child(6), /* Pagamento */
@@ -284,6 +292,8 @@
   width: 120px;
   min-width: 120px;
   max-width: 120px;
+  padding: var(--spacing-2) var(--spacing-2);
+  text-align: center;
 }
 
 /* Truncar texto longo nas colunas */
@@ -291,7 +301,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  text-align: left;
 }
 
 /* Exceção para coluna de ações - não truncar */
@@ -299,6 +310,19 @@
   white-space: normal;
   overflow: visible;
   text-overflow: unset;
+  text-align: center;
+}
+
+/* Centralizar cabeçalhos da tabela */
+.data-table th {
+  text-align: center;
+  padding: var(--spacing-3);
+  font-weight: 600;
+}
+
+/* Exceção para coluna de ações - centralizar */
+.data-table th:last-child {
+  text-align: center;
 }
 
 /* Status badges */
