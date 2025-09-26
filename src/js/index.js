@@ -1967,9 +1967,9 @@ class PetShopApp {
   }
 
   // Formulário de serviço
-  showServiceForm(serviceId = null) {
+  async showServiceForm(serviceId = null) {
     const isEdit = serviceId !== null;
-    const service = isEdit ? store.getService(serviceId) : null;
+    const service = isEdit ? await store.getService(serviceId) : null;
 
     const content = `
       <div class="form-container">
@@ -2564,7 +2564,7 @@ class PetShopApp {
   }
 
   async deleteService(serviceId) {
-    const service = store.getService(serviceId);
+    const service = await store.getService(serviceId);
     if (!service) return;
 
     const confirmed = await ui.confirm(
@@ -4290,19 +4290,19 @@ Entre em contato conosco para agendar o reforço!`;
 
     // Calcular total
     let totalPrevisto = 0;
-    const itens = selectedServices.map((checkbox) => {
+    const itens = await Promise.all(selectedServices.map(async (checkbox) => {
       const serviceId = checkbox.value;
-      const service = store.getService(serviceId);
+      const service = await store.getService(serviceId);
       const preco = parseFloat(checkbox.dataset.preco) || 0;
       totalPrevisto += preco;
 
       return {
         serviceId: serviceId,
-        nome: service.nome,
+        nome: service?.nome || "Serviço não encontrado",
         precoAplicado: preco,
-        custoAproxAplicado: service.temCusto ? service.custoAproximado : null,
+        custoAproxAplicado: service?.temCusto ? service.custoAproximado : null,
       };
-    });
+    }));
 
     const appointmentData = {
       clienteId: formData.get("clienteId"),
@@ -4427,19 +4427,19 @@ Entre em contato conosco para agendar o reforço!`;
 
     // Calcular total
     let totalPrevisto = 0;
-    const itens = selectedServices.map((checkbox) => {
+    const itens = await Promise.all(selectedServices.map(async (checkbox) => {
       const serviceId = checkbox.value;
-      const service = store.getService(serviceId);
+      const service = await store.getService(serviceId);
       const preco = parseFloat(checkbox.dataset.preco) || 0;
       totalPrevisto += preco;
 
       return {
         serviceId: serviceId,
-        nome: service.nome,
+        nome: service?.nome || "Serviço não encontrado",
         precoAplicado: preco,
-        custoAproxAplicado: service.temCusto ? service.custoAproximado : null,
+        custoAproxAplicado: service?.temCusto ? service.custoAproximado : null,
       };
-    });
+    }));
 
     const appointmentData = {
       clienteId: formData.get("clienteId"),
