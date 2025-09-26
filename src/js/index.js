@@ -602,36 +602,12 @@ class PetShopApp {
 
                 <div class="stat-card">
                     <div class="stat-header">
-                        <div class="stat-title">Serviços Hoje</div>
+                        <div class="stat-title">Serviços para Hoje</div>
                         <div class="stat-icon stat-icon-error">📅</div>
                     </div>
                     <div class="stat-value">${todayAppointments.length}</div>
                     <div class="stat-change positive">
                         <span>+${todayAppointments.length} programados</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dashboard-grid">
-                <div class="dashboard-main">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Serviços Programados para Hoje</h3>
-                        </div>
-                        <div class="card-body">
-                            ${this.renderTodayAppointments(todayAppointments)}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="dashboard-sidebar">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Pets com Vacina a Vencer</h3>
-                        </div>
-                        <div class="card-body">
-                            ${this.renderPetsWithVaccinesDue(petsWithVaccinesDue)}
-                        </div>
                     </div>
                 </div>
             </div>

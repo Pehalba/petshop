@@ -1,24 +1,6 @@
 /* ===== PÁGINAS ESPECÍFICAS ===== */
 
 /* Dashboard */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: var(--spacing-6);
-  margin-bottom: var(--spacing-8);
-}
-
-.dashboard-main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-6);
-}
-
-.dashboard-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-6);
-}
 
 /* Vacinas a vencer */
 .vaccines-due-list {
@@ -184,10 +166,6 @@
 
 /* Responsividade do dashboard */
 @media (max-width: 1024px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .calendar-day {
     min-height: 60px;
   }
