@@ -229,6 +229,8 @@
 .data-table-actions {
   display: flex;
   gap: var(--spacing-2);
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .data-table-body {
@@ -914,14 +916,16 @@
 
 .data-table-actions .btn {
   padding: var(--spacing-2) var(--spacing-3);
-  font-size: 0.75rem;
-  min-width: 32px;
-  height: 32px;
+  font-size: 0.8rem;
+  min-width: 80px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--border-radius-sm);
   transition: all var(--transition-fast);
+  font-weight: 500;
+  gap: var(--spacing-1);
 }
 
 .data-table-actions .btn:hover {
@@ -934,6 +938,12 @@
   font-size: 0.75rem;
   min-width: 28px;
   height: 28px;
+}
+
+/* Coluna de ações */
+.actions-column {
+  width: 300px;
+  min-width: 300px;
 }
 
 /* ===== INFORMAÇÕES DO CLIENTE ===== */

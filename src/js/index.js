@@ -2810,34 +2810,34 @@ class PetShopApp {
           <td>${paymentBadge}</td>
           <td>
             <div class="data-table-actions">
-              <button class="btn btn-sm btn-outline" onclick="app.viewAppointment('${
+              <button class="btn btn-outline" onclick="app.viewAppointment('${
                 appointment.id
               }')" title="Ver detalhes">
-                <i class="icon-eye"></i>
+                👁️ Ver
               </button>
-              <button class="btn btn-sm btn-outline" onclick="app.editAppointment('${
+              <button class="btn btn-outline" onclick="app.editAppointment('${
                 appointment.id
               }')" title="Editar">
-                <i class="icon-edit"></i>
+                ✏️ Editar
               </button>
-              <button class="btn btn-sm btn-info" onclick="app.sendConfirmationWhatsApp('${
+              <button class="btn btn-info" onclick="app.sendConfirmationWhatsApp('${
                 appointment.id
               }')" title="Enviar confirmação via WhatsApp">
-                <i class="icon-message-circle"></i>
+                📱 WhatsApp
               </button>
               ${
                 appointment.pagamento && appointment.pagamento.status !== "pago"
                   ? `
-                <button class="btn btn-sm btn-success" onclick="app.markAppointmentPaid('${appointment.id}')" title="Marcar como pago">
-                  <i class="icon-check"></i>
+                <button class="btn btn-success" onclick="app.markAppointmentPaid('${appointment.id}')" title="Marcar como pago">
+                  ✅ Pago
                 </button>
               `
                   : ""
               }
-              <button class="btn btn-sm btn-danger" onclick="app.cancelAppointment('${
+              <button class="btn btn-danger" onclick="app.cancelAppointment('${
                 appointment.id
               }')" title="Cancelar">
-                <i class="icon-x"></i>
+                ❌ Cancelar
               </button>
             </div>
           </td>
@@ -2858,7 +2858,7 @@ class PetShopApp {
               <th>Profissional</th>
               <th>Status</th>
               <th>Pagamento</th>
-              <th>Ações</th>
+              <th class="actions-column">Ações</th>
             </tr>
           </thead>
           <tbody>
