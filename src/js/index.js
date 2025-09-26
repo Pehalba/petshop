@@ -155,14 +155,6 @@ class PetShopApp {
                         <span class="nav-link-icon">📅</span>
                         Agendamentos
                     </a>
-                    <a href="#" class="nav-link" data-page="ordem">
-                        <span class="nav-link-icon">📋</span>
-                        Ordem
-                    </a>
-                    <a href="#" class="nav-link" data-page="pagamentos">
-                        <span class="nav-link-icon">💳</span>
-                        Pagamentos
-                    </a>
                     <a href="#" class="nav-link" data-page="relatorios">
                         <span class="nav-link-icon">📈</span>
                         Relatórios
