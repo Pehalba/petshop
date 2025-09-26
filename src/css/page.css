@@ -418,10 +418,10 @@
 /* Dashboard Calendar Section */
 .dashboard-calendar-section {
   margin-top: 2rem;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
-  align-items: start;
+  align-items: center;
   width: 100% !important;
   max-width: none !important;
   min-width: 0;
@@ -429,8 +429,16 @@
 
 #dashboard-calendar {
   width: 100% !important;
-  max-width: none !important;
+  max-width: 1200px !important;
   min-width: 0;
+  margin: 0 auto;
+}
+
+#dashboard-day-list {
+  width: 100% !important;
+  max-width: 1200px !important;
+  min-width: 0;
+  margin: 0 auto;
 }
 
 /* Forçar largura total no dashboard */
