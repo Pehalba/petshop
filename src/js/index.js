@@ -2668,7 +2668,7 @@ class PetShopApp {
     }
   }
 
-  renderAppointmentsTable(appointments) {
+  async renderAppointmentsTable(appointments) {
     if (appointments.length === 0) {
       return `
         <div class="empty-state">
@@ -2682,12 +2682,12 @@ class PetShopApp {
       `;
     }
 
-    const tableRows = appointments
-      .map((appointment) => {
-        const client = store.getClient(appointment.clienteId);
-        const pet = appointment.petId ? store.getPet(appointment.petId) : null;
+    const tableRows = await Promise.all(
+      appointments.map(async (appointment) => {
+        const client = await store.getClient(appointment.clienteId);
+        const pet = appointment.petId ? await store.getPet(appointment.petId) : null;
         const professional = appointment.profissionalId
-          ? store.getProfessional(appointment.profissionalId)
+          ? await store.getProfessional(appointment.profissionalId)
           : null;
 
         const statusBadge = this.getStatusBadge(appointment.status);
@@ -2753,7 +2753,7 @@ class PetShopApp {
         </tr>
       `;
       })
-      .join("");
+    );
 
     return `
       <div class="data-table">
