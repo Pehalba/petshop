@@ -754,21 +754,22 @@ class PetShopApp {
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
     
-    // Primeiro dia do mês atual
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-    // Último dia do mês atual
-    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-    
-    // Calcular o primeiro domingo da semana que contém o dia 1 do mês
-    const firstSunday = new Date(firstDayOfMonth);
-    firstSunday.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
-    
     const monthNames = [
       "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
       "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ];
     
-    const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    // Dias da semana abreviados
+    const weekDays = ["D", "S", "T", "Q", "Q", "S", "S"];
+    
+    // Primeiro dia do mês
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    // Último dia do mês
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    
+    // Calcular quantos dias do mês anterior precisamos mostrar
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
     
     let calendarHTML = `
       <div class="calendar-header">
@@ -781,37 +782,27 @@ class PetShopApp {
         <div class="calendar-days">
     `;
     
-    // Gerar 6 semanas (42 dias) começando do primeiro domingo
-    for (let week = 0; week < 6; week++) {
-      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-        const currentDate = new Date(firstSunday);
-        currentDate.setDate(firstSunday.getDate() + (week * 7) + dayOfWeek);
-        
-        const isCurrentMonth = currentDate.getMonth() === currentMonth;
-        const isToday = currentDate.toDateString() === today.toDateString();
-        
-        // Buscar agendamentos para este dia
-        const dayAppointments = appointments.filter(apt => {
-          if (!apt.dataHoraInicio) return false;
-          const aptDate = new Date(apt.dataHoraInicio);
-          return aptDate.toDateString() === currentDate.toDateString();
-        });
-        
-        calendarHTML += `
-          <div class="calendar-day ${isCurrentMonth ? 'current-month' : 'other-month'} ${isToday ? 'today' : ''}">
-            <div class="calendar-day-number">${currentDate.getDate()}</div>
-            <div class="calendar-day-appointments">
-              ${dayAppointments.slice(0, 3).map(apt => `
-                <div class="calendar-appointment" title="${apt.itens.map(s => s.nome).join(', ')}">
-                  <span class="appointment-time">${new Date(apt.dataHoraInicio).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</span>
-                  <span class="appointment-service">${apt.itens[0]?.nome || 'Serviço'}</span>
-                </div>
-              `).join('')}
-              ${dayAppointments.length > 3 ? `<div class="calendar-more">+${dayAppointments.length - 3} mais</div>` : ''}
-            </div>
-          </div>
-        `;
-      }
+    // Gerar 42 dias (6 semanas)
+    for (let i = 0; i < 42; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      
+      const isCurrentMonth = currentDate.getMonth() === currentMonth;
+      const isToday = currentDate.toDateString() === today.toDateString();
+      
+      // Buscar agendamentos para este dia
+      const dayAppointments = appointments.filter(apt => {
+        if (!apt.dataHoraInicio) return false;
+        const aptDate = new Date(apt.dataHoraInicio);
+        return aptDate.toDateString() === currentDate.toDateString();
+      });
+      
+      calendarHTML += `
+        <div class="calendar-day ${isCurrentMonth ? 'current-month' : 'other-month'} ${isToday ? 'today' : ''}">
+          <span class="calendar-day-number">${currentDate.getDate()}</span>
+          ${dayAppointments.length > 0 ? '<div class="calendar-dot"></div>' : ''}
+        </div>
+      `;
     }
     
     calendarHTML += `
