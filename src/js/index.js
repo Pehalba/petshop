@@ -570,10 +570,14 @@ class PetShopApp {
       );
       
       // Debug: mostrar todas as vacinas salvas
-      console.log('🔍 DEBUG - Pets com vacinas:', pets.filter(pet => pet.vacinas && pet.vacinas.length > 0).map(pet => ({
-        nome: pet.nome,
-        vacinas: pet.vacinas.map(v => ({ nome: v.nomeVacina, proximaDose: v.proximaDose }))
-      })));
+      const petsComVacinas = pets.filter(pet => pet.vacinas && pet.vacinas.length > 0);
+      console.log('🔍 DEBUG - Total pets com vacinas:', petsComVacinas.length);
+      petsComVacinas.forEach(pet => {
+        console.log(`🐕 Pet: ${pet.nome}`);
+        pet.vacinas.forEach((vacina, index) => {
+          console.log(`  💉 Vacina ${index + 1}: ${vacina.nomeVacina} - Próxima dose: "${vacina.proximaDose}"`);
+        });
+      });
 
       content.innerHTML = `
             <div class="page-header">
