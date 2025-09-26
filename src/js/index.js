@@ -568,6 +568,12 @@ class PetShopApp {
         currentMonth,
         currentYear
       );
+      
+      // Debug: mostrar todas as vacinas salvas
+      console.log('🔍 DEBUG - Pets com vacinas:', pets.filter(pet => pet.vacinas && pet.vacinas.length > 0).map(pet => ({
+        nome: pet.nome,
+        vacinas: pet.vacinas.map(v => ({ nome: v.nomeVacina, proximaDose: v.proximaDose }))
+      })));
 
       content.innerHTML = `
             <div class="page-header">
