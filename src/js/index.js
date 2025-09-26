@@ -1482,8 +1482,8 @@ class PetShopApp {
 
     container.appendChild(vaccineItem);
 
-    // Calcular número da próxima vacina
-    const nextVaccineNumber = currentVaccineCount + 2;
+    // Calcular número da próxima vacina (que acabamos de adicionar + 1)
+    const nextVaccineNumber = currentVaccineCount + 1 + 1;
     
     // Adicionar botão no final do formulário da vacina
     vaccineItem.innerHTML += `
@@ -3379,8 +3379,8 @@ class PetShopApp {
 
     container.appendChild(vaccineItem);
 
-    // Calcular número da próxima vacina (atual + 1 + 1)
-    const nextVaccineNumber = currentVaccineCount + 2;
+    // Calcular número da próxima vacina (que acabamos de adicionar + 1)
+    const nextVaccineNumber = currentVaccineCount + 1 + 1;
     
     // Adicionar botão no final do formulário da vacina
     vaccineItem.innerHTML += `
