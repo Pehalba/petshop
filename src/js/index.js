@@ -280,7 +280,6 @@ class PetShopApp {
         this.handleAction(action.dataset.action);
       }
     });
-
   }
 
   navigateToPage(page) {
@@ -351,7 +350,6 @@ class PetShopApp {
         break;
     }
   }
-
 
   // ===== ONBOARDING =====
   showOnboarding() {
@@ -547,7 +545,7 @@ class PetShopApp {
 
     // Limpar classes específicas de outras páginas
     content.classList.remove("dashboard-page");
-    
+
     // Adicionar classe específica para o dashboard
     content.classList.add("dashboard-page");
 
@@ -565,7 +563,11 @@ class PetShopApp {
       // Calcular pets com vacina a vencer neste mês
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
-      const petsWithVaccinesDue = this.getPetsWithVaccinesDueThisMonth(pets, currentMonth, currentYear);
+      const petsWithVaccinesDue = this.getPetsWithVaccinesDueThisMonth(
+        pets,
+        currentMonth,
+        currentYear
+      );
 
       content.innerHTML = `
             <div class="page-header">
@@ -628,11 +630,10 @@ class PetShopApp {
 
         `;
 
-        // Inicializar calendário após renderizar o HTML
-        setTimeout(() => {
-          this.initCalendar();
-        }, 100);
-
+      // Inicializar calendário após renderizar o HTML
+      setTimeout(() => {
+        this.initCalendar();
+      }, 100);
     } catch (error) {
       console.error("❌ Erro ao carregar dashboard:", error);
       content.innerHTML = `
@@ -649,11 +650,11 @@ class PetShopApp {
   }
 
   initCalendar() {
-    const calendarContainer = document.getElementById('dashboard-calendar');
-    const dayListContainer = document.getElementById('dashboard-day-list');
-    
+    const calendarContainer = document.getElementById("dashboard-calendar");
+    const dayListContainer = document.getElementById("dashboard-day-list");
+
     if (!calendarContainer || !dayListContainer) {
-      console.warn('Containers do calendário não encontrados');
+      console.warn("Containers do calendário não encontrados");
       return;
     }
 
@@ -662,7 +663,7 @@ class PetShopApp {
       this.calendarController = new CalendarController(store);
       this.calendarController.init(calendarContainer, dayListContainer);
     } else {
-      console.warn('CalendarController não carregado');
+      console.warn("CalendarController não carregado");
     }
   }
 
@@ -716,28 +717,31 @@ class PetShopApp {
   // ===== MÉTODOS AUXILIARES DO DASHBOARD =====
   getPetsWithVaccinesDueThisMonth(pets, currentMonth, currentYear) {
     const petsWithVaccinesDue = [];
-    
-    pets.forEach(pet => {
+
+    pets.forEach((pet) => {
       if (pet.vacinas && pet.vacinas.length > 0) {
-        pet.vacinas.forEach(vacina => {
+        pet.vacinas.forEach((vacina) => {
           if (vacina.proximaDose) {
             const proximaDoseDate = new Date(vacina.proximaDose);
             const proximaDoseMonth = proximaDoseDate.getMonth();
             const proximaDoseYear = proximaDoseDate.getFullYear();
-            
+
             // Se a próxima dose é neste mês e ano
-            if (proximaDoseMonth === currentMonth && proximaDoseYear === currentYear) {
+            if (
+              proximaDoseMonth === currentMonth &&
+              proximaDoseYear === currentYear
+            ) {
               petsWithVaccinesDue.push({
                 pet,
                 vacina,
-                proximaDose: vacina.proximaDose
+                proximaDose: vacina.proximaDose,
               });
             }
           }
         });
       }
     });
-    
+
     return petsWithVaccinesDue;
   }
 
@@ -753,11 +757,14 @@ class PetShopApp {
 
     return `
       <div class="vaccines-due-list">
-        ${petsWithVaccinesDue.map(item => {
-          const proximaDoseDate = new Date(item.proximaDose);
-          const diasRestantes = Math.ceil((proximaDoseDate - new Date()) / (1000 * 60 * 60 * 24));
-          
-          return `
+        ${petsWithVaccinesDue
+          .map((item) => {
+            const proximaDoseDate = new Date(item.proximaDose);
+            const diasRestantes = Math.ceil(
+              (proximaDoseDate - new Date()) / (1000 * 60 * 60 * 24)
+            );
+
+            return `
             <div class="vaccine-due-item">
               <div class="vaccine-due-pet">
                 <strong>${item.pet.nome}</strong>
@@ -765,20 +772,24 @@ class PetShopApp {
               </div>
               <div class="vaccine-due-details">
                 <span class="vaccine-name">${item.vacina.nomeVacina}</span>
-                <span class="vaccine-date">${utils.formatDate(item.proximaDose)}</span>
+                <span class="vaccine-date">${utils.formatDate(
+                  item.proximaDose
+                )}</span>
               </div>
               <div class="vaccine-due-status">
-                <span class="badge ${diasRestantes <= 7 ? 'badge-warning' : 'badge-info'}">
-                  ${diasRestantes <= 0 ? 'Vencida' : `${diasRestantes} dias`}
+                <span class="badge ${
+                  diasRestantes <= 7 ? "badge-warning" : "badge-info"
+                }">
+                  ${diasRestantes <= 0 ? "Vencida" : `${diasRestantes} dias`}
                 </span>
               </div>
             </div>
           `;
-        }).join('')}
+          })
+          .join("")}
       </div>
     `;
   }
-
 
   // Placeholder para outras páginas
   async renderClientes() {
@@ -1448,7 +1459,10 @@ class PetShopApp {
       } else {
         // Para criar novo, gerar ID único
         const newClientId = store.generateId("cli");
-        savedClient = await store.saveClient({ ...clientData, id: newClientId });
+        savedClient = await store.saveClient({
+          ...clientData,
+          id: newClientId,
+        });
       }
 
       // Salvar pets se houver
@@ -2409,12 +2423,18 @@ class PetShopApp {
       if (serviceId) {
         // Atualizar
         console.log("🔄 Atualizando serviço:", serviceId, serviceData);
-        savedService = await store.saveService({ ...serviceData, id: serviceId });
+        savedService = await store.saveService({
+          ...serviceData,
+          id: serviceId,
+        });
       } else {
         // Criar novo
         const newServiceId = store.generateId("srv");
         console.log("➕ Criando novo serviço:", newServiceId, serviceData);
-        savedService = await store.saveService({ ...serviceData, id: newServiceId });
+        savedService = await store.saveService({
+          ...serviceData,
+          id: newServiceId,
+        });
       }
 
       console.log("✅ Serviço salvo:", savedService);
@@ -2740,7 +2760,9 @@ class PetShopApp {
         }
 
         const client = await store.getClient(appointment.clienteId);
-        const pet = appointment.petId ? await store.getPet(appointment.petId) : null;
+        const pet = appointment.petId
+          ? await store.getPet(appointment.petId)
+          : null;
         const professional = appointment.profissionalId
           ? await store.getProfessional(appointment.profissionalId)
           : null;
@@ -2748,8 +2770,11 @@ class PetShopApp {
         const statusBadge = this.getStatusBadge(appointment.status);
         const paymentBadge = this.getPaymentBadge(appointment.pagamento || {});
         console.log("🔍 Dados do agendamento:", appointment);
-        console.log("🔍 Itens do agendamento:", JSON.stringify(appointment.itens, null, 2));
-        
+        console.log(
+          "🔍 Itens do agendamento:",
+          JSON.stringify(appointment.itens, null, 2)
+        );
+
         const servicesText =
           appointment.itens.length === 1
             ? appointment.itens[0].nome || "Serviço sem nome"
@@ -3136,47 +3161,50 @@ class PetShopApp {
 
   // ===== MÉTODOS DE VACINAS =====
   toggleVaccineSection() {
-    const statusSelect = document.getElementById('petStatusVacinal');
-    const vaccinesSection = document.getElementById('vaccinesSection');
-    
-    if (statusSelect.value === 'registrar_agora') {
-      vaccinesSection.style.display = 'block';
+    const statusSelect = document.getElementById("petStatusVacinal");
+    const vaccinesSection = document.getElementById("vaccinesSection");
+
+    if (statusSelect.value === "registrar_agora") {
+      vaccinesSection.style.display = "block";
     } else {
-      vaccinesSection.style.display = 'none';
+      vaccinesSection.style.display = "none";
     }
   }
 
   addVaccine() {
-    const container = document.getElementById('vaccinesContainer');
+    const container = document.getElementById("vaccinesContainer");
     const vaccineIndex = container.children.length;
-    
+
     const vaccineItem = this.renderVaccineItem(null, vaccineIndex);
-    container.insertAdjacentHTML('beforeend', vaccineItem);
-    
+    container.insertAdjacentHTML("beforeend", vaccineItem);
+
     // Se era o primeiro item, remover mensagem de vazio
-    const emptyMessage = container.querySelector('.empty-vaccines');
+    const emptyMessage = container.querySelector(".empty-vaccines");
     if (emptyMessage) {
       emptyMessage.remove();
     }
   }
 
   removeVaccine(index) {
-    const container = document.getElementById('vaccinesContainer');
-    const vaccineItem = container.querySelector(`[data-vaccine-index="${index}"]`);
-    
+    const container = document.getElementById("vaccinesContainer");
+    const vaccineItem = container.querySelector(
+      `[data-vaccine-index="${index}"]`
+    );
+
     if (vaccineItem) {
       vaccineItem.remove();
     }
-    
+
     // Se não há mais vacinas, mostrar mensagem de vazio
     if (container.children.length === 0) {
-      container.innerHTML = '<div class="empty-vaccines">Nenhuma vacina registrada</div>';
+      container.innerHTML =
+        '<div class="empty-vaccines">Nenhuma vacina registrada</div>';
     }
   }
 
   renderVaccineItem(vaccine, index) {
     const vaccineId = vaccine?.id || `temp_${index}`;
-    
+
     return `
       <div class="vaccine-item" data-vaccine-index="${index}">
         <div class="vaccine-header">
@@ -3193,7 +3221,7 @@ class PetShopApp {
               type="text" 
               name="vacinaNome[]" 
               class="form-input vaccine-name-input" 
-              value="${vaccine?.nomeVacina || ''}"
+              value="${vaccine?.nomeVacina || ""}"
               placeholder="Ex: V10, Antirrábica, Gripe Canina..."
               list="vaccineSuggestions"
               required
@@ -3217,7 +3245,7 @@ class PetShopApp {
               type="date" 
               name="vacinaDataAplicacao[]" 
               class="form-input" 
-              value="${vaccine?.dataAplicacao || ''}"
+              value="${vaccine?.dataAplicacao || ""}"
               required
             >
           </div>
@@ -3230,7 +3258,7 @@ class PetShopApp {
               type="date" 
               name="vacinaProximaDose[]" 
               class="form-input" 
-              value="${vaccine?.proximaDose || ''}"
+              value="${vaccine?.proximaDose || ""}"
               onchange="app.toggleVaccineReminder(${index})"
             >
           </div>
@@ -3256,7 +3284,7 @@ class PetShopApp {
                 type="checkbox" 
                 name="vacinaHabilitarLembrete[]" 
                 class="form-checkbox" 
-                ${vaccine?.habilitarLembrete ? 'checked' : ''}
+                ${vaccine?.habilitarLembrete ? "checked" : ""}
                 onchange="app.toggleVaccineReminder(${index})"
               >
               <span class="checkmark"></span>
@@ -3271,7 +3299,7 @@ class PetShopApp {
             type="text" 
             name="vacinaObservacoes[]" 
             class="form-input" 
-            value="${vaccine?.observacoes || ''}"
+            value="${vaccine?.observacoes || ""}"
             placeholder="Observações sobre a vacina..."
           >
         </div>
@@ -3282,10 +3310,16 @@ class PetShopApp {
   }
 
   toggleVaccineReminder(index) {
-    const vaccineItem = document.querySelector(`[data-vaccine-index="${index}"]`);
-    const proximaDoseInput = vaccineItem.querySelector('input[name="vacinaProximaDose[]"]');
-    const habilitarLembreteCheckbox = vaccineItem.querySelector('input[name="vacinaHabilitarLembrete[]"]');
-    
+    const vaccineItem = document.querySelector(
+      `[data-vaccine-index="${index}"]`
+    );
+    const proximaDoseInput = vaccineItem.querySelector(
+      'input[name="vacinaProximaDose[]"]'
+    );
+    const habilitarLembreteCheckbox = vaccineItem.querySelector(
+      'input[name="vacinaHabilitarLembrete[]"]'
+    );
+
     // Se habilitar lembrete está marcado mas não há próxima dose, exigir próxima dose
     if (habilitarLembreteCheckbox.checked && !proximaDoseInput.value) {
       proximaDoseInput.required = true;
@@ -3314,7 +3348,7 @@ class PetShopApp {
           proximaDose: proximasDoses[i] || null,
           antecedenciaDias: parseInt(antecedencias[i]) || 7,
           habilitarLembrete: habilitarLembretes[i] === "on",
-          observacoes: observacoes[i] || ""
+          observacoes: observacoes[i] || "",
         };
         vacinas.push(vacina);
       }
@@ -3336,11 +3370,13 @@ class PetShopApp {
       `;
     }
 
-    const vacinas = pet.vacinas.sort((a, b) => new Date(b.dataAplicacao) - new Date(a.dataAplicacao));
-    
+    const vacinas = pet.vacinas.sort(
+      (a, b) => new Date(b.dataAplicacao) - new Date(a.dataAplicacao)
+    );
+
     return `
       <div class="vaccines-list">
-        ${vacinas.map(vacina => this.renderVaccineCard(vacina, pet)).join('')}
+        ${vacinas.map((vacina) => this.renderVaccineCard(vacina, pet)).join("")}
       </div>
     `;
   }
@@ -3348,7 +3384,7 @@ class PetShopApp {
   renderVaccineCard(vacina, pet) {
     const status = this.getVaccineStatus(vacina);
     const statusClass = this.getVaccineStatusClass(status);
-    
+
     return `
       <div class="vaccine-card">
         <div class="vaccine-header">
@@ -3357,20 +3393,36 @@ class PetShopApp {
         </div>
         
         <div class="vaccine-details">
-          <p><strong>Data de Aplicação:</strong> ${utils.formatDate(vacina.dataAplicacao)}</p>
-          ${vacina.proximaDose ? `<p><strong>Próxima Dose:</strong> ${utils.formatDate(vacina.proximaDose)}</p>` : ''}
-          ${vacina.observacoes ? `<p><strong>Observações:</strong> ${vacina.observacoes}</p>` : ''}
+          <p><strong>Data de Aplicação:</strong> ${utils.formatDate(
+            vacina.dataAplicacao
+          )}</p>
+          ${
+            vacina.proximaDose
+              ? `<p><strong>Próxima Dose:</strong> ${utils.formatDate(
+                  vacina.proximaDose
+                )}</p>`
+              : ""
+          }
+          ${
+            vacina.observacoes
+              ? `<p><strong>Observações:</strong> ${vacina.observacoes}</p>`
+              : ""
+          }
         </div>
         
         <div class="vaccine-actions">
-          ${vacina.habilitarLembrete && vacina.proximaDose ? `
+          ${
+            vacina.habilitarLembrete && vacina.proximaDose
+              ? `
             <button class="btn btn-sm btn-outline" onclick="app.sendVaccineWhatsApp('${pet.clienteId}', '${vacina.nomeVacina}', '${vacina.proximaDose}')">
               <i class="icon-whatsapp"></i> WhatsApp
             </button>
             <button class="btn btn-sm btn-outline" onclick="app.createVaccineAppointment('${pet.id}', '${vacina.nomeVacina}')">
               <i class="icon-calendar"></i> Agendar
             </button>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
       </div>
     `;
@@ -3378,21 +3430,23 @@ class PetShopApp {
 
   getVaccineStatus(vacina) {
     if (!vacina.proximaDose) return "Sem próxima dose";
-    
-    const today = new Date().toISOString().split('T')[0];
+
+    const today = new Date().toISOString().split("T")[0];
     const proximaDose = vacina.proximaDose;
     const antecedenciaDias = vacina.antecedenciaDias || 7;
-    
+
     if (today > proximaDose) {
       return "Atrasada";
     }
-    
-    const diasRestantes = Math.ceil((new Date(proximaDose) - new Date(today)) / (1000 * 60 * 60 * 24));
-    
+
+    const diasRestantes = Math.ceil(
+      (new Date(proximaDose) - new Date(today)) / (1000 * 60 * 60 * 24)
+    );
+
     if (diasRestantes <= antecedenciaDias) {
       return `Próximo reforço em ${diasRestantes} dias`;
     }
-    
+
     return "Em dia";
   }
 
@@ -3410,9 +3464,11 @@ class PetShopApp {
       return;
     }
 
-    const message = `Olá ${client.nomeCompleto.split(' ')[0]}! 
+    const message = `Olá ${client.nomeCompleto.split(" ")[0]}! 
 
-Lembramos que o reforço da vacina ${nomeVacina} está previsto para ${utils.formatDate(proximaDose)}.
+Lembramos que o reforço da vacina ${nomeVacina} está previsto para ${utils.formatDate(
+      proximaDose
+    )}.
 
 Entre em contato conosco para agendar o reforço!`;
 
@@ -3434,21 +3490,31 @@ Entre em contato conosco para agendar o reforço!`;
         return;
       }
 
-      const pet = appointment.petId ? await store.getPet(appointment.petId) : null;
-      const dataHora = new Date(appointment.dataHoraInicio).toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      });
+      const pet = appointment.petId
+        ? await store.getPet(appointment.petId)
+        : null;
+      const dataHora = new Date(appointment.dataHoraInicio).toLocaleString(
+        "pt-BR",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      );
 
-      const servicos = appointment.itens.map(item => item.nome).join(", ");
+      const servicos = appointment.itens.map((item) => item.nome).join(", ");
       const petNome = pet ? pet.nome : "seu pet";
-      
-      const mensagem = `Olá ${cliente.nomeCompleto.split(" ")[0]}! Tudo certo para recebermos o ${petNome} hoje? Confirmação do agendamento para ${dataHora} - Serviços: ${servicos}. Aguardamos você! 🐾`;
 
-      const whatsappLink = buildWhatsAppLink(cliente.telefoneWhatsApp, mensagem);
+      const mensagem = `Olá ${
+        cliente.nomeCompleto.split(" ")[0]
+      }! Tudo certo para recebermos o ${petNome} hoje? Confirmação do agendamento para ${dataHora} - Serviços: ${servicos}. Aguardamos você! 🐾`;
+
+      const whatsappLink = buildWhatsAppLink(
+        cliente.telefoneWhatsApp,
+        mensagem
+      );
       window.open(whatsappLink, "_blank");
     } catch (error) {
       console.error("Erro ao enviar confirmação:", error);
@@ -3459,15 +3525,15 @@ Entre em contato conosco para agendar o reforço!`;
   async createVaccineAppointment(petId, nomeVacina) {
     // Redirecionar para página de agendamentos com pet pré-selecionado
     window.location.hash = "#agendamentos";
-    
+
     // Aguardar um pouco para a página carregar
     setTimeout(() => {
       const petSelect = document.getElementById("petId");
       if (petSelect) {
         petSelect.value = petId;
-        
+
         // Disparar evento de mudança para carregar dados do pet
-        petSelect.dispatchEvent(new Event('change'));
+        petSelect.dispatchEvent(new Event("change"));
       }
     }, 500);
   }
@@ -3654,14 +3720,24 @@ Entre em contato conosco para agendar o reforço!`;
             <div class="form-group">
               <label for="petStatusVacinal">Status Vacinal</label>
               <select id="petStatusVacinal" name="statusVacinal" class="form-select" onchange="app.toggleVaccineSection()">
-                <option value="nao_vacinado" ${pet?.statusVacinal === "nao_vacinado" ? "selected" : ""}>Não vacinado ainda</option>
-                <option value="sem_registro" ${pet?.statusVacinal === "sem_registro" ? "selected" : ""}>Sem registro informado</option>
-                <option value="registrar_agora" ${pet?.statusVacinal === "registrar_agora" ? "selected" : ""}>Registrar vacinas agora</option>
-                <option value="registrar_depois" ${pet?.statusVacinal === "registrar_depois" ? "selected" : ""}>Vou registrar depois</option>
+                <option value="nao_vacinado" ${
+                  pet?.statusVacinal === "nao_vacinado" ? "selected" : ""
+                }>Não vacinado ainda</option>
+                <option value="sem_registro" ${
+                  pet?.statusVacinal === "sem_registro" ? "selected" : ""
+                }>Sem registro informado</option>
+                <option value="registrar_agora" ${
+                  pet?.statusVacinal === "registrar_agora" ? "selected" : ""
+                }>Registrar vacinas agora</option>
+                <option value="registrar_depois" ${
+                  pet?.statusVacinal === "registrar_depois" ? "selected" : ""
+                }>Vou registrar depois</option>
               </select>
             </div>
             
-            <div id="vaccinesSection" style="display: ${pet?.statusVacinal === "registrar_agora" ? "block" : "none"};">
+            <div id="vaccinesSection" style="display: ${
+              pet?.statusVacinal === "registrar_agora" ? "block" : "none"
+            };">
               <div class="vaccines-header">
                 <h4>Vacinas Aplicadas</h4>
                 <button type="button" class="btn btn-sm btn-outline" onclick="app.addVaccine()">
@@ -3669,9 +3745,14 @@ Entre em contato conosco para agendar o reforço!`;
                 </button>
               </div>
               <div id="vaccinesContainer">
-                ${pet?.vacinas && pet.vacinas.length > 0 ? 
-                  pet.vacinas.map((vacina, index) => this.renderVaccineItem(vacina, index)).join('') :
-                  '<div class="empty-vaccines">Nenhuma vacina registrada</div>'
+                ${
+                  pet?.vacinas && pet.vacinas.length > 0
+                    ? pet.vacinas
+                        .map((vacina, index) =>
+                          this.renderVaccineItem(vacina, index)
+                        )
+                        .join("")
+                    : '<div class="empty-vaccines">Nenhuma vacina registrada</div>'
                 }
               </div>
             </div>
@@ -3770,7 +3851,7 @@ Entre em contato conosco para agendar o reforço!`;
               clienteId: savedPet.clienteId,
               nomeVacina: vacina.nomeVacina,
               proximaDose: vacina.proximaDose,
-              antecedenciaDias: vacina.antecedenciaDias
+              antecedenciaDias: vacina.antecedenciaDias,
             });
           }
         }
@@ -3956,7 +4037,6 @@ Entre em contato conosco para agendar o reforço!`;
     }
   }
 
-
   renderRelatorios() {
     const content = document.getElementById("content");
     content.innerHTML =
@@ -4026,7 +4106,9 @@ Entre em contato conosco para agendar o reforço!`;
   // Formulário de agendamento
   async showAppointmentForm(appointmentId = null) {
     const isEdit = appointmentId !== null;
-    const appointment = isEdit ? await store.getAppointment(appointmentId) : null;
+    const appointment = isEdit
+      ? await store.getAppointment(appointmentId)
+      : null;
     const clients = await store.getClients();
     const services = await store.getServices();
     const professionals = await store.getProfessionals();
@@ -4394,23 +4476,27 @@ Entre em contato conosco para agendar o reforço!`;
 
     // Calcular total
     let totalPrevisto = 0;
-    const itens = await Promise.all(selectedServices.map(async (checkbox) => {
-      const serviceId = checkbox.value;
-      const service = await store.getService(serviceId);
-      const preco = parseFloat(checkbox.dataset.preco) || 0;
-      totalPrevisto += preco;
+    const itens = await Promise.all(
+      selectedServices.map(async (checkbox) => {
+        const serviceId = checkbox.value;
+        const service = await store.getService(serviceId);
+        const preco = parseFloat(checkbox.dataset.preco) || 0;
+        totalPrevisto += preco;
 
-      console.log("🔍 Serviço encontrado:", service);
-      console.log("🔍 ServiceId:", serviceId);
-      console.log("🔍 Preço:", preco);
+        console.log("🔍 Serviço encontrado:", service);
+        console.log("🔍 ServiceId:", serviceId);
+        console.log("🔍 Preço:", preco);
 
-      return {
-        serviceId: serviceId,
-        nome: service?.nome || "Serviço não encontrado",
-        precoAplicado: preco,
-        custoAproxAplicado: service?.temCusto ? service.custoAproximado : null,
-      };
-    }));
+        return {
+          serviceId: serviceId,
+          nome: service?.nome || "Serviço não encontrado",
+          precoAplicado: preco,
+          custoAproxAplicado: service?.temCusto
+            ? service.custoAproximado
+            : null,
+        };
+      })
+    );
 
     console.log("🔍 Itens processados:", itens);
 
@@ -4537,23 +4623,27 @@ Entre em contato conosco para agendar o reforço!`;
 
     // Calcular total
     let totalPrevisto = 0;
-    const itens = await Promise.all(selectedServices.map(async (checkbox) => {
-      const serviceId = checkbox.value;
-      const service = await store.getService(serviceId);
-      const preco = parseFloat(checkbox.dataset.preco) || 0;
-      totalPrevisto += preco;
+    const itens = await Promise.all(
+      selectedServices.map(async (checkbox) => {
+        const serviceId = checkbox.value;
+        const service = await store.getService(serviceId);
+        const preco = parseFloat(checkbox.dataset.preco) || 0;
+        totalPrevisto += preco;
 
-      console.log("🔍 Serviço encontrado:", service);
-      console.log("🔍 ServiceId:", serviceId);
-      console.log("🔍 Preço:", preco);
+        console.log("🔍 Serviço encontrado:", service);
+        console.log("🔍 ServiceId:", serviceId);
+        console.log("🔍 Preço:", preco);
 
-      return {
-        serviceId: serviceId,
-        nome: service?.nome || "Serviço não encontrado",
-        precoAplicado: preco,
-        custoAproxAplicado: service?.temCusto ? service.custoAproximado : null,
-      };
-    }));
+        return {
+          serviceId: serviceId,
+          nome: service?.nome || "Serviço não encontrado",
+          precoAplicado: preco,
+          custoAproxAplicado: service?.temCusto
+            ? service.custoAproximado
+            : null,
+        };
+      })
+    );
 
     console.log("🔍 Itens processados:", itens);
 
@@ -4598,14 +4688,14 @@ Entre em contato conosco para agendar o reforço!`;
     this.showAppointmentForm(appointmentId);
   }
 
-  viewAppointment(appointmentId) {
-    const appointment = store.getAppointment(appointmentId);
+  async viewAppointment(appointmentId) {
+    const appointment = await store.getAppointment(appointmentId);
     if (!appointment) return;
 
-    const client = store.getClient(appointment.clienteId);
-    const pet = appointment.petId ? store.getPet(appointment.petId) : null;
+    const client = await store.getClient(appointment.clienteId);
+    const pet = appointment.petId ? await store.getPet(appointment.petId) : null;
     const professional = appointment.profissionalId
-      ? store.getProfessional(appointment.profissionalId)
+      ? await store.getProfessional(appointment.profissionalId)
       : null;
 
     const content = `
@@ -4741,7 +4831,7 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   async markAppointmentPaid(appointmentId) {
-    const appointment = store.getAppointment(appointmentId);
+    const appointment = await store.getAppointment(appointmentId);
     if (!appointment) return;
 
     const confirmed = await ui.confirm(
@@ -4774,7 +4864,7 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   async cancelAppointment(appointmentId) {
-    const appointment = store.getAppointment(appointmentId);
+    const appointment = await store.getAppointment(appointmentId);
     if (!appointment) return;
 
     const confirmed = await ui.confirm(
@@ -6042,7 +6132,10 @@ Entre em contato conosco para agendar o reforço!`;
 
     try {
       const newClientId = store.generateId("cli");
-      const savedClient = await store.saveClient({ ...clientData, id: newClientId });
+      const savedClient = await store.saveClient({
+        ...clientData,
+        id: newClientId,
+      });
 
       ui.success("Cliente criado com sucesso!");
 
