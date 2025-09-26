@@ -965,8 +965,8 @@ class PetShopApp {
     }
   }
 
-  filterClients(query) {
-    const clients = store.getClients();
+  async filterClients(query) {
+    const clients = await store.getClients();
     const filtered = clients.filter((client) => {
       const searchText = `${client.nomeCompleto} ${
         client.telefoneWhatsApp || ""
@@ -978,8 +978,8 @@ class PetShopApp {
     container.innerHTML = this.renderClientsTable(filtered);
   }
 
-  sortClients(field) {
-    const clients = store.getClients();
+  async sortClients(field) {
+    const clients = await store.getClients();
     const sorted = clients.sort((a, b) => {
       let aVal = a[field] || "";
       let bVal = b[field] || "";
@@ -4926,8 +4926,8 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // Filtrar agendamentos
-  filterAppointments() {
-    const appointments = store.getAppointments();
+  async filterAppointments() {
+    const appointments = await store.getAppointments();
     const searchTerm =
       document.getElementById("appointmentSearch")?.value.toLowerCase() || "";
     const statusFilter =
@@ -4989,8 +4989,8 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // Renderizar calendário de agendamentos
-  renderAppointmentCalendar() {
-    const appointments = store.getAppointments();
+  async renderAppointmentCalendar() {
+    const appointments = await store.getAppointments();
     const today = new Date();
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
@@ -5241,10 +5241,10 @@ Entre em contato conosco para agendar o reforço!`;
     return badges[evolucao] || '<span class="badge badge-secondary">-</span>';
   }
 
-  showProntuarioForm(prontuarioId = null) {
+  async showProntuarioForm(prontuarioId = null) {
     const content = document.getElementById("content");
-    const prontuario = prontuarioId ? store.getProntuario(prontuarioId) : null;
-    const pets = store.getPets();
+    const prontuario = prontuarioId ? await store.getProntuario(prontuarioId) : null;
+    const pets = await store.getPets();
 
     content.innerHTML = `
       <div class="page-header">
@@ -5755,10 +5755,10 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // Métodos auxiliares para prontuários
-  showProntuarioFormForPet(petId) {
+  async showProntuarioFormForPet(petId) {
     const content = document.getElementById("content");
-    const pet = store.getPet(petId);
-    const pets = store.getPets();
+    const pet = await store.getPet(petId);
+    const pets = await store.getPets();
 
     content.innerHTML = `
       <div class="page-header">
@@ -6192,12 +6192,12 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // Atualizar select de clientes e selecionar o novo cliente
-  updateClientSelectAndSelect(clientId) {
+  async updateClientSelectAndSelect(clientId) {
     const clienteSelect = document.getElementById("clienteId");
     if (!clienteSelect) return;
 
     // Recarregar lista de clientes
-    const clients = store.getClients();
+    const clients = await store.getClients();
 
     // Atualizar options
     clienteSelect.innerHTML =
@@ -6427,7 +6427,7 @@ Entre em contato conosco para agendar o reforço!`;
     if (!clienteId) return;
 
     // Recarregar pets do cliente
-    const pets = store.getPets().filter((pet) => pet.clienteId === clienteId);
+    const pets = (await store.getPets()).filter((pet) => pet.clienteId === clienteId);
 
     // Atualizar options
     petSelect.innerHTML =
@@ -6452,13 +6452,13 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // ===== MÉTODOS DE CONFIGURAÇÃO =====
-  showSystemStats() {
-    const clients = store.getClients();
-    const pets = store.getPets();
-    const services = store.getServices();
-    const appointments = store.getAppointments();
-    const orders = store.getOrders();
-    const payments = store.getPayments();
+  async showSystemStats() {
+    const clients = await store.getClients();
+    const pets = await store.getPets();
+    const services = await store.getServices();
+    const appointments = await store.getAppointments();
+    const orders = await store.getOrders();
+    const payments = await store.getPayments();
 
     const stats = {
       totalClients: clients.length,
