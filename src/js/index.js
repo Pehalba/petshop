@@ -553,6 +553,11 @@ class PetShopApp {
         (apt) => apt.dataHoraInicio && apt.dataHoraInicio.startsWith(today)
       );
 
+      // Calcular pets com vacina a vencer neste mês
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      const petsWithVaccinesDue = this.getPetsWithVaccinesDueThisMonth(pets, currentMonth, currentYear);
+
       content.innerHTML = `
             <div class="page-header">
                 <h1 class="page-title">Dashboard</h1>
@@ -586,35 +591,57 @@ class PetShopApp {
 
                 <div class="stat-card">
                     <div class="stat-header">
-                        <div class="stat-title">Serviços</div>
-                        <div class="stat-icon stat-icon-warning">✂️</div>
+                        <div class="stat-title">Vacinas a Vencer</div>
+                        <div class="stat-icon stat-icon-warning">💉</div>
                     </div>
-                    <div class="stat-value">${services.length}</div>
+                    <div class="stat-value">${petsWithVaccinesDue.length}</div>
                     <div class="stat-change positive">
-                        <span>+${
-                          services.filter((s) => s.ativo).length
-                        } ativos</span>
+                        <span>+${petsWithVaccinesDue.length} este mês</span>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-header">
-                        <div class="stat-title">Agendamentos Hoje</div>
+                        <div class="stat-title">Serviços Hoje</div>
                         <div class="stat-icon stat-icon-error">📅</div>
                     </div>
                     <div class="stat-value">${todayAppointments.length}</div>
                     <div class="stat-change positive">
-                        <span>+${todayAppointments.length} hoje</span>
+                        <span>+${todayAppointments.length} programados</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-main">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Serviços Programados para Hoje</h3>
+                        </div>
+                        <div class="card-body">
+                            ${this.renderTodayAppointments(todayAppointments)}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-sidebar">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Pets com Vacina a Vencer</h3>
+                        </div>
+                        <div class="card-body">
+                            ${this.renderPetsWithVaccinesDue(petsWithVaccinesDue)}
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <h3>Agendamentos de Hoje</h3>
+                    <h3>Calendário de Agendamentos</h3>
                 </div>
                 <div class="card-body">
-                    ${this.renderTodayAppointments(todayAppointments)}
+                    ${this.renderDashboardCalendar(appointments)}
                 </div>
             </div>
         `;
@@ -680,6 +707,139 @@ class PetShopApp {
         `;
   }
 
+  // ===== MÉTODOS AUXILIARES DO DASHBOARD =====
+  getPetsWithVaccinesDueThisMonth(pets, currentMonth, currentYear) {
+    const petsWithVaccinesDue = [];
+    
+    pets.forEach(pet => {
+      if (pet.vacinas && pet.vacinas.length > 0) {
+        pet.vacinas.forEach(vacina => {
+          if (vacina.proximaDose) {
+            const proximaDoseDate = new Date(vacina.proximaDose);
+            const proximaDoseMonth = proximaDoseDate.getMonth();
+            const proximaDoseYear = proximaDoseDate.getFullYear();
+            
+            // Se a próxima dose é neste mês e ano
+            if (proximaDoseMonth === currentMonth && proximaDoseYear === currentYear) {
+              petsWithVaccinesDue.push({
+                pet,
+                vacina,
+                proximaDose: vacina.proximaDose
+              });
+            }
+          }
+        });
+      }
+    });
+    
+    return petsWithVaccinesDue;
+  }
+
+  renderPetsWithVaccinesDue(petsWithVaccinesDue) {
+    if (petsWithVaccinesDue.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-icon">✅</div>
+          <p>Nenhuma vacina vence este mês</p>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="vaccines-due-list">
+        ${petsWithVaccinesDue.map(item => {
+          const proximaDoseDate = new Date(item.proximaDose);
+          const diasRestantes = Math.ceil((proximaDoseDate - new Date()) / (1000 * 60 * 60 * 24));
+          
+          return `
+            <div class="vaccine-due-item">
+              <div class="vaccine-due-pet">
+                <strong>${item.pet.nome}</strong>
+                <span class="vaccine-due-owner">(${item.pet.clienteId})</span>
+              </div>
+              <div class="vaccine-due-details">
+                <span class="vaccine-name">${item.vacina.nomeVacina}</span>
+                <span class="vaccine-date">${utils.formatDate(item.proximaDose)}</span>
+              </div>
+              <div class="vaccine-due-status">
+                <span class="badge ${diasRestantes <= 7 ? 'badge-warning' : 'badge-info'}">
+                  ${diasRestantes <= 0 ? 'Vencida' : `${diasRestantes} dias`}
+                </span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  renderDashboardCalendar(appointments) {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    // Primeiro dia do mês
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    const monthNames = [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+    
+    const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    
+    let calendarHTML = `
+      <div class="calendar-header">
+        <h4>${monthNames[currentMonth]} ${currentYear}</h4>
+      </div>
+      <div class="calendar-grid">
+        <div class="calendar-weekdays">
+          ${weekDays.map(day => `<div class="calendar-weekday">${day}</div>`).join('')}
+        </div>
+        <div class="calendar-days">
+    `;
+    
+    // Gerar dias do calendário
+    for (let i = 0; i < 42; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      
+      const isCurrentMonth = currentDate.getMonth() === currentMonth;
+      const isToday = currentDate.toDateString() === today.toDateString();
+      
+      // Buscar agendamentos para este dia
+      const dayAppointments = appointments.filter(apt => {
+        if (!apt.dataHoraInicio) return false;
+        const aptDate = new Date(apt.dataHoraInicio);
+        return aptDate.toDateString() === currentDate.toDateString();
+      });
+      
+      calendarHTML += `
+        <div class="calendar-day ${isCurrentMonth ? 'current-month' : 'other-month'} ${isToday ? 'today' : ''}">
+          <div class="calendar-day-number">${currentDate.getDate()}</div>
+          <div class="calendar-day-appointments">
+            ${dayAppointments.slice(0, 3).map(apt => `
+              <div class="calendar-appointment" title="${apt.itens.map(s => s.nome).join(', ')}">
+                <span class="appointment-time">${new Date(apt.dataHoraInicio).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</span>
+                <span class="appointment-service">${apt.itens[0]?.nome || 'Serviço'}</span>
+              </div>
+            `).join('')}
+            ${dayAppointments.length > 3 ? `<div class="calendar-more">+${dayAppointments.length - 3} mais</div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+    
+    calendarHTML += `
+        </div>
+      </div>
+    `;
+    
+    return calendarHTML;
+  }
 
   // Placeholder para outras páginas
   async renderClientes() {
