@@ -166,10 +166,6 @@ class PetShopApp {
                 </nav>
                 
                 <div class="header-actions">
-                    <div class="header-search">
-                        <input type="text" class="search-input" placeholder="Buscar..." id="global-search">
-                        <span class="search-icon">🔍</span>
-                    </div>
                     <div id="userInfo" class="user-info">
                         <span class="user-name">Pet Shop</span>
                         <span class="sync-status online">☁️ Online</span>
@@ -289,16 +285,6 @@ class PetShopApp {
       }
     });
 
-    // Busca global
-    const globalSearch = document.getElementById("global-search");
-    if (globalSearch) {
-      globalSearch.addEventListener(
-        "input",
-        utils.debounce((e) => {
-          this.handleGlobalSearch(e.target.value);
-        }, 300)
-      );
-    }
   }
 
   navigateToPage(page) {
@@ -367,86 +353,6 @@ class PetShopApp {
     }
   }
 
-  handleGlobalSearch(query) {
-    if (!query.trim()) return;
-
-    // Buscar em clientes
-    const clients = store.getClients();
-    const clientResults = utils.searchInArray(clients, query, [
-      "nomeCompleto",
-      "telefoneWhatsApp",
-      "email",
-    ]);
-
-    // Buscar em pets
-    const pets = store.getPets();
-    const petResults = utils.searchInArray(pets, query, ["nome", "raca"]);
-
-    // Buscar em serviços
-    const services = store.getServices();
-    const serviceResults = utils.searchInArray(services, query, [
-      "nome",
-      "descricao",
-    ]);
-
-    // Mostrar resultados
-    this.showSearchResults({
-      clients: clientResults,
-      pets: petResults,
-      services: serviceResults,
-    });
-  }
-
-  showSearchResults(results) {
-    const modal = ui.createModal("search-results", {
-      title: "Resultados da Busca",
-      content: this.renderSearchResults(results),
-      size: "large",
-    });
-    ui.showModal("search-results");
-  }
-
-  renderSearchResults(results) {
-    let html = '<div class="search-results">';
-
-    if (results.clients.length > 0) {
-      html += "<h4>Clientes</h4>";
-      html += '<ul class="search-list">';
-      results.clients.forEach((client) => {
-        html += `<li><a href="#" data-page="clientes" data-client-id="${client.id}">${client.nomeCompleto}</a></li>`;
-      });
-      html += "</ul>";
-    }
-
-    if (results.pets.length > 0) {
-      html += "<h4>Pets</h4>";
-      html += '<ul class="search-list">';
-      results.pets.forEach((pet) => {
-        html += `<li><a href="#" data-page="pets" data-pet-id="${pet.id}">${pet.nome} (${pet.raca})</a></li>`;
-      });
-      html += "</ul>";
-    }
-
-    if (results.services.length > 0) {
-      html += "<h4>Serviços</h4>";
-      html += '<ul class="search-list">';
-      results.services.forEach((service) => {
-        html += `<li><a href="#" data-page="servicos" data-service-id="${service.id}">${service.nome}</a></li>`;
-      });
-      html += "</ul>";
-    }
-
-    if (
-      results.clients.length === 0 &&
-      results.pets.length === 0 &&
-      results.services.length === 0
-    ) {
-      html += "<p>Nenhum resultado encontrado.</p>";
-    }
-
-    html += "</div>";
-    return html;
-  }
 
   // ===== ONBOARDING =====
   showOnboarding() {
