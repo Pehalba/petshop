@@ -2370,20 +2370,24 @@ class PetShopApp {
       let savedService;
       if (serviceId) {
         // Atualizar
-        savedService = store.saveService({ ...serviceData, id: serviceId });
+        console.log("🔄 Atualizando serviço:", serviceId, serviceData);
+        savedService = await store.saveService({ ...serviceData, id: serviceId });
       } else {
         // Criar novo
         const newServiceId = store.generateId("srv");
-        savedService = store.saveService({ ...serviceData, id: newServiceId });
+        console.log("➕ Criando novo serviço:", newServiceId, serviceData);
+        savedService = await store.saveService({ ...serviceData, id: newServiceId });
       }
 
+      console.log("✅ Serviço salvo:", savedService);
       ui.success(
         serviceId
           ? "Serviço atualizado com sucesso!"
           : "Serviço cadastrado com sucesso!"
       );
-      this.renderServicos();
+      await this.renderServicos();
     } catch (error) {
+      console.error("❌ Erro ao salvar serviço:", error);
       ui.error("Erro ao salvar serviço: " + error.message);
     }
   }
