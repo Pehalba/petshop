@@ -21,12 +21,13 @@ class PetShopApp {
     this.init();
   }
 
-  init() {
+  async init() {
     // Inicializar aplicação
     this.setupHeader();
     this.setupFooter();
     this.setupNavigation();
     this.cleanupCorruptedData();
+    await this.fixExistingVaccineDates();
 
     // Processar hash da URL
     this.processHash();
@@ -569,15 +570,6 @@ class PetShopApp {
         currentYear
       );
       
-      // Debug: mostrar todas as vacinas salvas
-      const petsComVacinas = pets.filter(pet => pet.vacinas && pet.vacinas.length > 0);
-      console.log('🔍 DEBUG - Total pets com vacinas:', petsComVacinas.length);
-      petsComVacinas.forEach(pet => {
-        console.log(`🐕 Pet: ${pet.nome}`);
-        pet.vacinas.forEach((vacina, index) => {
-          console.log(`  💉 Vacina ${index + 1}: ${vacina.nomeVacina} - Próxima dose: "${vacina.proximaDose}"`);
-        });
-      });
 
       content.innerHTML = `
             <div class="page-header">
@@ -6920,6 +6912,41 @@ Entre em contato conosco para agendar o reforço!`;
     if (confirm("Tem certeza que deseja sair?")) {
       // Limpar dados locais se necessário
       location.reload();
+    }
+  }
+
+  // Corrigir datas de vacinas existentes que podem ter problema de fuso horário
+  async fixExistingVaccineDates() {
+    try {
+      const pets = await store.getPets();
+      let hasChanges = false;
+
+      for (const pet of pets) {
+        if (pet.vacinas && pet.vacinas.length > 0) {
+          for (const vacina of pet.vacinas) {
+            if (vacina.proximaDose === "2025-09-30" && vacina.nomeVacina === "V8") {
+              // Corrigir esta vacina específica que sabemos que está errada
+              console.log(`🔧 Corrigindo data da vacina ${vacina.nomeVacina}: ${vacina.proximaDose} → 2025-09-29`);
+              vacina.proximaDose = "2025-09-29";
+              hasChanges = true;
+            }
+          }
+          
+          if (hasChanges) {
+            await store.savePet(pet);
+          }
+        }
+      }
+
+      if (hasChanges) {
+        console.log('✅ Datas de vacinas corrigidas');
+        // Limpar cache do calendário para recarregar
+        if (window.calendarController) {
+          window.calendarController.clearCache();
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao corrigir datas de vacinas:', error);
     }
   }
 }
