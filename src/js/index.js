@@ -4326,6 +4326,8 @@ Entre em contato conosco para agendar o reforço!`;
       observacoes: formData.get("observacoes") || "",
     };
 
+    console.log("📅 Dados do agendamento antes de salvar:", appointmentData);
+
     // Validações
     if (!this.validateAppointment(appointmentData, appointmentId)) {
       return;

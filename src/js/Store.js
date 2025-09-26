@@ -269,7 +269,12 @@ class Store {
     };
 
     // Limpar campos undefined (Firebase não aceita)
-    this.cleanUndefinedFields(itemData);
+    console.log("🧹 Dados antes da limpeza:", itemData);
+    const cleanedData = this.cleanUndefinedFields(itemData);
+    console.log("🧹 Dados após limpeza:", cleanedData);
+    
+    // Usar dados limpos
+    Object.assign(itemData, cleanedData);
 
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
