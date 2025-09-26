@@ -421,9 +421,17 @@
 .dashboard-calendar-section {
   margin-top: 2rem;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 2rem;
   align-items: start;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-calendar-section {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 }
 
 @media (max-width: 768px) {
