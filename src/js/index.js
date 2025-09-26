@@ -3173,16 +3173,29 @@ class PetShopApp {
 
   addVaccine() {
     const container = document.getElementById("vaccinesContainer");
-    const vaccineIndex = container.children.length;
+    const vaccineIndex = container.querySelectorAll(".vaccine-item").length;
 
-    const vaccineItem = this.renderVaccineItem(null, vaccineIndex);
-    container.insertAdjacentHTML("beforeend", vaccineItem);
-
-    // Se era o primeiro item, remover mensagem de vazio
-    const emptyMessage = container.querySelector(".empty-vaccines");
-    if (emptyMessage) {
-      emptyMessage.remove();
+    // Remover o botão original do topo se existir
+    const originalButton = container.querySelector(".add-vaccine-button");
+    if (originalButton) {
+      originalButton.remove();
     }
+
+    const vaccineItem = document.createElement("div");
+    vaccineItem.className = "vaccine-item";
+    vaccineItem.innerHTML = this.renderVaccineItem(null, vaccineIndex);
+
+    // Adicionar botão no final do formulário da vacina
+    vaccineItem.innerHTML += `
+      <div class="vaccine-form-footer">
+        <button type="button" class="btn btn-outline add-vaccine-button" onclick="app.addVaccine()">
+          <i class="icon-plus"></i> Adicionar ${this.getNextVaccineNumber()}ª Vacina
+        </button>
+      </div>
+    `;
+
+    container.appendChild(vaccineItem);
+    this.updateAddVaccineButton();
   }
 
   removeVaccine(index) {
@@ -3195,11 +3208,39 @@ class PetShopApp {
       vaccineItem.remove();
     }
 
-    // Se não há mais vacinas, mostrar mensagem de vazio
-    if (container.children.length === 0) {
-      container.innerHTML =
-        '<div class="empty-vaccines">Nenhuma vacina registrada</div>';
+    this.updateAddVaccineButton();
+  }
+
+  // Atualizar botão de adicionar vacina
+  updateAddVaccineButton() {
+    const container = document.getElementById("vaccinesContainer");
+    const vaccineCount = container.querySelectorAll(".vaccine-item").length;
+    const addButton = container.querySelector(".add-vaccine-button");
+
+    if (vaccineCount === 0) {
+      // Se não há vacinas, criar botão no topo
+      if (addButton) {
+        addButton.remove();
+      }
+      const topButton = document.createElement("button");
+      topButton.type = "button";
+      topButton.className = "btn btn-outline add-vaccine-button";
+      topButton.onclick = () => this.addVaccine();
+      topButton.innerHTML = `<i class="icon-plus"></i> Adicionar 1ª Vacina`;
+      container.appendChild(topButton);
+    } else if (addButton) {
+      // Se há vacinas, atualizar o botão existente
+      addButton.innerHTML = `<i class="icon-plus"></i> Adicionar ${
+        vaccineCount + 1
+      }ª Vacina`;
     }
+  }
+
+  // Obter número da próxima vacina
+  getNextVaccineNumber() {
+    const container = document.getElementById("vaccinesContainer");
+    const vaccineCount = container.querySelectorAll(".vaccine-item").length;
+    return vaccineCount + 1;
   }
 
   renderVaccineItem(vaccine, index) {
@@ -3734,9 +3775,6 @@ Entre em contato conosco para agendar o reforço!`;
             };">
               <div class="vaccines-header">
                 <h4>Vacinas Aplicadas</h4>
-                <button type="button" class="btn btn-sm btn-outline" onclick="app.addVaccine()">
-                  <i class="icon-plus"></i> Adicionar Vacina
-                </button>
               </div>
               <div id="vaccinesContainer">
                 ${
@@ -3746,7 +3784,9 @@ Entre em contato conosco para agendar o reforço!`;
                           this.renderVaccineItem(vacina, index)
                         )
                         .join("")
-                    : '<div class="empty-vaccines">Nenhuma vacina registrada</div>'
+                    : `<button type="button" class="btn btn-outline add-vaccine-button" onclick="app.addVaccine()">
+                        <i class="icon-plus"></i> Adicionar 1ª Vacina
+                      </button>`
                 }
               </div>
             </div>
