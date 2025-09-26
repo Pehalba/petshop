@@ -3188,14 +3188,25 @@ class PetShopApp {
     container.appendChild(vaccineItem);
 
     // Adicionar botão no final do formulário da vacina após adicionar ao container
-    const nextVaccineNumber = container.querySelectorAll(".vaccine-item").length + 1;
-    vaccineItem.innerHTML += `
-      <div class="vaccine-form-footer">
-        <button type="button" class="btn btn-outline add-vaccine-button" onclick="app.addVaccine()">
-          <i class="icon-plus"></i> Adicionar ${nextVaccineNumber}ª Vacina
-        </button>
-      </div>
-    `;
+    // Aguardar um pouco para garantir que o DOM foi atualizado
+    setTimeout(() => {
+      const currentVaccineCount = container.querySelectorAll(".vaccine-item").length;
+      const nextVaccineNumber = currentVaccineCount + 1;
+      
+      // Remover botão anterior se existir
+      const existingButton = container.querySelector(".add-vaccine-button");
+      if (existingButton) {
+        existingButton.remove();
+      }
+      
+      vaccineItem.innerHTML += `
+        <div class="vaccine-form-footer">
+          <button type="button" class="btn btn-outline add-vaccine-button" onclick="app.addVaccine()">
+            <i class="icon-plus"></i> Adicionar ${nextVaccineNumber}ª Vacina
+          </button>
+        </div>
+      `;
+    }, 10);
   }
 
   removeVaccine(index) {
