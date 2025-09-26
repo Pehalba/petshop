@@ -4,8 +4,9 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  width: 100%;
-  max-width: none;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
 }
 
 .calendar-header {
@@ -300,52 +301,52 @@
   .calendar-header {
     padding: 12px 16px;
   }
-  
+
   .cal-title {
     font-size: 16px;
   }
-  
+
   .cal-nav {
     width: 32px;
     height: 32px;
   }
-  
+
   .cal-days {
     grid-auto-rows: 50px;
   }
-  
+
   .cal-day-number {
     font-size: 13px;
   }
-  
+
   .cal-count {
     font-size: 9px;
     padding: 1px 3px;
     min-width: 14px;
   }
-  
+
   .appointment-card {
     padding: 10px 16px;
   }
-  
+
   .appointment-time {
     min-width: 50px;
     font-size: 13px;
   }
-  
+
   .appointment-client {
     font-size: 13px;
   }
-  
+
   .appointment-services {
     font-size: 11px;
   }
-  
+
   .appointment-actions {
     flex-direction: column;
     gap: 2px;
   }
-  
+
   .appointment-actions .btn {
     padding: 3px 6px;
     font-size: 11px;
@@ -357,15 +358,15 @@
     padding: 8px 4px;
     font-size: 11px;
   }
-  
+
   .cal-days {
     grid-auto-rows: 45px;
   }
-  
+
   .cal-day-number {
     font-size: 12px;
   }
-  
+
   .cal-count {
     font-size: 8px;
     padding: 1px 2px;

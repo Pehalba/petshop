@@ -54,13 +54,12 @@
   align-self: flex-end;
 }
 
-
 /* Responsividade do dashboard */
 @media (max-width: 768px) {
   .vaccine-due-item {
     padding: var(--spacing-2);
   }
-  
+
   .vaccine-due-details {
     flex-direction: column;
     align-items: flex-start;
@@ -309,7 +308,6 @@
 
 /* Responsividade */
 @media (max-width: 1024px) {
-
   .form-row-3 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -424,7 +422,26 @@
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
   align-items: start;
-  width: 100%;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+}
+
+#dashboard-calendar {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+}
+
+/* Forçar largura total no dashboard */
+#content {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+/* Container principal do dashboard */
+.dashboard-calendar-section * {
+  box-sizing: border-box;
 }
 
 @media (max-width: 1024px) {
@@ -2413,12 +2430,12 @@
     align-items: flex-start;
     gap: var(--spacing-2);
   }
-  
+
   .vaccine-actions {
     width: 100%;
     justify-content: flex-start;
   }
-  
+
   .vaccine-actions .btn {
     flex: 1;
     min-width: 0;
