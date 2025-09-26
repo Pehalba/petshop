@@ -2703,7 +2703,7 @@ class PetShopApp {
           : null;
 
         const statusBadge = this.getStatusBadge(appointment.status);
-        const paymentBadge = this.getPaymentBadge(appointment.pagamento);
+        const paymentBadge = this.getPaymentBadge(appointment.pagamento || {});
         console.log("🔍 Dados do agendamento:", appointment);
         console.log("🔍 Itens do agendamento:", JSON.stringify(appointment.itens, null, 2));
         
@@ -2810,6 +2810,11 @@ class PetShopApp {
   }
 
   getPaymentBadge(payment) {
+    // Verificar se payment existe e tem status
+    if (!payment || !payment.status) {
+      return `<span class="badge badge-secondary">Indefinido</span>`;
+    }
+
     const paymentConfig = {
       pago: { class: "badge-success", text: "Pago" },
       nao_pago: { class: "badge-danger", text: "Não Pago" },
