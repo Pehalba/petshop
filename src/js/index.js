@@ -1476,12 +1476,9 @@ class PetShopApp {
     const currentVaccineCount = container.querySelectorAll(".pet-vaccine-item").length;
     const vaccineIndex = currentVaccineCount;
 
-    const vaccineItem = document.createElement("div");
-    vaccineItem.className = "pet-vaccine-item";
-    vaccineItem.setAttribute("data-vaccine-index", vaccineIndex);
-    vaccineItem.innerHTML = this.renderPetVaccineItem(vaccineIndex, petIndex);
-
-    container.appendChild(vaccineItem);
+    // Criar elemento de vacina usando o método render
+    const vaccineItemHTML = this.renderPetVaccineItem(vaccineIndex, petIndex);
+    container.insertAdjacentHTML('beforeend', vaccineItemHTML);
 
     // Re-numerar todas as vacinas para garantir sequência correta
     this.renumberPetVaccines(petIndex);
@@ -1555,7 +1552,7 @@ class PetShopApp {
   // Renderizar item de vacina para pet no formulário de cliente
   renderPetVaccineItem(vaccineIndex, petIndex) {
     return `
-      <div class="pet-vaccine-item" data-pet-vaccine-index="${vaccineIndex}">
+      <div class="pet-vaccine-item" data-vaccine-index="${vaccineIndex}">
         <div class="vaccine-header">
           <h6>Vacina ${vaccineIndex + 1}</h6>
           <button type="button" class="btn btn-sm btn-danger" onclick="app.removePetVaccine(${petIndex}, ${vaccineIndex})">
@@ -3393,12 +3390,9 @@ class PetShopApp {
     const currentVaccineCount = container.querySelectorAll(".vaccine-item").length;
     const vaccineIndex = currentVaccineCount;
 
-    const vaccineItem = document.createElement("div");
-    vaccineItem.className = "vaccine-item";
-    vaccineItem.setAttribute("data-vaccine-index", vaccineIndex);
-    vaccineItem.innerHTML = this.renderVaccineItem(null, vaccineIndex);
-
-    container.appendChild(vaccineItem);
+    // Criar elemento de vacina usando o método render
+    const vaccineItemHTML = this.renderVaccineItem(null, vaccineIndex);
+    container.insertAdjacentHTML('beforeend', vaccineItemHTML);
 
     // Re-numerar todas as vacinas para garantir sequência correta
     this.renumberVaccines();
