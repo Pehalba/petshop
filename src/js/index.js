@@ -2696,6 +2696,11 @@ class PetShopApp {
           }
         }
 
+        // Garantir que itens existe e é um array
+        if (!appointment.itens || !Array.isArray(appointment.itens)) {
+          appointment.itens = [];
+        }
+
         const client = await store.getClient(appointment.clienteId);
         const pet = appointment.petId ? await store.getPet(appointment.petId) : null;
         const professional = appointment.profissionalId
