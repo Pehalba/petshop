@@ -3185,17 +3185,17 @@ class PetShopApp {
     vaccineItem.className = "vaccine-item";
     vaccineItem.innerHTML = this.renderVaccineItem(null, vaccineIndex);
 
-    // Adicionar botão no final do formulário da vacina
+    container.appendChild(vaccineItem);
+
+    // Adicionar botão no final do formulário da vacina após adicionar ao container
+    const nextVaccineNumber = container.querySelectorAll(".vaccine-item").length + 1;
     vaccineItem.innerHTML += `
       <div class="vaccine-form-footer">
         <button type="button" class="btn btn-outline add-vaccine-button" onclick="app.addVaccine()">
-          <i class="icon-plus"></i> Adicionar ${this.getNextVaccineNumber()}ª Vacina
+          <i class="icon-plus"></i> Adicionar ${nextVaccineNumber}ª Vacina
         </button>
       </div>
     `;
-
-    container.appendChild(vaccineItem);
-    this.updateAddVaccineButton();
   }
 
   removeVaccine(index) {
