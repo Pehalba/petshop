@@ -757,6 +757,8 @@ class PetShopApp {
     // Primeiro dia do mês
     const firstDay = new Date(currentYear, currentMonth, 1);
     const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    
+    // Calcular o primeiro dia da semana do calendário (domingo da semana que contém o dia 1)
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
     
@@ -778,35 +780,37 @@ class PetShopApp {
         <div class="calendar-days">
     `;
     
-    // Gerar dias do calendário
-    for (let i = 0; i < 42; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(startDate.getDate() + i);
-      
-      const isCurrentMonth = currentDate.getMonth() === currentMonth;
-      const isToday = currentDate.toDateString() === today.toDateString();
-      
-      // Buscar agendamentos para este dia
-      const dayAppointments = appointments.filter(apt => {
-        if (!apt.dataHoraInicio) return false;
-        const aptDate = new Date(apt.dataHoraInicio);
-        return aptDate.toDateString() === currentDate.toDateString();
-      });
-      
-      calendarHTML += `
-        <div class="calendar-day ${isCurrentMonth ? 'current-month' : 'other-month'} ${isToday ? 'today' : ''}">
-          <div class="calendar-day-number">${currentDate.getDate()}</div>
-          <div class="calendar-day-appointments">
-            ${dayAppointments.slice(0, 3).map(apt => `
-              <div class="calendar-appointment" title="${apt.itens.map(s => s.nome).join(', ')}">
-                <span class="appointment-time">${new Date(apt.dataHoraInicio).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</span>
-                <span class="appointment-service">${apt.itens[0]?.nome || 'Serviço'}</span>
-              </div>
-            `).join('')}
-            ${dayAppointments.length > 3 ? `<div class="calendar-more">+${dayAppointments.length - 3} mais</div>` : ''}
+    // Gerar 6 semanas (42 dias) do calendário
+    for (let week = 0; week < 6; week++) {
+      for (let day = 0; day < 7; day++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + (week * 7) + day);
+        
+        const isCurrentMonth = currentDate.getMonth() === currentMonth;
+        const isToday = currentDate.toDateString() === today.toDateString();
+        
+        // Buscar agendamentos para este dia
+        const dayAppointments = appointments.filter(apt => {
+          if (!apt.dataHoraInicio) return false;
+          const aptDate = new Date(apt.dataHoraInicio);
+          return aptDate.toDateString() === currentDate.toDateString();
+        });
+        
+        calendarHTML += `
+          <div class="calendar-day ${isCurrentMonth ? 'current-month' : 'other-month'} ${isToday ? 'today' : ''}">
+            <div class="calendar-day-number">${currentDate.getDate()}</div>
+            <div class="calendar-day-appointments">
+              ${dayAppointments.slice(0, 3).map(apt => `
+                <div class="calendar-appointment" title="${apt.itens.map(s => s.nome).join(', ')}">
+                  <span class="appointment-time">${new Date(apt.dataHoraInicio).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</span>
+                  <span class="appointment-service">${apt.itens[0]?.nome || 'Serviço'}</span>
+                </div>
+              `).join('')}
+              ${dayAppointments.length > 3 ? `<div class="calendar-more">+${dayAppointments.length - 3} mais</div>` : ''}
+            </div>
           </div>
-        </div>
-      `;
+        `;
+      }
     }
     
     calendarHTML += `
