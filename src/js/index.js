@@ -2648,9 +2648,11 @@ class PetShopApp {
 
     try {
       const allAppointments = await store.getAppointments();
-      
+
       // Filtrar agendamentos cancelados por padrão
-      const appointments = allAppointments.filter(appointment => appointment.status !== 'cancelado');
+      const appointments = allAppointments.filter(
+        (appointment) => appointment.status !== "cancelado"
+      );
 
       content.innerHTML = `
       <div class="page-header">
@@ -4945,7 +4947,9 @@ Entre em contato conosco para agendar o reforço!`;
     // Aplicar filtro padrão: ocultar cancelados se nenhum filtro de status específico for selecionado
     let appointments = allAppointments;
     if (!statusFilter) {
-      appointments = allAppointments.filter(appointment => appointment.status !== 'cancelado');
+      appointments = allAppointments.filter(
+        (appointment) => appointment.status !== "cancelado"
+      );
     }
 
     const filtered = appointments.filter((appointment) => {
