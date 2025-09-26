@@ -166,10 +166,6 @@ class PetShopApp {
                 </nav>
                 
                 <div class="header-actions">
-                    <div id="userInfo" class="user-info">
-                        <span class="user-name">Pet Shop</span>
-                        <span class="sync-status online">☁️ Online</span>
-                    </div>
                     <div class="header-profile">
                         <button class="profile-button" id="profile-menu">
                             <div class="profile-avatar">👤</div>
