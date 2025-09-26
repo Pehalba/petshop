@@ -1378,6 +1378,29 @@ class PetShopApp {
           <input type="number" name="petPeso[]" class="form-input" step="0.1" min="0">
         </div>
       </div>
+      
+      <div class="form-section">
+        <h4>Vacinas</h4>
+        <div class="form-group">
+          <label>Status Vacinal</label>
+          <select name="petStatusVacinal[]" class="form-select" onchange="app.togglePetVaccineSection(${petIndex})">
+            <option value="nao_vacinado">Não vacinado</option>
+            <option value="registrar_agora">Registrar vacina</option>
+          </select>
+        </div>
+        
+        <div id="petVaccinesSection${petIndex}" style="display: none;">
+          <div class="vaccines-header">
+            <h5>Vacinas Aplicadas</h5>
+          </div>
+          <div id="petVaccinesContainer${petIndex}">
+            <button type="button" class="btn btn-outline add-pet-vaccine-button" onclick="app.addPetVaccine(${petIndex})">
+              <i class="icon-plus"></i> Adicionar 1ª Vacina
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="form-group">
         <label>Observações</label>
         <textarea name="petObservacoes[]" class="form-textarea" rows="2" placeholder="Observações sobre o pet..."></textarea>
@@ -1423,6 +1446,172 @@ class PetShopApp {
     const container = document.getElementById("petsContainer");
     const petCount = container.querySelectorAll(".pet-form").length;
     return petCount + 1;
+  }
+
+  // Toggle da seção de vacinas para pets no formulário de cliente
+  togglePetVaccineSection(petIndex) {
+    const select = document.querySelector(`select[name="petStatusVacinal[]"]:nth-of-type(${petIndex + 1})`);
+    const vaccinesSection = document.getElementById(`petVaccinesSection${petIndex}`);
+    
+    if (select && vaccinesSection) {
+      if (select.value === "registrar_agora") {
+        vaccinesSection.style.display = "block";
+      } else {
+        vaccinesSection.style.display = "none";
+      }
+    }
+  }
+
+  // Adicionar vacina para pet no formulário de cliente
+  addPetVaccine(petIndex) {
+    const container = document.getElementById(`petVaccinesContainer${petIndex}`);
+    
+    // Remover o botão original do topo se existir
+    const originalButton = container.querySelector(".add-pet-vaccine-button");
+    if (originalButton) {
+      originalButton.remove();
+    }
+
+    // Contar vacinas existentes ANTES de adicionar
+    const currentVaccineCount = container.querySelectorAll(".pet-vaccine-item").length;
+    const vaccineIndex = currentVaccineCount;
+
+    const vaccineItem = document.createElement("div");
+    vaccineItem.className = "pet-vaccine-item";
+    vaccineItem.innerHTML = this.renderPetVaccineItem(vaccineIndex, petIndex);
+
+    container.appendChild(vaccineItem);
+
+    // Calcular número da próxima vacina
+    const nextVaccineNumber = currentVaccineCount + 2;
+    
+    // Adicionar botão no final do formulário da vacina
+    vaccineItem.innerHTML += `
+      <div class="pet-vaccine-form-footer">
+        <button type="button" class="btn btn-outline add-pet-vaccine-button" onclick="app.addPetVaccine(${petIndex})">
+          <i class="icon-plus"></i> Adicionar ${nextVaccineNumber}ª Vacina
+        </button>
+      </div>
+    `;
+  }
+
+  // Remover vacina de pet no formulário de cliente
+  removePetVaccine(petIndex, vaccineIndex) {
+    const container = document.getElementById(`petVaccinesContainer${petIndex}`);
+    const vaccineItem = container.querySelector(`[data-pet-vaccine-index="${vaccineIndex}"]`);
+
+    if (vaccineItem) {
+      vaccineItem.remove();
+    }
+
+    this.updateAddPetVaccineButton(petIndex);
+  }
+
+  // Atualizar botão de adicionar vacina para pet
+  updateAddPetVaccineButton(petIndex) {
+    const container = document.getElementById(`petVaccinesContainer${petIndex}`);
+    const vaccineCount = container.querySelectorAll(".pet-vaccine-item").length;
+    const addButton = container.querySelector(".add-pet-vaccine-button");
+
+    if (vaccineCount === 0) {
+      // Se não há vacinas, criar botão no topo
+      if (addButton) {
+        addButton.remove();
+      }
+      const topButton = document.createElement("button");
+      topButton.type = "button";
+      topButton.className = "btn btn-outline add-pet-vaccine-button";
+      topButton.onclick = () => this.addPetVaccine(petIndex);
+      topButton.innerHTML = `<i class="icon-plus"></i> Adicionar 1ª Vacina`;
+      container.appendChild(topButton);
+    } else if (addButton) {
+      // Se há vacinas, atualizar o botão existente
+      addButton.innerHTML = `<i class="icon-plus"></i> Adicionar ${
+        vaccineCount + 1
+      }ª Vacina`;
+    }
+  }
+
+  // Renderizar item de vacina para pet no formulário de cliente
+  renderPetVaccineItem(vaccineIndex, petIndex) {
+    return `
+      <div class="pet-vaccine-item" data-pet-vaccine-index="${vaccineIndex}">
+        <div class="vaccine-header">
+          <h6>Vacina ${vaccineIndex + 1}</h6>
+          <button type="button" class="btn btn-sm btn-danger" onclick="app.removePetVaccine(${petIndex}, ${vaccineIndex})">
+            <i class="icon-trash"></i> Remover
+          </button>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome da Vacina</label>
+            <input 
+              type="text" 
+              name="petVacinaNome[${petIndex}][]" 
+              class="form-input" 
+              placeholder="Ex: V10, Antirrábica..."
+              required
+            >
+          </div>
+          <div class="form-group">
+            <label>Data de Aplicação</label>
+            <input 
+              type="date" 
+              name="petVacinaDataAplicacao[${petIndex}][]" 
+              class="form-input" 
+              required
+            >
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Próxima Dose (Opcional)</label>
+            <input 
+              type="date" 
+              name="petVacinaProximaDose[${petIndex}][]" 
+              class="form-input"
+            >
+          </div>
+          <div class="form-group">
+            <label>Antecedência (dias)</label>
+            <input 
+              type="number" 
+              name="petVacinaAntecedenciaDias[${petIndex}][]" 
+              class="form-input" 
+              value="7"
+              min="1"
+              max="30"
+            >
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                name="petVacinaHabilitarLembrete[${petIndex}][]" 
+                class="form-checkbox"
+              >
+              <span class="checkmark"></span>
+              Habilitar lembrete
+            </label>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Observações</label>
+          <input 
+            type="text" 
+            name="petVacinaObservacoes[${petIndex}][]" 
+            class="form-input" 
+            placeholder="Observações sobre a vacina..."
+          >
+        </div>
+      </div>
+    `;
   }
 
   async saveClient(event, clientId = null) {
