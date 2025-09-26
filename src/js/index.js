@@ -2693,7 +2693,7 @@ class PetShopApp {
         const statusBadge = this.getStatusBadge(appointment.status);
         const paymentBadge = this.getPaymentBadge(appointment.pagamento);
         console.log("🔍 Dados do agendamento:", appointment);
-        console.log("🔍 Itens do agendamento:", appointment.itens);
+        console.log("🔍 Itens do agendamento:", JSON.stringify(appointment.itens, null, 2));
         
         const servicesText =
           appointment.itens.length === 1
