@@ -417,6 +417,22 @@
   margin: 0;
 }
 
+/* Dashboard Calendar Section */
+.dashboard-calendar-section {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .dashboard-calendar-section {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
 /* Configurações avançadas */
 .advanced-settings {
   padding: var(--spacing-4);

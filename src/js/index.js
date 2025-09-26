@@ -612,7 +612,18 @@ class PetShopApp {
                 </div>
             </div>
 
+            <div class="dashboard-calendar-section">
+                <div id="dashboard-calendar"></div>
+                <div id="dashboard-day-list"></div>
+            </div>
+
         `;
+
+        // Inicializar calendário após renderizar o HTML
+        setTimeout(() => {
+          this.initCalendar();
+        }, 100);
+
     } catch (error) {
       console.error("❌ Erro ao carregar dashboard:", error);
       content.innerHTML = `
@@ -625,6 +636,24 @@ class PetShopApp {
           <button class="btn btn-primary" onclick="location.reload()">Recarregar Página</button>
         </div>
       `;
+    }
+  }
+
+  initCalendar() {
+    const calendarContainer = document.getElementById('dashboard-calendar');
+    const dayListContainer = document.getElementById('dashboard-day-list');
+    
+    if (!calendarContainer || !dayListContainer) {
+      console.warn('Containers do calendário não encontrados');
+      return;
+    }
+
+    // Inicializar controlador do calendário
+    if (window.CalendarController) {
+      this.calendarController = new CalendarController(store);
+      this.calendarController.init(calendarContainer, dayListContainer);
+    } else {
+      console.warn('CalendarController não carregado');
     }
   }
 
@@ -2754,6 +2783,11 @@ class PetShopApp {
               }')" title="Editar">
                 <i class="icon-edit"></i>
               </button>
+              <button class="btn btn-sm btn-info" onclick="app.sendConfirmationWhatsApp('${
+                appointment.id
+              }')" title="Enviar confirmação via WhatsApp">
+                <i class="icon-message-circle"></i>
+              </button>
               ${
                 appointment.pagamento && appointment.pagamento.status !== "pago"
                   ? `
@@ -3375,6 +3409,42 @@ Entre em contato conosco para agendar o reforço!`;
 
     const url = utils.generateWhatsAppLink(client.telefoneWhatsApp, message);
     window.open(url, "_blank");
+  }
+
+  async sendConfirmationWhatsApp(appointmentId) {
+    try {
+      const appointment = await store.getAppointment(appointmentId);
+      if (!appointment) {
+        UI.showToast("Agendamento não encontrado", "error");
+        return;
+      }
+
+      const cliente = await store.getClient(appointment.clienteId);
+      if (!cliente || !cliente.telefoneWhatsApp) {
+        UI.showToast("Cliente não encontrado ou sem WhatsApp", "error");
+        return;
+      }
+
+      const pet = appointment.petId ? await store.getPet(appointment.petId) : null;
+      const dataHora = new Date(appointment.dataHoraInicio).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      const servicos = appointment.itens.map(item => item.nome).join(", ");
+      const petNome = pet ? pet.nome : "seu pet";
+      
+      const mensagem = `Olá ${cliente.nomeCompleto.split(" ")[0]}! Tudo certo para recebermos o ${petNome} hoje? Confirmação do agendamento para ${dataHora} - Serviços: ${servicos}. Aguardamos você! 🐾`;
+
+      const whatsappLink = buildWhatsAppLink(cliente.telefoneWhatsApp, mensagem);
+      window.open(whatsappLink, "_blank");
+    } catch (error) {
+      console.error("Erro ao enviar confirmação:", error);
+      UI.showToast("Erro ao enviar confirmação", "error");
+    }
   }
 
   async createVaccineAppointment(petId, nomeVacina) {

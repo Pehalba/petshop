@@ -605,6 +605,22 @@ class Store {
     return this.save("appointments", appointment);
   }
 
+  async getAppointmentsByDateRange(from, to) {
+    try {
+      const appointments = await this.getAppointments();
+      const fromDate = new Date(from);
+      const toDate = new Date(to);
+      
+      return appointments.filter(appointment => {
+        const appointmentDate = new Date(appointment.dataHoraInicio);
+        return appointmentDate >= fromDate && appointmentDate <= toDate;
+      });
+    } catch (error) {
+      console.error("❌ Erro ao buscar appointments por data:", error);
+      return [];
+    }
+  }
+
   deleteAppointment(id) {
     return this.delete("appointments", id);
   }

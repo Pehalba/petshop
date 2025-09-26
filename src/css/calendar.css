@@ -1,0 +1,371 @@
+/* Calendário - Dashboard */
+.calendar {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dee2e6;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #495057;
+}
+
+.cal-nav:hover:not(.disabled) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.cal-nav.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.cal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+  text-transform: capitalize;
+}
+
+.calendar-grid {
+  padding: 0;
+}
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.cal-weekday {
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cal-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 60px;
+}
+
+.cal-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #f1f3f4;
+  border-bottom: 1px solid #f1f3f4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.cal-day:hover:not(.is-other-month) {
+  background: #f8f9fa;
+}
+
+.cal-day.is-today {
+  background: #e3f2fd;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.cal-day.is-today .cal-day-number {
+  background: #1976d2;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-day.is-selected {
+  background: #e8f5e8;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.cal-day.is-other-month {
+  background: #f8f9fa;
+  color: #adb5bd;
+  cursor: default;
+}
+
+.cal-day.is-other-month:hover {
+  background: #f8f9fa;
+}
+
+.cal-day-number {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.cal-count {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: #dc3545;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: 8px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Estados de contagem */
+.cal-day.has-1 .cal-count {
+  background: #28a745;
+}
+
+.cal-day.has-2-3 .cal-count {
+  background: #ffc107;
+  color: #212529;
+}
+
+.cal-day.has-4plus .cal-count {
+  background: #dc3545;
+}
+
+/* Lista do dia */
+.day-list {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.day-list h4 {
+  margin: 0;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.appointments-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.appointment-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f1f3f4;
+  transition: background 0.2s ease;
+}
+
+.appointment-card:hover {
+  background: #f8f9fa;
+}
+
+.appointment-card:last-child {
+  border-bottom: none;
+}
+
+.appointment-time {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  min-width: 60px;
+  margin-right: 12px;
+}
+
+.appointment-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.appointment-client {
+  font-size: 14px;
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 2px;
+}
+
+.appointment-services {
+  font-size: 12px;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.appointment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-confirmed {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-in-progress {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-unknown {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+.appointment-actions .btn {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.empty-day {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.day-list-error {
+  padding: 40px 20px;
+  text-align: center;
+  color: #dc3545;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .calendar-header {
+    padding: 12px 16px;
+  }
+  
+  .cal-title {
+    font-size: 16px;
+  }
+  
+  .cal-nav {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .cal-days {
+    grid-auto-rows: 50px;
+  }
+  
+  .cal-day-number {
+    font-size: 13px;
+  }
+  
+  .cal-count {
+    font-size: 9px;
+    padding: 1px 3px;
+    min-width: 14px;
+  }
+  
+  .appointment-card {
+    padding: 10px 16px;
+  }
+  
+  .appointment-time {
+    min-width: 50px;
+    font-size: 13px;
+  }
+  
+  .appointment-client {
+    font-size: 13px;
+  }
+  
+  .appointment-services {
+    font-size: 11px;
+  }
+  
+  .appointment-actions {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .appointment-actions .btn {
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cal-weekday {
+    padding: 8px 4px;
+    font-size: 11px;
+  }
+  
+  .cal-days {
+    grid-auto-rows: 45px;
+  }
+  
+  .cal-day-number {
+    font-size: 12px;
+  }
+  
+  .cal-count {
+    font-size: 8px;
+    padding: 1px 2px;
+    min-width: 12px;
+  }
+}
