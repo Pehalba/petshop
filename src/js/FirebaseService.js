@@ -28,6 +28,8 @@ class FirebaseService {
 
   async init() {
     try {
+      console.log("🔥 Iniciando Firebase...");
+      
       // Verificar se estamos no navegador
       if (typeof window === "undefined") {
         console.warn("⚠️ Firebase não pode ser inicializado fora do navegador");
@@ -35,12 +37,23 @@ class FirebaseService {
       }
 
       // Carregar Firebase dinamicamente
+      console.log("📦 Carregando scripts do Firebase...");
       await this.loadFirebase();
       
       // Verificar se o Firebase foi carregado corretamente
+      console.log("🔍 Verificando se Firebase foi carregado...");
+      console.log("window.firebase:", !!window.firebase);
+      console.log("window.firebase.apps:", !!window.firebase?.apps);
+      
       if (!window.firebase || !window.firebase.apps) {
         throw new Error("Firebase não foi carregado corretamente");
       }
+
+      console.log("🔧 Inicializando Firebase...");
+      this.app = window.firebase.initializeApp(this.firebaseConfig);
+      this.db = window.firebase.firestore();
+      this.auth = window.firebase.auth();
+      this.storage = window.firebase.storage();
 
       this.isInitialized = true;
       this.setupOfflineHandling();
@@ -64,6 +77,7 @@ class FirebaseService {
   async loadFirebase() {
     // Carregar Firebase via CDN se não estiver disponível
     if (!window.firebase) {
+      console.log("📦 Carregando scripts do Firebase...");
       await this.loadScript(
         "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"
       );
@@ -76,19 +90,11 @@ class FirebaseService {
       await this.loadScript(
         "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"
       );
+      console.log("✅ Scripts do Firebase carregados");
     }
 
     // Aguardar um pouco para garantir que o Firebase carregou
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Inicializar Firebase
-    if (!window.firebase.apps || window.firebase.apps.length === 0) {
-      window.firebase.initializeApp(this.firebaseConfig);
-    }
-
-    this.db = window.firebase.firestore();
-    this.auth = window.firebase.auth();
-    this.storage = window.firebase.storage();
+    await new Promise(resolve => setTimeout(resolve, 200));
   }
 
   loadScript(src) {
