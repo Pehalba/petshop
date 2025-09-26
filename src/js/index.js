@@ -2859,7 +2859,7 @@ class PetShopApp {
       </div>
 
       <div class="data-container">
-        ${this.renderPetsTable(pets)}
+        ${await this.renderPetsTable(pets)}
       </div>
     `;
 
@@ -2878,7 +2878,7 @@ class PetShopApp {
     }
   }
 
-  renderPetsTable(pets) {
+  async renderPetsTable(pets) {
     if (pets.length === 0) {
       return `
         <div class="empty-state">
@@ -2892,9 +2892,9 @@ class PetShopApp {
       `;
     }
 
-    const tableRows = pets
-      .map((pet) => {
-        const client = store.getClient(pet.clienteId);
+    const tableRows = await Promise.all(
+      pets.map(async (pet) => {
+        const client = await store.getClient(pet.clienteId);
         const idade = pet.dataNascimento
           ? utils.calculateAge(pet.dataNascimento)
           : pet.idade || "-";
@@ -2954,7 +2954,7 @@ class PetShopApp {
         </tr>
       `;
       })
-      .join("");
+    );
 
     return `
       <div class="data-table">
@@ -2971,7 +2971,7 @@ class PetShopApp {
             </tr>
           </thead>
           <tbody>
-            ${tableRows}
+            ${tableRows.join("")}
           </tbody>
         </table>
       </div>
@@ -3004,32 +3004,34 @@ class PetShopApp {
     }
   }
 
-  filterPets(query) {
-    const pets = store.getPets();
-    const filtered = pets.filter((pet) => {
-      const client = store.getClient(pet.clienteId);
-      const searchText = `${pet.nome || ""} ${pet.raca || ""} ${
-        client?.nomeCompleto || ""
-      }`.toLowerCase();
-      return searchText.includes(query.toLowerCase());
-    });
+  async filterPets(query) {
+    const pets = await store.getPets();
+    const filtered = await Promise.all(
+      pets.filter(async (pet) => {
+        const client = await store.getClient(pet.clienteId);
+        const searchText = `${pet.nome || ""} ${pet.raca || ""} ${
+          client?.nomeCompleto || ""
+        }`.toLowerCase();
+        return searchText.includes(query.toLowerCase());
+      })
+    );
 
     const container = document.querySelector(".data-container");
-    container.innerHTML = this.renderPetsTable(filtered);
+    container.innerHTML = await this.renderPetsTable(filtered);
   }
 
-  filterPetsByClient(clientId) {
-    const pets = store.getPets();
+  async filterPetsByClient(clientId) {
+    const pets = await store.getPets();
     const filtered = clientId
       ? pets.filter((pet) => pet.clienteId === clientId)
       : pets;
 
     const container = document.querySelector(".data-container");
-    container.innerHTML = this.renderPetsTable(filtered);
+    container.innerHTML = await this.renderPetsTable(filtered);
   }
 
-  sortPets(field) {
-    const pets = store.getPets();
+  async sortPets(field) {
+    const pets = await store.getPets();
     const sorted = pets.sort((a, b) => {
       let aVal = a[field] || "";
       let bVal = b[field] || "";
@@ -3046,7 +3048,7 @@ class PetShopApp {
     });
 
     const container = document.querySelector(".data-container");
-    container.innerHTML = this.renderPetsTable(sorted);
+    container.innerHTML = await this.renderPetsTable(sorted);
   }
 
   // ===== MÉTODOS DE PETS =====
