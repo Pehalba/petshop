@@ -739,6 +739,19 @@
   align-items: center;
 }
 
+/* Elementos de filtro menores */
+.form-select-sm {
+  min-width: 120px;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: 0.9rem;
+}
+
+.form-input-sm {
+  min-width: 140px;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: 0.9rem;
+}
+
 .search-box {
   position: relative;
   flex: 1;

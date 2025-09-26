@@ -2610,20 +2610,17 @@ class PetShopApp {
           >
           <i class="icon-search"></i>
         </div>
-      </div>
-
-      <div class="page-filters">
         <div class="filter-actions">
-          <select id="appointmentStatusFilter" class="form-select">
-            <option value="">Todos os status</option>
+          <select id="appointmentStatusFilter" class="form-select form-select-sm">
+            <option value="">Status</option>
             <option value="pendente">Pendente</option>
             <option value="confirmado">Confirmado</option>
             <option value="em_andamento">Em Andamento</option>
             <option value="concluido">Concluído</option>
             <option value="cancelado">Cancelado</option>
           </select>
-          <select id="appointmentPaymentFilter" class="form-select">
-            <option value="">Todos os pagamentos</option>
+          <select id="appointmentPaymentFilter" class="form-select form-select-sm">
+            <option value="">Pagamento</option>
             <option value="pago">Pago</option>
             <option value="nao_pago">Não Pago</option>
             <option value="previsto">Previsto</option>
@@ -2632,7 +2629,7 @@ class PetShopApp {
           <input 
             type="date" 
             id="appointmentDateFilter" 
-            class="form-input"
+            class="form-input form-input-sm"
             title="Filtrar por data"
           >
         </div>
