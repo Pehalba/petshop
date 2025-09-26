@@ -311,6 +311,9 @@ class PetShopApp {
     const content = document.getElementById("content");
     if (!content) return;
 
+    // Limpar classes específicas de páginas
+    content.classList.remove("dashboard-page");
+
     // Mostrar loading
     ui.showLoading(content, "Carregando página...");
 
@@ -541,6 +544,12 @@ class PetShopApp {
   async renderDashboard() {
     const content = document.getElementById("content");
     if (!content) return;
+
+    // Limpar classes específicas de outras páginas
+    content.classList.remove("dashboard-page");
+    
+    // Adicionar classe específica para o dashboard
+    content.classList.add("dashboard-page");
 
     try {
       const clients = await store.getClients();

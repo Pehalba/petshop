@@ -441,8 +441,8 @@
   margin: 0 auto;
 }
 
-/* Forçar largura total no dashboard */
-#content {
+/* Forçar largura total apenas no dashboard */
+.dashboard-page #content {
   max-width: none !important;
   width: 100% !important;
 }
