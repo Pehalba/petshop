@@ -2610,6 +2610,9 @@ class PetShopApp {
           >
           <i class="icon-search"></i>
         </div>
+      </div>
+
+      <div class="page-filters">
         <div class="filter-actions">
           <select id="appointmentStatusFilter" class="form-select">
             <option value="">Todos os status</option>
@@ -3914,12 +3917,12 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // Formulário de agendamento
-  showAppointmentForm(appointmentId = null) {
+  async showAppointmentForm(appointmentId = null) {
     const isEdit = appointmentId !== null;
-    const appointment = isEdit ? store.getAppointment(appointmentId) : null;
-    const clients = store.getClients();
-    const services = store.getServices();
-    const professionals = store.getProfessionals();
+    const appointment = isEdit ? await store.getAppointment(appointmentId) : null;
+    const clients = await store.getClients();
+    const services = await store.getServices();
+    const professionals = await store.getProfessionals();
 
     const content = `
       <div class="form-container">
