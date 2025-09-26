@@ -3169,6 +3169,308 @@ class PetShopApp {
     }
   }
 
+  // ===== MÉTODOS DE VACINAS =====
+  toggleVaccineSection() {
+    const statusSelect = document.getElementById('petStatusVacinal');
+    const vaccinesSection = document.getElementById('vaccinesSection');
+    
+    if (statusSelect.value === 'registrar_agora') {
+      vaccinesSection.style.display = 'block';
+    } else {
+      vaccinesSection.style.display = 'none';
+    }
+  }
+
+  addVaccine() {
+    const container = document.getElementById('vaccinesContainer');
+    const vaccineIndex = container.children.length;
+    
+    const vaccineItem = this.renderVaccineItem(null, vaccineIndex);
+    container.insertAdjacentHTML('beforeend', vaccineItem);
+    
+    // Se era o primeiro item, remover mensagem de vazio
+    const emptyMessage = container.querySelector('.empty-vaccines');
+    if (emptyMessage) {
+      emptyMessage.remove();
+    }
+  }
+
+  removeVaccine(index) {
+    const container = document.getElementById('vaccinesContainer');
+    const vaccineItem = container.querySelector(`[data-vaccine-index="${index}"]`);
+    
+    if (vaccineItem) {
+      vaccineItem.remove();
+    }
+    
+    // Se não há mais vacinas, mostrar mensagem de vazio
+    if (container.children.length === 0) {
+      container.innerHTML = '<div class="empty-vaccines">Nenhuma vacina registrada</div>';
+    }
+  }
+
+  renderVaccineItem(vaccine, index) {
+    const vaccineId = vaccine?.id || `temp_${index}`;
+    
+    return `
+      <div class="vaccine-item" data-vaccine-index="${index}">
+        <div class="vaccine-header">
+          <h5>Vacina ${index + 1}</h5>
+          <button type="button" class="btn btn-sm btn-danger" onclick="app.removeVaccine(${index})">
+            <i class="icon-trash"></i> Remover
+          </button>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome da Vacina</label>
+            <input 
+              type="text" 
+              name="vacinaNome[]" 
+              class="form-input vaccine-name-input" 
+              value="${vaccine?.nomeVacina || ''}"
+              placeholder="Ex: V10, Antirrábica, Gripe Canina..."
+              list="vaccineSuggestions"
+              required
+            >
+            <datalist id="vaccineSuggestions">
+              <option value="V8">
+              <option value="V10">
+              <option value="V12">
+              <option value="Antirrábica">
+              <option value="Gripe Canina (Tosse dos Canis)">
+              <option value="Leptospirose">
+              <option value="Giárdia">
+              <option value="V4 Felina">
+              <option value="Raiva">
+            </datalist>
+          </div>
+          
+          <div class="form-group">
+            <label>Data de Aplicação</label>
+            <input 
+              type="date" 
+              name="vacinaDataAplicacao[]" 
+              class="form-input" 
+              value="${vaccine?.dataAplicacao || ''}"
+              required
+            >
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Próxima Dose (Opcional)</label>
+            <input 
+              type="date" 
+              name="vacinaProximaDose[]" 
+              class="form-input" 
+              value="${vaccine?.proximaDose || ''}"
+              onchange="app.toggleVaccineReminder(${index})"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Antecedência (dias)</label>
+            <input 
+              type="number" 
+              name="vacinaAntecedenciaDias[]" 
+              class="form-input" 
+              value="${vaccine?.antecedenciaDias || 7}"
+              min="0"
+              max="30"
+              placeholder="7"
+            >
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                name="vacinaHabilitarLembrete[]" 
+                class="form-checkbox" 
+                ${vaccine?.habilitarLembrete ? 'checked' : ''}
+                onchange="app.toggleVaccineReminder(${index})"
+              >
+              <span class="checkmark"></span>
+              Habilitar lembrete
+            </label>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Observações</label>
+          <input 
+            type="text" 
+            name="vacinaObservacoes[]" 
+            class="form-input" 
+            value="${vaccine?.observacoes || ''}"
+            placeholder="Observações sobre a vacina..."
+          >
+        </div>
+        
+        <input type="hidden" name="vacinaId[]" value="${vaccineId}">
+      </div>
+    `;
+  }
+
+  toggleVaccineReminder(index) {
+    const vaccineItem = document.querySelector(`[data-vaccine-index="${index}"]`);
+    const proximaDoseInput = vaccineItem.querySelector('input[name="vacinaProximaDose[]"]');
+    const habilitarLembreteCheckbox = vaccineItem.querySelector('input[name="vacinaHabilitarLembrete[]"]');
+    
+    // Se habilitar lembrete está marcado mas não há próxima dose, exigir próxima dose
+    if (habilitarLembreteCheckbox.checked && !proximaDoseInput.value) {
+      proximaDoseInput.required = true;
+      proximaDoseInput.focus();
+    } else {
+      proximaDoseInput.required = false;
+    }
+  }
+
+  processVaccines(formData) {
+    const vacinas = [];
+    const nomes = formData.getAll("vacinaNome[]");
+    const datasAplicacao = formData.getAll("vacinaDataAplicacao[]");
+    const proximasDoses = formData.getAll("vacinaProximaDose[]");
+    const antecedencias = formData.getAll("vacinaAntecedenciaDias[]");
+    const habilitarLembretes = formData.getAll("vacinaHabilitarLembrete[]");
+    const observacoes = formData.getAll("vacinaObservacoes[]");
+    const ids = formData.getAll("vacinaId[]");
+
+    for (let i = 0; i < nomes.length; i++) {
+      if (nomes[i] && datasAplicacao[i]) {
+        const vacina = {
+          id: ids[i] || store.generateId("vac"),
+          nomeVacina: nomes[i].trim(),
+          dataAplicacao: datasAplicacao[i],
+          proximaDose: proximasDoses[i] || null,
+          antecedenciaDias: parseInt(antecedencias[i]) || 7,
+          habilitarLembrete: habilitarLembretes[i] === "on",
+          observacoes: observacoes[i] || ""
+        };
+        vacinas.push(vacina);
+      }
+    }
+
+    return vacinas;
+  }
+
+  renderPetVaccines(pet) {
+    if (!pet.vacinas || pet.vacinas.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-icon">💉</div>
+          <p>Nenhuma vacina registrada</p>
+          <button class="btn btn-primary btn-sm" onclick="app.editPet('${pet.id}')">
+            <i class="icon-plus"></i> Registrar Vacinas
+          </button>
+        </div>
+      `;
+    }
+
+    const vacinas = pet.vacinas.sort((a, b) => new Date(b.dataAplicacao) - new Date(a.dataAplicacao));
+    
+    return `
+      <div class="vaccines-list">
+        ${vacinas.map(vacina => this.renderVaccineCard(vacina, pet)).join('')}
+      </div>
+    `;
+  }
+
+  renderVaccineCard(vacina, pet) {
+    const status = this.getVaccineStatus(vacina);
+    const statusClass = this.getVaccineStatusClass(status);
+    
+    return `
+      <div class="vaccine-card">
+        <div class="vaccine-header">
+          <h4>${vacina.nomeVacina}</h4>
+          <span class="badge ${statusClass}">${status}</span>
+        </div>
+        
+        <div class="vaccine-details">
+          <p><strong>Data de Aplicação:</strong> ${utils.formatDate(vacina.dataAplicacao)}</p>
+          ${vacina.proximaDose ? `<p><strong>Próxima Dose:</strong> ${utils.formatDate(vacina.proximaDose)}</p>` : ''}
+          ${vacina.observacoes ? `<p><strong>Observações:</strong> ${vacina.observacoes}</p>` : ''}
+        </div>
+        
+        <div class="vaccine-actions">
+          ${vacina.habilitarLembrete && vacina.proximaDose ? `
+            <button class="btn btn-sm btn-outline" onclick="app.sendVaccineWhatsApp('${pet.clienteId}', '${vacina.nomeVacina}', '${vacina.proximaDose}')">
+              <i class="icon-whatsapp"></i> WhatsApp
+            </button>
+            <button class="btn btn-sm btn-outline" onclick="app.createVaccineAppointment('${pet.id}', '${vacina.nomeVacina}')">
+              <i class="icon-calendar"></i> Agendar
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  getVaccineStatus(vacina) {
+    if (!vacina.proximaDose) return "Sem próxima dose";
+    
+    const today = new Date().toISOString().split('T')[0];
+    const proximaDose = vacina.proximaDose;
+    const antecedenciaDias = vacina.antecedenciaDias || 7;
+    
+    if (today > proximaDose) {
+      return "Atrasada";
+    }
+    
+    const diasRestantes = Math.ceil((new Date(proximaDose) - new Date(today)) / (1000 * 60 * 60 * 24));
+    
+    if (diasRestantes <= antecedenciaDias) {
+      return `Próximo reforço em ${diasRestantes} dias`;
+    }
+    
+    return "Em dia";
+  }
+
+  getVaccineStatusClass(status) {
+    if (status === "Atrasada") return "badge-danger";
+    if (status.includes("Próximo reforço")) return "badge-warning";
+    if (status === "Em dia") return "badge-success";
+    return "badge-secondary";
+  }
+
+  async sendVaccineWhatsApp(clienteId, nomeVacina, proximaDose) {
+    const client = await store.getClient(clienteId);
+    if (!client || !client.telefoneWhatsApp) {
+      ui.error("Cliente não encontrado ou sem telefone WhatsApp");
+      return;
+    }
+
+    const message = `Olá ${client.nomeCompleto.split(' ')[0]}! 
+
+Lembramos que o reforço da vacina ${nomeVacina} está previsto para ${utils.formatDate(proximaDose)}.
+
+Entre em contato conosco para agendar o reforço!`;
+
+    const url = utils.generateWhatsAppLink(client.telefoneWhatsApp, message);
+    window.open(url, "_blank");
+  }
+
+  async createVaccineAppointment(petId, nomeVacina) {
+    // Redirecionar para página de agendamentos com pet pré-selecionado
+    window.location.hash = "#agendamentos";
+    
+    // Aguardar um pouco para a página carregar
+    setTimeout(() => {
+      const petSelect = document.getElementById("petId");
+      if (petSelect) {
+        petSelect.value = petId;
+        
+        // Disparar evento de mudança para carregar dados do pet
+        petSelect.dispatchEvent(new Event('change'));
+      }
+    }, 500);
+  }
+
   async showPetForm(petId = null, preSelectedClientId = null) {
     const isEdit = petId !== null;
     const pet = isEdit ? await store.getPet(petId) : null;
@@ -3346,6 +3648,34 @@ class PetShopApp {
             </div>
           </div>
 
+          <div class="form-section">
+            <h3>Vacinas</h3>
+            <div class="form-group">
+              <label for="petStatusVacinal">Status Vacinal</label>
+              <select id="petStatusVacinal" name="statusVacinal" class="form-select" onchange="app.toggleVaccineSection()">
+                <option value="nao_vacinado" ${pet?.statusVacinal === "nao_vacinado" ? "selected" : ""}>Não vacinado ainda</option>
+                <option value="sem_registro" ${pet?.statusVacinal === "sem_registro" ? "selected" : ""}>Sem registro informado</option>
+                <option value="registrar_agora" ${pet?.statusVacinal === "registrar_agora" ? "selected" : ""}>Registrar vacinas agora</option>
+                <option value="registrar_depois" ${pet?.statusVacinal === "registrar_depois" ? "selected" : ""}>Vou registrar depois</option>
+              </select>
+            </div>
+            
+            <div id="vaccinesSection" style="display: ${pet?.statusVacinal === "registrar_agora" ? "block" : "none"};">
+              <div class="vaccines-header">
+                <h4>Vacinas Aplicadas</h4>
+                <button type="button" class="btn btn-sm btn-outline" onclick="app.addVaccine()">
+                  <i class="icon-plus"></i> Adicionar Vacina
+                </button>
+              </div>
+              <div id="vaccinesContainer">
+                ${pet?.vacinas && pet.vacinas.length > 0 ? 
+                  pet.vacinas.map((vacina, index) => this.renderVaccineItem(vacina, index)).join('') :
+                  '<div class="empty-vaccines">Nenhuma vacina registrada</div>'
+                }
+              </div>
+            </div>
+          </div>
+
           <div class="form-actions">
             <button type="button" class="btn btn-outline" onclick="app.renderPets()">
               Cancelar
@@ -3403,7 +3733,16 @@ class PetShopApp {
       pesoAproximadoKg: parseFloat(formData.get("pesoAproximadoKg")) || null,
       clienteId: formData.get("clienteId"),
       observacoes: formData.get("observacoes"),
+      statusVacinal: formData.get("statusVacinal") || "nao_vacinado",
     };
+
+    // Processar vacinas se status for "registrar_agora"
+    if (petData.statusVacinal === "registrar_agora") {
+      const vacinas = this.processVaccines(formData);
+      petData.vacinas = vacinas;
+    } else {
+      petData.vacinas = [];
+    }
 
     // Validações
     if (!this.validatePet(petData)) {
@@ -3419,6 +3758,21 @@ class PetShopApp {
         // Para criar novo, gerar ID único
         const newPetId = store.generateId("pet");
         savedPet = await store.savePet({ ...petData, id: newPetId });
+      }
+
+      // Criar lembretes para vacinas com próxima dose
+      if (savedPet.vacinas && savedPet.vacinas.length > 0) {
+        for (const vacina of savedPet.vacinas) {
+          if (vacina.habilitarLembrete && vacina.proximaDose) {
+            await store.upsertVaccineReminder({
+              petId: savedPet.id,
+              clienteId: savedPet.clienteId,
+              nomeVacina: vacina.nomeVacina,
+              proximaDose: vacina.proximaDose,
+              antecedenciaDias: vacina.antecedenciaDias
+            });
+          }
+        }
       }
 
       ui.success(
@@ -3553,6 +3907,13 @@ class PetShopApp {
             `
                 : ""
             }
+
+            <div class="detail-card">
+              <h3>Vacinas</h3>
+              <div class="vaccines-section">
+                ${this.renderPetVaccines(pet)}
+              </div>
+            </div>
 
             <div class="detail-card">
               <h3>Histórico Médico</h3>

@@ -18,6 +18,7 @@ class Store {
       breeds: "pet_shop_breeds",
       sizes: "pet_shop_sizes",
       prontuarios: "pet_shop_prontuarios",
+      reminders: "pet_shop_reminders",
     };
 
     this.init();
@@ -668,6 +669,117 @@ class Store {
     });
     
     console.log("✅ Cache limpo, dados serão recarregados do Firebase");
+  }
+
+  // ===== MÉTODOS DE LEMBRETES =====
+  async getReminders() {
+    return await this.getAll("reminders");
+  }
+
+  async getReminder(id) {
+    return await this.getById("reminders", id);
+  }
+
+  async saveReminder(reminder) {
+    return await this.save("reminders", reminder);
+  }
+
+  async deleteReminder(id) {
+    return await this.delete("reminders", id);
+  }
+
+  // Buscar lembretes vencidos ou próximos do vencimento
+  async getDueReminders() {
+    const reminders = await this.getReminders();
+    const today = new Date().toISOString().split('T')[0];
+    
+    return reminders.filter(reminder => {
+      if (!reminder.ativo) return false;
+      
+      const notifyFrom = reminder.notifyFrom;
+      const proximaDose = reminder.proximaDose;
+      
+      // Lembretes que devem ser notificados hoje ou estão atrasados
+      return (notifyFrom <= today && today <= proximaDose) || today > proximaDose;
+    });
+  }
+
+  // Criar/atualizar lembrete de vacina
+  async upsertVaccineReminder({ petId, clienteId, nomeVacina, proximaDose, antecedenciaDias = 7 }) {
+    const notifyFrom = this.addDays(proximaDose, -antecedenciaDias);
+    
+    const reminderData = {
+      tipo: 'vacina',
+      petId,
+      clienteId,
+      nomeVacina,
+      proximaDose,
+      antecedenciaDias,
+      notifyFrom,
+      notifiedAt: null,
+      ativo: true
+    };
+
+    // Verificar se já existe lembrete para esta vacina
+    const existingReminders = await this.getReminders();
+    const existing = existingReminders.find(r => 
+      r.petId === petId && 
+      r.nomeVacina === nomeVacina && 
+      r.tipo === 'vacina' &&
+      r.ativo
+    );
+
+    if (existing) {
+      // Atualizar lembrete existente
+      return await this.saveReminder({ ...existing, ...reminderData });
+    } else {
+      // Criar novo lembrete
+      const newId = this.generateId("rem");
+      return await this.saveReminder({ ...reminderData, id: newId });
+    }
+  }
+
+  // Adiar lembrete
+  async snoozeReminder(id, days = 3) {
+    const reminder = await this.getReminder(id);
+    if (!reminder) return null;
+
+    const newNotifyFrom = this.addDays(reminder.notifyFrom, days);
+    return await this.saveReminder({ 
+      ...reminder, 
+      notifyFrom: newNotifyFrom,
+      notifiedAt: null 
+    });
+  }
+
+  // Resolver lembrete
+  async resolveReminder(id) {
+    const reminder = await this.getReminder(id);
+    if (!reminder) return null;
+
+    return await this.saveReminder({ 
+      ...reminder, 
+      notifiedAt: new Date().toISOString().split('T')[0],
+      ativo: false 
+    });
+  }
+
+  // Desativar lembrete
+  async deactivateReminder(id) {
+    const reminder = await this.getReminder(id);
+    if (!reminder) return null;
+
+    return await this.saveReminder({ 
+      ...reminder, 
+      ativo: false 
+    });
+  }
+
+  // Utilitário para adicionar dias a uma data
+  addDays(dateString, days) {
+    const date = new Date(dateString);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().split('T')[0];
   }
 
   // Função para limpar dados corrompidos
