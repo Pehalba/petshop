@@ -3276,11 +3276,25 @@ class PetShopApp {
   async deleteService(serviceId) {
     console.log("🔍 deleteService chamado com ID:", serviceId);
     
+    // Listar todos os serviços para debug
+    const allServices = await store.getServices();
+    console.log("🔍 Todos os serviços disponíveis:", allServices);
+    console.log("🔍 IDs dos serviços:", allServices.map(s => s.id));
+    
     const service = await store.getService(serviceId);
     console.log("🔍 Serviço encontrado:", service);
     
     if (!service) {
       console.log("❌ Serviço não encontrado");
+      console.log("🔍 Tentando buscar diretamente no localStorage...");
+      
+      // Tentar buscar diretamente no localStorage
+      const localData = localStorage.getItem('pet_services');
+      const localServices = localData ? JSON.parse(localData) : [];
+      console.log("🔍 Serviços no localStorage:", localServices);
+      const localService = localServices.find(s => s.id === serviceId);
+      console.log("🔍 Serviço encontrado no localStorage:", localService);
+      
       ui.error("Serviço não encontrado!");
       return;
     }

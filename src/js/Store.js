@@ -302,16 +302,25 @@ class Store {
   }
 
   async getById(storeName, id) {
+    console.log(`🔍 getById chamado para: ${storeName}/${id}`);
+
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
+      console.log(
+        `🔍 Firebase não disponível, usando localStorage para: ${storeName}/${id}`
+      );
       // Fallback para localStorage se Firebase não estiver pronto
       const items = this.getAllSync(storeName);
-      return items.find((item) => item.id === id) || null;
+      const result = items.find((item) => item.id === id) || null;
+      console.log(`🔍 Resultado do localStorage:`, result);
+      return result;
     }
 
     try {
       // Buscar item diretamente do Firebase
+      console.log(`🔍 Buscando ${storeName}/${id} do Firebase...`);
       const item = await window.firebaseService.getDocument(storeName, id);
+      console.log(`🔍 Resultado do Firebase:`, item);
       return item;
     } catch (error) {
       console.error(
@@ -320,7 +329,9 @@ class Store {
       );
       // Fallback para localStorage em caso de erro
       const items = this.getAllSync(storeName);
-      return items.find((item) => item.id === id) || null;
+      const result = items.find((item) => item.id === id) || null;
+      console.log(`🔍 Resultado do fallback localStorage:`, result);
+      return result;
     }
   }
 
