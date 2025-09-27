@@ -4982,19 +4982,33 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   async deletePet(petId) {
-    const pet = store.getPet(petId);
+    const pet = await store.getPet(petId);
     if (!pet) return;
 
+    // Verificar se pet tem agendamentos vinculados
+    const appointments = store.getAppointmentsByPet(petId);
+    let confirmMessage = `Tem certeza que deseja excluir o pet "${pet.nome || "Sem nome"}"?`;
+    
+    if (appointments.length > 0) {
+      confirmMessage += `\n\n⚠️ Este pet tem ${appointments.length} agendamento(s) vinculado(s) que serão cancelados automaticamente.`;
+    }
+
     const confirmed = await ui.confirm(
-      `Tem certeza que deseja excluir o pet "${pet.nome || "Sem nome"}"?`,
+      confirmMessage,
       "Confirmar Exclusão",
       { type: "danger" }
     );
 
     if (confirmed) {
       try {
-        store.deletePet(petId);
-        ui.success("Pet excluído com sucesso!");
+        await store.deletePet(petId);
+        
+        if (appointments.length > 0) {
+          ui.success(`Pet excluído com sucesso! ${appointments.length} agendamento(s) foram cancelados.`);
+        } else {
+          ui.success("Pet excluído com sucesso!");
+        }
+        
         this.renderPets();
       } catch (error) {
         ui.error("Erro ao excluir pet: " + error.message);

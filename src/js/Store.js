@@ -426,6 +426,16 @@ class Store {
       await window.firebaseService.deleteDocument(storeName, id);
 
       console.log(`✅ ${storeName} excluído da nuvem:`, id);
+
+      // Também remover do localStorage para evitar sincronização de volta
+      const items = this.getAllSync(storeName);
+      const filteredItems = items.filter((item) => item.id !== id);
+      localStorage.setItem(
+        this.stores[storeName],
+        JSON.stringify(filteredItems)
+      );
+      console.log(`✅ ${storeName} também removido do localStorage:`, id);
+
       return true;
     } catch (error) {
       console.error(
@@ -497,17 +507,33 @@ class Store {
     return this.save("pets", pet);
   }
 
-  deletePet(id) {
+  async deletePet(id) {
     // Verificar se pet tem agendamentos vinculados
     const appointments = this.getAppointmentsByPet(id);
 
     if (appointments.length > 0) {
-      throw new Error(
-        "Não é possível excluir pet com agendamentos vinculados."
+      console.log(
+        `🔍 Pet tem ${appointments.length} agendamentos vinculados, cancelando...`
       );
+
+      // Cancelar todos os agendamentos vinculados
+      for (const appointment of appointments) {
+        const updatedAppointment = {
+          ...appointment,
+          status: "cancelado",
+          motivoCancelamento: "Pet excluído",
+          dataCancelamento: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        await this.save("appointments", updatedAppointment);
+        console.log(`✅ Agendamento ${appointment.id} cancelado`);
+      }
+
+      console.log(`✅ Todos os agendamentos do pet foram cancelados`);
     }
 
-    return this.delete("pets", id);
+    return await this.delete("pets", id);
   }
 
   getAppointmentsByPet(petId) {
