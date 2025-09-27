@@ -3474,6 +3474,16 @@
   flex-shrink: 0;
 }
 
+/* Botões específicos para tabela de pets */
+.pets-page .data-table-actions .btn {
+  width: auto !important;
+  min-width: 32px !important;
+  max-width: none !important;
+  font-size: 0.75rem !important;
+  padding: var(--spacing-1) var(--spacing-2) !important;
+  height: 28px !important;
+}
+
 /* Campo de cliente no formulário de prontuário */
 .cliente-info {
   padding: var(--spacing-3);

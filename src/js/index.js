@@ -3554,6 +3554,9 @@ class PetShopApp {
     const content = document.getElementById("content");
     console.log("🔍 renderPets iniciado");
 
+    // Adicionar classe específica para página de pets
+    content.className = "pets-page";
+
     try {
       console.log("🔍 Carregando pets...");
       const pets = await store.getPets();
