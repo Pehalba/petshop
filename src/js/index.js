@@ -128,7 +128,7 @@ class PetShopApp {
     header.innerHTML = `
             <div class="header-container">
                 <a href="#" class="brand" data-page="dashboard" aria-label="Página inicial — Dra. Karianny">
-                    <img src="logo.jpg" alt="Logo Dra. Karianny — Dermatologia Veterinária" width="36" height="36">
+                    <img src="logo.jpg" alt="Logo Dra. Karianny — Dermatologia Veterinária" width="96" height="96">
                     <div class="brand-text">
                         <strong class="brand-title">Dra. Karianny Tolentino Sabatini</strong>
                         <small class="brand-subtitle">Dermatologia Veterinária</small>
@@ -582,49 +582,47 @@ class PetShopApp {
             </div>
 
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card clickable-card" onclick="app.navigateToPage('clientes')">
                     <div class="stat-header">
                         <div class="stat-title">Clientes</div>
                         <div class="stat-icon stat-icon-primary">👥</div>
                     </div>
                     <div class="stat-value">${clients.length}</div>
-                    <div class="stat-change positive">
-                        <span>+${
-                          clients.filter((c) => c.status === "ativo").length
-                        } ativos</span>
+                    <div class="stat-action">
+                        <span>Ver todos os clientes →</span>
                     </div>
                 </div>
 
-                <div class="stat-card">
+                <div class="stat-card clickable-card" onclick="app.navigateToPage('pets')">
                     <div class="stat-header">
                         <div class="stat-title">Pets</div>
                         <div class="stat-icon stat-icon-success">🐕</div>
                     </div>
                     <div class="stat-value">${pets.length}</div>
-                    <div class="stat-change positive">
-                        <span>+${pets.length} cadastrados</span>
+                    <div class="stat-action">
+                        <span>Ver todos os pets →</span>
                     </div>
                 </div>
 
-                <div class="stat-card">
+                <div class="stat-card clickable-card" onclick="app.showVaccinesThisMonth()">
                     <div class="stat-header">
-                        <div class="stat-title">Vacinas a Vencer</div>
+                        <div class="stat-title">Vacinas do Mês</div>
                         <div class="stat-icon stat-icon-warning">💉</div>
                     </div>
                     <div class="stat-value">${petsWithVaccinesDue.length}</div>
-                    <div class="stat-change positive">
-                        <span>+${petsWithVaccinesDue.length} este mês</span>
+                    <div class="stat-action">
+                        <span>Ver vacinas do mês →</span>
                     </div>
                 </div>
 
-                <div class="stat-card">
+                <div class="stat-card clickable-card" onclick="app.navigateToPage('agendamentos')">
                     <div class="stat-header">
-                        <div class="stat-title">Serviços para Hoje</div>
-                        <div class="stat-icon stat-icon-error">📅</div>
+                        <div class="stat-title">Agendamentos</div>
+                        <div class="stat-icon stat-icon-info">📅</div>
                     </div>
                     <div class="stat-value">${todayAppointments.length}</div>
-                    <div class="stat-change positive">
-                        <span>+${todayAppointments.length} programados</span>
+                    <div class="stat-action">
+                        <span>Ver agendamentos →</span>
                     </div>
                 </div>
             </div>
@@ -2113,6 +2111,29 @@ class PetShopApp {
         </div>
       </div>
 
+      <div class="category-tabs">
+        <button class="category-tab active" data-category="" onclick="app.filterServicesByCategoryTab('')">
+          <span class="tab-icon">📋</span>
+          <span class="tab-text">Todos</span>
+          <span class="tab-count" id="count-all">0</span>
+        </button>
+        <button class="category-tab" data-category="petshop" onclick="app.filterServicesByCategoryTab('petshop')">
+          <span class="tab-icon">🛁</span>
+          <span class="tab-text">Pet Shop</span>
+          <span class="tab-count" id="count-petshop">0</span>
+        </button>
+        <button class="category-tab" data-category="dermatologico" onclick="app.filterServicesByCategoryTab('dermatologico')">
+          <span class="tab-icon">🔬</span>
+          <span class="tab-text">Dermatológico</span>
+          <span class="tab-count" id="count-dermatologico">0</span>
+        </button>
+        <button class="category-tab" data-category="veterinario" onclick="app.filterServicesByCategoryTab('veterinario')">
+          <span class="tab-icon">🩺</span>
+          <span class="tab-text">Veterinário</span>
+          <span class="tab-count" id="count-veterinario">0</span>
+        </button>
+      </div>
+
       ${this.renderServicesTable(services)}
     `;
 
@@ -2164,18 +2185,38 @@ class PetShopApp {
     `;
   }
 
-  renderServicesTable(services) {
+  renderServicesTable(services, categoryFilter = "") {
     if (services.length === 0) {
-      return `
-        <div class="empty-state">
-          <div class="empty-icon">🛠️</div>
-          <h3>Nenhum serviço cadastrado</h3>
-          <p>Comece cadastrando seus primeiros serviços</p>
-          <button class="btn btn-primary" onclick="app.showServiceForm()">
-            Cadastrar Primeiro Serviço
-          </button>
-        </div>
-      `;
+      if (categoryFilter) {
+        const categoryNames = {
+          petshop: "Pet Shop",
+          dermatologico: "Dermatológico",
+          veterinario: "Veterinário",
+        };
+        const categoryName = categoryNames[categoryFilter] || "esta categoria";
+
+        return `
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>Nenhum serviço em ${categoryName}</h3>
+            <p>Não há serviços cadastrados nesta categoria</p>
+            <button class="btn btn-primary" onclick="app.showServiceForm()">
+              Cadastrar Serviço
+            </button>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="empty-state">
+            <div class="empty-icon">🛠️</div>
+            <h3>Nenhum serviço cadastrado</h3>
+            <p>Comece cadastrando seus primeiros serviços</p>
+            <button class="btn btn-primary" onclick="app.showServiceForm()">
+              Cadastrar Primeiro Serviço
+            </button>
+          </div>
+        `;
+      }
     }
 
     const tableRows = services
@@ -2185,6 +2226,13 @@ class PetShopApp {
             ? MoneyUtils.formatMargin(service.preco, service.custoAproximado)
             : null;
 
+        const categoriaLabel =
+          {
+            petshop: "Pet Shop",
+            dermatologico: "Dermatológico",
+            veterinario: "Veterinário",
+          }[service.categoria] || "Não definida";
+
         return `
         <tr>
           <td>
@@ -2192,6 +2240,13 @@ class PetShopApp {
               <strong>${service.nome}</strong>
               ${service.descricao ? `<small>${service.descricao}</small>` : ""}
             </div>
+          </td>
+          <td>
+            <span class="category-badge category-${
+              service.categoria || "undefined"
+            }">
+              ${categoriaLabel}
+            </span>
           </td>
           <td>
             ${
@@ -2263,6 +2318,7 @@ class PetShopApp {
           <thead>
             <tr>
               <th>Nome</th>
+              <th>Categoria</th>
               <th>Preço</th>
               <th>Custo Aprox.</th>
               <th>Margem</th>
@@ -2311,6 +2367,30 @@ class PetShopApp {
                   placeholder="Ex: Banho, Tosa, Hidratação..."
                 >
                 <div class="form-error" id="nome-error"></div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group required">
+                <label for="categoria">Categoria do Serviço *</label>
+                <select 
+                  id="categoria" 
+                  name="categoria" 
+                  class="form-select" 
+                  required
+                >
+                  <option value="">Selecione uma categoria</option>
+                  <option value="petshop" ${
+                    service?.categoria === "petshop" ? "selected" : ""
+                  }>Pet Shop</option>
+                  <option value="dermatologico" ${
+                    service?.categoria === "dermatologico" ? "selected" : ""
+                  }>Dermatológico</option>
+                  <option value="veterinario" ${
+                    service?.categoria === "veterinario" ? "selected" : ""
+                  }>Veterinário</option>
+                </select>
+                <div class="form-error" id="categoria-error"></div>
               </div>
             </div>
             
@@ -2653,6 +2733,7 @@ class PetShopApp {
     const formData = new FormData(event.target);
     const serviceData = {
       nome: formData.get("nome").trim(),
+      categoria: formData.get("categoria"),
       preco: MoneyUtils.parseBRL(formData.get("preco")),
       temCusto: formData.get("temCusto") === "on",
       custoAproximado:
@@ -2827,7 +2908,7 @@ class PetShopApp {
     const searchInput = document.getElementById("serviceSearch");
     if (searchInput) {
       searchInput.addEventListener("input", (e) => {
-        this.filterServices(e.target.value);
+        this.filterServices();
       });
     }
 
@@ -2838,24 +2919,77 @@ class PetShopApp {
         this.sortServices(e.target.value);
       });
     }
+
+    // Atualizar contadores das abas
+    this.updateCategoryCounts();
+  }
+
+  // Filtrar serviços por aba de categoria
+  async filterServicesByCategoryTab(category) {
+    // Atualizar aba ativa
+    document.querySelectorAll(".category-tab").forEach((tab) => {
+      tab.classList.remove("active");
+    });
+    const activeTab = document.querySelector(`[data-category="${category}"]`);
+    if (activeTab) {
+      activeTab.classList.add("active");
+    }
+
+    // Filtrar serviços
+    await this.filterServices();
+  }
+
+  // Atualizar contadores das categorias
+  async updateCategoryCounts() {
+    const services = await store.getServices();
+
+    const counts = {
+      all: services.length,
+      petshop: services.filter((s) => s.categoria === "petshop").length,
+      dermatologico: services.filter((s) => s.categoria === "dermatologico")
+        .length,
+      veterinario: services.filter((s) => s.categoria === "veterinario").length,
+    };
+
+    document.getElementById("count-all").textContent = counts.all;
+    document.getElementById("count-petshop").textContent = counts.petshop;
+    document.getElementById("count-dermatologico").textContent =
+      counts.dermatologico;
+    document.getElementById("count-veterinario").textContent =
+      counts.veterinario;
   }
 
   // Filtrar serviços
-  filterServices(searchTerm) {
-    const services = store.getServices();
-    const filtered = services.filter((service) =>
-      service.nome.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  async filterServices() {
+    const services = await store.getServices();
+    const searchTerm = document.getElementById("serviceSearch")?.value || "";
+    const activeTab = document.querySelector(".category-tab.active");
+    const categoryFilter = activeTab ? activeTab.dataset.category : "";
+
+    const filtered = services.filter((service) => {
+      const matchesSearch = service.nome
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesCategory =
+        !categoryFilter || service.categoria === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
 
     const tableContainer = document.querySelector(".data-table");
     if (tableContainer) {
-      tableContainer.outerHTML = this.renderServicesTable(filtered);
+      tableContainer.outerHTML = this.renderServicesTable(
+        filtered,
+        categoryFilter
+      );
     }
+
+    // Atualizar contadores após filtrar
+    this.updateCategoryCounts();
   }
 
   // Ordenar serviços
-  sortServices(sortBy) {
-    const services = store.getServices();
+  async sortServices(sortBy) {
+    const services = await store.getServices();
     const sorted = [...services].sort((a, b) => {
       switch (sortBy) {
         case "nome":
@@ -2872,6 +3006,91 @@ class PetShopApp {
     const tableContainer = document.querySelector(".data-table");
     if (tableContainer) {
       tableContainer.outerHTML = this.renderServicesTable(sorted);
+    }
+  }
+
+  // Filtrar serviços por categoria no agendamento
+  async filterServicesByCategory() {
+    const categoryFilter =
+      document.getElementById("serviceCategory")?.value || "";
+    const services = await store.getServices();
+
+    const filteredServices = categoryFilter
+      ? services.filter((service) => service.categoria === categoryFilter)
+      : services;
+
+    const servicesGrid = document.getElementById("servicesGrid");
+    if (servicesGrid) {
+      servicesGrid.innerHTML = filteredServices
+        .map(
+          (service) => `
+        <div class="service-item">
+          <label class="service-checkbox-label">
+            <input 
+              type="checkbox" 
+              name="services" 
+              value="${service.id}"
+              data-preco="${service.preco}"
+              data-nome="${service.nome}"
+              onchange="app.updateServiceSelection('${service.id}')"
+            >
+            <span class="service-checkmark"></span>
+            <div class="service-info">
+              <strong>${service.nome}</strong>
+            </div>
+          </label>
+          
+          <!-- Variações do serviço (aparece quando selecionado) -->
+          ${
+            service.temVariacoes
+              ? `
+            <div class="service-variations" id="variations-${
+              service.id
+            }" style="display: none;">
+              <h4 class="variation-title">Selecione o porte:</h4>
+              <div class="variation-group">
+                <label class="variation-label">
+                  <input type="radio" name="variation-${
+                    service.id
+                  }" value="pequeno" checked>
+                  <span class="variation-option">
+                    <span class="variation-name">Pequeno</span>
+                    <span class="variation-price">${MoneyUtils.formatBRL(
+                      service.variacoes?.pequeno || service.preco
+                    )}</span>
+                  </span>
+                </label>
+                <label class="variation-label">
+                  <input type="radio" name="variation-${
+                    service.id
+                  }" value="medio">
+                  <span class="variation-option">
+                    <span class="variation-name">Médio</span>
+                    <span class="variation-price">${MoneyUtils.formatBRL(
+                      service.variacoes?.medio || service.preco
+                    )}</span>
+                  </span>
+                </label>
+                <label class="variation-label">
+                  <input type="radio" name="variation-${
+                    service.id
+                  }" value="grande">
+                  <span class="variation-option">
+                    <span class="variation-name">Grande</span>
+                    <span class="variation-price">${MoneyUtils.formatBRL(
+                      service.variacoes?.grande || service.preco
+                    )}</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+          `
+              : ""
+          }
+        </div>
+      `
+        )
+        .join("");
     }
   }
 
@@ -3063,7 +3282,6 @@ class PetShopApp {
           </td>
           <td>${servicesText}</td>
           <td>${MoneyUtils.formatBRL(appointment.totalPrevisto)}</td>
-          <td>${statusBadge}</td>
           <td>${paymentBadge}</td>
           <td>
             <div class="data-table-actions">
@@ -3121,7 +3339,6 @@ class PetShopApp {
               <th>Cliente</th>
               <th>Serviços</th>
               <th>Total</th>
-              <th>Status</th>
               <th>Pagamento</th>
               <th class="actions-column">Ações</th>
             </tr>
@@ -3761,15 +3978,22 @@ class PetShopApp {
           ${
             vacina.habilitarLembrete && vacina.proximaDose
               ? `
-            <button class="btn btn-sm btn-outline" onclick="app.sendVaccineWhatsApp('${pet.clienteId}', '${vacina.nomeVacina}', '${vacina.proximaDose}')">
+            <button class="btn btn-sm btn-outline" onclick="app.sendVaccineWhatsApp('${pet.clienteId}', '${vacina.nomeVacina}', '${vacina.proximaDose}')" title="Enviar WhatsApp">
               <i class="icon-whatsapp"></i> WhatsApp
             </button>
-            <button class="btn btn-sm btn-outline" onclick="app.createVaccineAppointment('${pet.id}', '${vacina.nomeVacina}')">
+            <button class="btn btn-sm btn-outline" onclick="app.createVaccineAppointment('${pet.id}', '${vacina.nomeVacina}')" title="Agendar aplicação">
               <i class="icon-calendar"></i> Agendar
             </button>
           `
               : ""
           }
+          <button class="btn btn-sm btn-danger" onclick="app.deleteVaccine('${
+            pet.id
+          }', '${vacina.nomeVacina}', '${
+      vacina.dataAplicacao
+    }')" title="Deletar vacina">
+            <i class="icon-trash"></i> Deletar
+          </button>
         </div>
       </div>
     `;
@@ -3802,6 +4026,196 @@ class PetShopApp {
     if (status.includes("Próximo reforço")) return "badge-warning";
     if (status === "Em dia") return "badge-success";
     return "badge-secondary";
+  }
+
+  async deleteVaccine(petId, nomeVacina, dataAplicacao) {
+    if (
+      !confirm(
+        `Tem certeza que deseja deletar a vacina "${nomeVacina}" aplicada em ${utils.formatDate(
+          dataAplicacao
+        )}?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const pet = await store.getPet(petId);
+      if (!pet) {
+        ui.error("Pet não encontrado");
+        return;
+      }
+
+      // Filtrar a vacina específica
+      pet.vacinas = pet.vacinas.filter(
+        (vacina) =>
+          !(
+            vacina.nomeVacina === nomeVacina &&
+            vacina.dataAplicacao === dataAplicacao
+          )
+      );
+
+      await store.savePet(pet);
+      ui.success("Vacina deletada com sucesso!");
+
+      // Atualizar a página do pet
+      this.viewPet(petId);
+    } catch (error) {
+      ui.error("Erro ao deletar vacina: " + error.message);
+    }
+  }
+
+  async deleteProntuario(prontuarioId, petId) {
+    if (
+      !confirm(
+        "Tem certeza que deseja deletar este prontuário? Esta ação não pode ser desfeita."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await store.deleteProntuario(prontuarioId);
+      ui.success("Prontuário deletado com sucesso!");
+
+      // Atualizar a página do pet
+      this.viewPet(petId);
+    } catch (error) {
+      ui.error("Erro ao deletar prontuário: " + error.message);
+    }
+  }
+
+  async showVaccinesThisMonth() {
+    try {
+      const pets = await store.getPets();
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear();
+
+      // Filtrar pets com vacinas vencendo este mês
+      const petsWithVaccinesDue = pets.filter((pet) => {
+        if (!pet.vacinas || pet.vacinas.length === 0) return false;
+
+        return pet.vacinas.some((vacina) => {
+          if (!vacina.proximaDose) return false;
+
+          const vaccineDate = new Date(vacina.proximaDose);
+          return (
+            vaccineDate.getMonth() + 1 === currentMonth &&
+            vaccineDate.getFullYear() === currentYear
+          );
+        });
+      });
+
+      // Renderizar página de vacinas do mês
+      const content = document.getElementById("content");
+      content.innerHTML = `
+        <div class="page-header">
+          <h1 class="page-title">Vacinas do Mês</h1>
+          <p class="page-subtitle">Pets com vacinas vencendo em ${currentDate.toLocaleDateString(
+            "pt-BR",
+            { month: "long", year: "numeric" }
+          )}</p>
+          <button class="btn btn-outline" onclick="app.navigateToPage('dashboard')">
+            ← Voltar ao Dashboard
+          </button>
+        </div>
+
+        <div class="vaccines-month-list">
+          ${
+            petsWithVaccinesDue.length === 0
+              ? `
+            <div class="empty-state">
+              <div class="empty-icon">✅</div>
+              <p>Nenhuma vacina vencendo este mês!</p>
+              <p class="text-muted">Todos os pets estão em dia com suas vacinas.</p>
+            </div>
+          `
+              : (
+                  await Promise.all(
+                    petsWithVaccinesDue.map((pet) =>
+                      this.renderPetVaccineCard(pet, currentMonth, currentYear)
+                    )
+                  )
+                ).join("")
+          }
+        </div>
+      `;
+
+      // Atualizar navegação
+      this.currentPage = "vacinas-mes";
+      this.updateNavigation();
+    } catch (error) {
+      console.error("❌ Erro ao carregar vacinas do mês:", error);
+      ui.error("Erro ao carregar vacinas do mês: " + error.message);
+    }
+  }
+
+  async renderPetVaccineCard(pet, currentMonth, currentYear) {
+    const vaccinesDue = pet.vacinas.filter((vacina) => {
+      if (!vacina.proximaDose) return false;
+      const vaccineDate = new Date(vacina.proximaDose);
+      return (
+        vaccineDate.getMonth() + 1 === currentMonth &&
+        vaccineDate.getFullYear() === currentYear
+      );
+    });
+
+    const client = await store.getClient(pet.clienteId);
+    const clientName = client ? client.nomeCompleto : "Cliente não encontrado";
+
+    return `
+      <div class="pet-vaccine-card">
+        <div class="pet-vaccine-header">
+          <div class="pet-info">
+            <h3>${pet.nome}</h3>
+            <p class="pet-owner">Tutor: ${clientName}</p>
+          </div>
+          <div class="vaccine-count">
+            <span class="count-badge">${vaccinesDue.length}</span>
+            <span class="count-label">vacina${
+              vaccinesDue.length > 1 ? "s" : ""
+            }</span>
+          </div>
+        </div>
+        
+        <div class="vaccines-due-list">
+          ${vaccinesDue
+            .map(
+              (vaccine) => `
+            <div class="vaccine-due-item">
+              <div class="vaccine-info">
+                <span class="vaccine-name">${vaccine.nomeVacina}</span>
+                <span class="vaccine-date">${utils.formatDate(
+                  vaccine.proximaDose
+                )}</span>
+              </div>
+              <div class="vaccine-actions">
+                <button class="btn btn-sm btn-outline" onclick="app.sendVaccineWhatsApp('${
+                  pet.clienteId
+                }', '${vaccine.nomeVacina}', '${
+                vaccine.proximaDose
+              }')" title="Enviar WhatsApp">
+                  <i class="icon-whatsapp"></i> WhatsApp
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="app.createVaccineAppointment('${
+                  pet.id
+                }', '${vaccine.nomeVacina}')" title="Agendar aplicação">
+                  <i class="icon-calendar"></i> Agendar
+                </button>
+                <button class="btn btn-sm btn-outline" onclick="app.viewPet('${
+                  pet.id
+                }')" title="Ver pet">
+                  <i class="icon-eye"></i> Ver Pet
+                </button>
+              </div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+    `;
   }
 
   async sendVaccineWhatsApp(clienteId, nomeVacina, proximaDose) {
@@ -4512,6 +4926,15 @@ Entre em contato conosco para agendar o reforço!`;
           <!-- Passo 2: Serviços -->
           <div class="form-section">
             <h3>2. Serviços</h3>
+            <div class="form-group">
+              <label for="serviceCategory">Categoria do Serviço</label>
+              <select id="serviceCategory" name="serviceCategory" class="form-select" onchange="app.filterServicesByCategory()">
+                <option value="">Todas as categorias</option>
+                <option value="petshop">Pet Shop</option>
+                <option value="dermatologico">Dermatológico</option>
+                <option value="veterinario">Veterinário</option>
+              </select>
+            </div>
             <div class="form-group">
               <label>Selecione os serviços *</label>
               <div class="services-grid" id="servicesGrid">
@@ -5881,7 +6304,13 @@ Entre em contato conosco para agendar o reforço!`;
           : "Prontuário criado com sucesso!"
       );
 
-      this.renderProntuarios();
+      // Navegar de volta para a página do pet
+      const petId = prontuarioData.petId;
+      if (petId) {
+        this.viewPet(petId);
+      } else {
+        this.renderProntuarios();
+      }
     } catch (error) {
       ui.error("Erro ao salvar prontuário: " + error.message);
     }
@@ -6471,13 +6900,18 @@ Entre em contato conosco para agendar o reforço!`;
             <div class="prontuario-actions">
               <button class="btn btn-sm btn-outline" onclick="app.viewProntuario('${
                 prontuario.id
-              }')">
+              }')" title="Ver detalhes">
                 <i class="icon-eye"></i> Ver
               </button>
               <button class="btn btn-sm btn-primary" onclick="app.editProntuario('${
                 prontuario.id
-              }')">
+              }')" title="Editar prontuário">
                 <i class="icon-edit"></i> Editar
+              </button>
+              <button class="btn btn-sm btn-danger" onclick="app.deleteProntuario('${
+                prontuario.id
+              }', '${petId}')" title="Deletar prontuário">
+                <i class="icon-trash"></i> Deletar
               </button>
             </div>
           </div>

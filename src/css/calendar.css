@@ -98,14 +98,14 @@
 }
 
 .cal-day.is-today {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--brand-rose-50);
+  color: var(--primary);
   font-weight: 600;
 }
 
 .cal-day.is-today .cal-day-number {
-  background: #1976d2;
-  color: white;
+  background: var(--primary);
+  color: var(--text-inverse);
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -151,27 +151,56 @@
 .cal-count.appointments {
   bottom: 4px;
   right: 4px;
-  background: #dc3545;
+  background: var(--primary);
+  font-size: 16px;
+  padding: 4px 6px;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cal-count.vaccines {
   bottom: 4px;
   left: 4px;
-  background: #28a745;
-  font-size: 8px;
-  padding: 1px 2px;
-  min-width: 14px;
+  background: var(--primary);
+  font-size: 16px;
+  padding: 4px 6px;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Cores simplificadas */
+/* Cores unificadas com a marca */
 .cal-count.appointments {
-  background: #28a745 !important; /* Sempre verde */
-  color: white;
+  background: var(--primary) !important;
+  color: var(--text-inverse);
+  font-size: 16px !important;
+  padding: 4px 6px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .cal-count.vaccines {
-  background: #ffc107 !important; /* Sempre amarelo */
-  color: #212529;
+  background: var(--primary) !important;
+  color: var(--text-inverse);
+  font-size: 16px !important;
+  padding: 4px 6px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* Lista do dia */
@@ -342,10 +371,20 @@
 }
 
 .vaccine-icon {
-  font-size: 20px;
+  font-size: 100px !important;
   line-height: 1;
   flex-shrink: 0;
   margin-top: 2px;
+  background: var(--primary);
+  color: var(--text-inverse);
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+    sans-serif;
 }
 
 .vaccine-details {

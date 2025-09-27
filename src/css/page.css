@@ -55,6 +55,13 @@
 }
 
 /* Responsividade do dashboard */
+@media (max-width: 1024px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .vaccine-due-item {
     padding: var(--spacing-2);
@@ -241,40 +248,40 @@
 }
 
 .data-table {
-  min-width: 1000px;
+  min-width: 1200px;
 }
 
 /* Otimizar colunas da tabela de agendamentos */
 .data-table th:nth-child(1), /* Data/Hora */
 .data-table td:nth-child(1) {
-  width: 120px;
-  min-width: 120px;
-  max-width: 120px;
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
 }
 
 .data-table th:nth-child(2), /* Cliente */
 .data-table td:nth-child(2) {
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
+}
+
+.data-table th:nth-child(3), /* Serviços */
+.data-table td:nth-child(3) {
   width: 150px;
   min-width: 150px;
   max-width: 150px;
 }
 
-.data-table th:nth-child(3), /* Serviços */
-.data-table td:nth-child(3) {
-  width: 120px;
-  min-width: 120px;
-  max-width: 120px;
-}
-
 .data-table th:nth-child(4), /* Total */
 .data-table td:nth-child(4) {
-  width: 80px;
-  min-width: 80px;
-  max-width: 80px;
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
   text-align: center;
 }
 
-.data-table th:nth-child(5), /* Status */
+.data-table th:nth-child(5), /* Pagamento */
 .data-table td:nth-child(5) {
   width: 120px;
   min-width: 120px;
@@ -282,11 +289,11 @@
   text-align: center;
 }
 
-.data-table th:nth-child(6), /* Pagamento */
+.data-table th:nth-child(6), /* Ações */
 .data-table td:nth-child(6) {
-  width: 120px;
-  min-width: 120px;
-  max-width: 120px;
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
   text-align: center;
 }
 
@@ -485,6 +492,23 @@
   border-radius: var(--border-radius-md);
   padding: var(--spacing-4);
   text-align: center;
+  transition: all 0.2s ease;
+}
+
+.stat-card.clickable-card {
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card.clickable-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-300);
+}
+
+.stat-card.clickable-card:active {
+  transform: translateY(0);
 }
 
 .stat-card h3 {
@@ -498,6 +522,183 @@
   color: var(--gray-600);
   font-size: 0.875rem;
   margin: 0;
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.stat-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-icon {
+  font-size: 1.2rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon-primary {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+}
+.stat-icon-success {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+}
+.stat-icon-warning {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+}
+.stat-icon-info {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.stat-change {
+  font-size: 0.875rem;
+  margin-bottom: var(--spacing-2);
+}
+
+.stat-change.positive {
+  color: var(--success-600);
+}
+
+.stat-action {
+  font-size: 0.8rem;
+  color: var(--primary-600);
+  font-weight: 500;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.stat-card.clickable-card:hover .stat-action {
+  opacity: 1;
+}
+
+/* Vacinas do Mês */
+.vaccines-month-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+.pet-vaccine-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  transition: all 0.2s ease;
+}
+
+.pet-vaccine-card:hover {
+  border-color: var(--primary-300);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pet-vaccine-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.pet-info h3 {
+  margin: 0 0 var(--spacing-1) 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+
+.pet-owner {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.vaccine-count {
+  text-align: center;
+}
+
+.count-badge {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--warning-600);
+  line-height: 1;
+}
+
+.count-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vaccines-due-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.vaccine-due-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-3);
+  background: var(--bg-light);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--warning-500);
+}
+
+.vaccine-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.vaccine-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.vaccine-date {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.vaccine-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.vaccine-actions .btn {
+  font-size: 0.8rem;
+  padding: var(--spacing-1) var(--spacing-2);
+  min-width: auto;
+  white-space: nowrap;
 }
 
 /* Dashboard Calendar Section */
@@ -737,8 +938,10 @@
 
 .detail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-6);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .detail-card {
@@ -1026,9 +1229,9 @@
 
 /* Coluna de ações */
 .actions-column {
-  width: 500px;
-  min-width: 500px;
-  max-width: 500px;
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
 }
 
 /* ===== INFORMAÇÕES DO CLIENTE ===== */
@@ -1247,25 +1450,85 @@
 }
 
 .checkbox-label:hover .checkmark {
-  border-color: var(--primary-400);
+  border-color: var(--primary);
   transform: scale(1.05);
 }
 
 .checkbox-label input[type="checkbox"]:focus + .checkmark {
-  border-color: var(--primary-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(214, 147, 138, 0.2);
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark {
-  background-color: #10b981;
-  border-color: #10b981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  background-color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(214, 147, 138, 0.3);
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
   content: "✅";
   font-size: 12px;
   line-height: 1;
+}
+
+/* Garantir que checkboxes dos formulários sejam visíveis */
+.form-section .checkbox-label {
+  display: flex !important;
+  align-items: center;
+  cursor: pointer;
+  gap: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0;
+  padding: var(--spacing-2);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast);
+}
+
+.form-section .checkbox-label:hover {
+  background-color: var(--brand-rose-50);
+}
+
+.form-section .checkbox-label input[type="checkbox"] {
+  display: none !important;
+}
+
+.form-section .checkmark {
+  width: 20px !important;
+  height: 20px !important;
+  border: 2px solid var(--gray-300) !important;
+  border-radius: var(--border-radius-sm) !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  background-color: var(--white) !important;
+  position: relative;
+}
+
+.form-section .checkbox-label:hover .checkmark {
+  border-color: var(--primary) !important;
+  transform: scale(1.05);
+}
+
+.form-section .checkbox-label input[type="checkbox"]:focus + .checkmark {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(214, 147, 138, 0.2) !important;
+}
+
+.form-section .checkbox-label input[type="checkbox"]:checked + .checkmark {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(214, 147, 138, 0.3) !important;
+}
+
+.form-section
+  .checkbox-label
+  input[type="checkbox"]:checked
+  + .checkmark::after {
+  content: "✅" !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
 }
 
 .form-help {
@@ -1618,6 +1881,9 @@
   border-radius: var(--border-radius);
   padding: 1rem;
   background: var(--gray-50);
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .prontuario-header {
@@ -1634,6 +1900,7 @@
 
 .prontuario-content {
   margin-bottom: 1rem;
+  flex: 1;
 }
 
 .prontuario-field {
@@ -1647,7 +1914,30 @@
 
 .prontuario-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: auto;
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--border-light);
+}
+
+.prontuario-actions .btn {
+  font-size: 0.8rem;
+  padding: var(--spacing-1) var(--spacing-3);
+  min-width: auto;
+  white-space: nowrap;
+}
+
+.prontuario-actions .btn-danger {
+  background-color: var(--error);
+  color: var(--text-inverse);
+  border-color: var(--error);
+}
+
+.prontuario-actions .btn-danger:hover {
+  background-color: var(--error-600);
+  border-color: var(--error-600);
 }
 
 .fotos-preview {
@@ -2153,6 +2443,102 @@
   margin-top: var(--spacing-1);
 }
 
+/* ===== CATEGORIAS DE SERVIÇOS ===== */
+.category-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.category-petshop {
+  background-color: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.category-dermatologico {
+  background-color: var(--warning-100);
+  color: var(--warning-700);
+}
+
+.category-veterinario {
+  background-color: var(--success-100);
+  color: var(--success-700);
+}
+
+.category-undefined {
+  background-color: var(--gray-100);
+  color: var(--gray-600);
+}
+
+/* ===== ABAS DE CATEGORIA ===== */
+.category-tabs {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-2);
+  background-color: var(--surface-muted);
+  border-radius: var(--border-radius-lg);
+  overflow-x: auto;
+}
+
+.category-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: transparent;
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-md);
+  color: var(--text-700);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.category-tab:hover {
+  background-color: var(--surface-card);
+  color: var(--text-900);
+  transform: translateY(-1px);
+}
+
+.category-tab.active {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.tab-icon {
+  font-size: 1.2rem;
+}
+
+.tab-text {
+  font-weight: 600;
+}
+
+.tab-count {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: inherit;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+.category-tab:not(.active) .tab-count {
+  background-color: var(--gray-200);
+  color: var(--gray-600);
+}
+
 /* ===== ÍCONES DOS BOTÕES ===== */
 .icon-eye::before {
   content: "👁";
@@ -2250,10 +2636,22 @@
 
   .detail-grid {
     grid-template-columns: 1fr;
+    max-width: 100%;
   }
 
   .pets-grid {
     grid-template-columns: 1fr;
+  }
+
+  .vaccine-due-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+  }
+
+  .vaccine-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .detail-title {
@@ -2413,6 +2811,9 @@
   border-radius: var(--radius-md);
   padding: var(--spacing-4);
   transition: all 0.2s ease;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .vaccine-card:hover {
@@ -2423,24 +2824,30 @@
 .vaccine-card .vaccine-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: var(--spacing-3);
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
 }
 
 .vaccine-card .vaccine-header h4 {
   margin: 0;
   color: var(--text-primary);
   font-size: 1.1rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .vaccine-details {
   margin-bottom: var(--spacing-3);
+  flex: 1;
 }
 
 .vaccine-details p {
   margin: 0 0 var(--spacing-2) 0;
   color: var(--text-secondary);
   font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .vaccine-details p:last-child {
@@ -2451,11 +2858,29 @@
   display: flex;
   gap: var(--spacing-2);
   flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: auto;
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--border-light);
 }
 
 .vaccine-actions .btn {
   font-size: 0.8rem;
   padding: var(--spacing-1) var(--spacing-3);
+  min-width: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.vaccine-actions .btn-danger {
+  background-color: var(--error);
+  color: var(--text-inverse);
+  border-color: var(--error);
+}
+
+.vaccine-actions .btn-danger:hover {
+  background-color: var(--error-600);
+  border-color: var(--error-600);
 }
 
 /* Status badges para vacinas */

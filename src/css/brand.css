@@ -55,7 +55,7 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 20px;
   text-decoration: none;
   color: inherit;
   transition: opacity 0.2s ease;
@@ -66,8 +66,8 @@
 }
 
 .brand img {
-  width: 36px;
-  height: 36px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
 }
 
@@ -363,8 +363,13 @@
   }
 
   .brand img {
-    width: 32px;
-    height: 32px;
+    width: 80px;
+    height: 80px;
+  }
+
+  .header-container {
+    height: 100px;
+    min-height: 100px;
   }
 }
 
@@ -374,8 +379,13 @@
   }
 
   .brand img {
-    width: 28px;
-    height: 28px;
+    width: 72px;
+    height: 72px;
+  }
+
+  .header-container {
+    height: 90px;
+    min-height: 90px;
   }
 }
 
