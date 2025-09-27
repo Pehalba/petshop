@@ -2004,22 +2004,36 @@ class PetShopApp {
       return;
     }
 
-    const client = store.getClient(clientId);
+    const client = await store.getClient(clientId);
     if (!client) {
       ui.error("Cliente não encontrado");
       return;
     }
 
+    // Verificar se cliente tem agendamentos e pets vinculados
+    const appointments = store.getAppointmentsByClient(clientId);
     const pets = store.getPetsByClient(clientId);
     const petsCount = pets.length;
+    const appointmentsCount = appointments.length;
 
     let confirmMessage = `Tem certeza que deseja excluir o cliente "${client.nomeCompleto}"?`;
-    if (petsCount > 0) {
-      confirmMessage += `\n\n⚠️ ATENÇÃO: ${petsCount} pet${
-        petsCount !== 1 ? "s" : ""
-      } cadastrado${petsCount !== 1 ? "s" : ""} também será${
-        petsCount !== 1 ? "ão" : ""
-      } excluído${petsCount !== 1 ? "s" : ""} automaticamente.`;
+    
+    if (appointmentsCount > 0 || petsCount > 0) {
+      confirmMessage += `\n\n⚠️ Este cliente tem:`;
+      
+      if (appointmentsCount > 0) {
+        confirmMessage += `\n• ${appointmentsCount} agendamento(s) que serão cancelados`;
+      }
+      
+      if (petsCount > 0) {
+        confirmMessage += `\n• ${petsCount} pet(s) que serão excluídos`;
+        if (petsCount > 0) {
+          const petNames = pets.map(pet => pet.nome || "Sem nome").join(", ");
+          confirmMessage += `\n  (${petNames})`;
+        }
+      }
+      
+      confirmMessage += `\n\nTodas essas ações serão executadas automaticamente.`;
     }
 
     const confirmed = await ui.confirm(confirmMessage, "Confirmar Exclusão", {
@@ -2028,23 +2042,19 @@ class PetShopApp {
 
     if (confirmed) {
       try {
-        // Excluir pets primeiro
-        if (petsCount > 0) {
-          pets.forEach((pet) => {
-            store.deletePet(pet.id);
-          });
+        // Usar a função do store que já cuida de tudo
+        await store.deleteClient(clientId);
+        
+        let successMessage = "Cliente excluído com sucesso!";
+        
+        if (appointmentsCount > 0) {
+          successMessage += ` ${appointmentsCount} agendamento(s) cancelados.`;
         }
-
-        // Excluir cliente
-        store.deleteClient(clientId);
-
-        const successMessage =
-          petsCount > 0
-            ? `Cliente e ${petsCount} pet${
-                petsCount !== 1 ? "s" : ""
-              } excluído${petsCount !== 1 ? "s" : ""} com sucesso!`
-            : "Cliente excluído com sucesso!";
-
+        
+        if (petsCount > 0) {
+          successMessage += ` ${petsCount} pet(s) excluído(s).`;
+        }
+        
         ui.success(successMessage);
         this.renderClientes();
       } catch (error) {
@@ -2787,8 +2797,13 @@ class PetShopApp {
 
     // Formatação dos campos de variações
     const variacaoInputs = [
-      "precoPequeno", "precoMedio", "precoGrande",
-      "precoAte5kg", "preco5a15kg", "preco15a30kg", "precoAcima30kg"
+      "precoPequeno",
+      "precoMedio",
+      "precoGrande",
+      "precoAte5kg",
+      "preco5a15kg",
+      "preco15a30kg",
+      "precoAcima30kg",
     ];
 
     variacaoInputs.forEach((inputId) => {
@@ -2846,11 +2861,16 @@ class PetShopApp {
   // Limpar inputs de variação
   clearVariationInputs() {
     const inputs = [
-      "precoPequeno", "precoMedio", "precoGrande",
-      "precoAte5kg", "preco5a15kg", "preco15a30kg", "precoAcima30kg"
+      "precoPequeno",
+      "precoMedio",
+      "precoGrande",
+      "precoAte5kg",
+      "preco5a15kg",
+      "preco15a30kg",
+      "precoAcima30kg",
     ];
-    
-    inputs.forEach(inputId => {
+
+    inputs.forEach((inputId) => {
       const input = document.getElementById(inputId);
       if (input) input.value = "";
     });
@@ -2858,23 +2878,30 @@ class PetShopApp {
 
   // Preencher inputs de variação com preço base
   fillVariationInputs(tipo = null) {
-    const precoBase = MoneyUtils.parseBRL(document.getElementById("preco").value);
-    
+    const precoBase = MoneyUtils.parseBRL(
+      document.getElementById("preco").value
+    );
+
     if (precoBase <= 0) return;
 
     const precoFormatado = MoneyUtils.formatBRL(precoBase);
 
     if (tipo === "porte" || !tipo) {
       const inputsPorte = ["precoPequeno", "precoMedio", "precoGrande"];
-      inputsPorte.forEach(inputId => {
+      inputsPorte.forEach((inputId) => {
         const input = document.getElementById(inputId);
         if (input) input.value = precoFormatado;
       });
     }
 
     if (tipo === "peso" || !tipo) {
-      const inputsPeso = ["precoAte5kg", "preco5a15kg", "preco15a30kg", "precoAcima30kg"];
-      inputsPeso.forEach(inputId => {
+      const inputsPeso = [
+        "precoAte5kg",
+        "preco5a15kg",
+        "preco15a30kg",
+        "precoAcima30kg",
+      ];
+      inputsPeso.forEach((inputId) => {
         const input = document.getElementById(inputId);
         if (input) input.value = precoFormatado;
       });
@@ -2884,7 +2911,7 @@ class PetShopApp {
   // Construir dados de variações baseado no tipo
   buildVariationsData(formData) {
     const tipoVariacao = formData.get("tipoVariacao");
-    
+
     if (tipoVariacao === "porte") {
       return {
         pequeno: MoneyUtils.parseBRL(formData.get("precoPequeno")),
@@ -2899,7 +2926,7 @@ class PetShopApp {
         acima30kg: MoneyUtils.parseBRL(formData.get("precoAcima30kg")),
       };
     }
-    
+
     return null;
   }
 
@@ -2920,7 +2947,10 @@ class PetShopApp {
       descricao: formData.get("descricao").trim(),
       ativo: true, // Sempre ativo - se não quiser, pode excluir
       temVariacoes: formData.get("temVariacoes") === "on",
-      tipoVariacao: formData.get("temVariacoes") === "on" ? formData.get("tipoVariacao") : null,
+      tipoVariacao:
+        formData.get("temVariacoes") === "on"
+          ? formData.get("tipoVariacao")
+          : null,
       variacoes:
         formData.get("temVariacoes") === "on"
           ? this.buildVariationsData(formData)
@@ -3275,26 +3305,29 @@ class PetShopApp {
 
   async deleteService(serviceId) {
     console.log("🔍 deleteService chamado com ID:", serviceId);
-    
+
     // Listar todos os serviços para debug
     const allServices = await store.getServices();
     console.log("🔍 Todos os serviços disponíveis:", allServices);
-    console.log("🔍 IDs dos serviços:", allServices.map(s => s.id));
-    
+    console.log(
+      "🔍 IDs dos serviços:",
+      allServices.map((s) => s.id)
+    );
+
     const service = await store.getService(serviceId);
     console.log("🔍 Serviço encontrado:", service);
-    
+
     if (!service) {
       console.log("❌ Serviço não encontrado");
       console.log("🔍 Tentando buscar diretamente no localStorage...");
-      
+
       // Tentar buscar diretamente no localStorage
-      const localData = localStorage.getItem('pet_services');
+      const localData = localStorage.getItem("pet_services");
       const localServices = localData ? JSON.parse(localData) : [];
       console.log("🔍 Serviços no localStorage:", localServices);
-      const localService = localServices.find(s => s.id === serviceId);
+      const localService = localServices.find((s) => s.id === serviceId);
       console.log("🔍 Serviço encontrado no localStorage:", localService);
-      
+
       ui.error("Serviço não encontrado!");
       return;
     }
@@ -3317,10 +3350,10 @@ class PetShopApp {
         await store.deleteService(serviceId);
         console.log("✅ Serviço excluído com sucesso");
         ui.success("Serviço excluído com sucesso!");
-        
+
         // Aguardar um pouco para garantir que a sincronização seja concluída
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         this.renderServicos();
       } catch (error) {
         console.error("❌ Erro ao excluir serviço:", error);
@@ -3334,7 +3367,7 @@ class PetShopApp {
   // ===== MÉTODOS DE AGENDAMENTOS =====
   async renderAgendamentos() {
     const content = document.getElementById("content");
-    
+
     // Adicionar classe específica para página de agendamentos
     content.className = "agendamentos-page";
 
@@ -4987,28 +5020,30 @@ Entre em contato conosco para agendar o reforço!`;
 
     // Verificar se pet tem agendamentos vinculados
     const appointments = store.getAppointmentsByPet(petId);
-    let confirmMessage = `Tem certeza que deseja excluir o pet "${pet.nome || "Sem nome"}"?`;
-    
+    let confirmMessage = `Tem certeza que deseja excluir o pet "${
+      pet.nome || "Sem nome"
+    }"?`;
+
     if (appointments.length > 0) {
       confirmMessage += `\n\n⚠️ Este pet tem ${appointments.length} agendamento(s) vinculado(s) que serão cancelados automaticamente.`;
     }
 
-    const confirmed = await ui.confirm(
-      confirmMessage,
-      "Confirmar Exclusão",
-      { type: "danger" }
-    );
+    const confirmed = await ui.confirm(confirmMessage, "Confirmar Exclusão", {
+      type: "danger",
+    });
 
     if (confirmed) {
       try {
         await store.deletePet(petId);
-        
+
         if (appointments.length > 0) {
-          ui.success(`Pet excluído com sucesso! ${appointments.length} agendamento(s) foram cancelados.`);
+          ui.success(
+            `Pet excluído com sucesso! ${appointments.length} agendamento(s) foram cancelados.`
+          );
         } else {
           ui.success("Pet excluído com sucesso!");
         }
-        
+
         this.renderPets();
       } catch (error) {
         ui.error("Erro ao excluir pet: " + error.message);
@@ -5194,7 +5229,9 @@ Entre em contato conosco para agendar o reforço!`;
                       service.id
                     }" style="display: none;">
                       <h4 class="variation-title">Selecione ${
-                        service.tipoVariacao === "peso" ? "a faixa de peso" : "o porte"
+                        service.tipoVariacao === "peso"
+                          ? "a faixa de peso"
+                          : "o porte"
                       }:</h4>
                       <div class="variation-group">
                         ${
@@ -5432,7 +5469,7 @@ Entre em contato conosco para agendar o reforço!`;
                   name="valorDesconto" 
                   class="form-input" 
                   value="${
-                    appointment?.desconto?.valor 
+                    appointment?.desconto?.valor
                       ? MoneyUtils.formatBRL(appointment.desconto.valor)
                       : ""
                   }"
@@ -5672,8 +5709,13 @@ Entre em contato conosco para agendar o reforço!`;
 
     // Calcular desconto
     const temDesconto = formData.get("temDesconto") === "on";
-    const valorDesconto = temDesconto ? MoneyUtils.parseBRL(formData.get("valorDesconto")) : 0;
-    const totalComDesconto = temDesconto && valorDesconto > 0 ? totalPrevisto - valorDesconto : totalPrevisto;
+    const valorDesconto = temDesconto
+      ? MoneyUtils.parseBRL(formData.get("valorDesconto"))
+      : 0;
+    const totalComDesconto =
+      temDesconto && valorDesconto > 0
+        ? totalPrevisto - valorDesconto
+        : totalPrevisto;
 
     console.log("🔍 Itens processados:", itens);
     console.log("🔍 Desconto aplicado:", valorDesconto);
@@ -5684,10 +5726,13 @@ Entre em contato conosco para agendar o reforço!`;
       petId: formData.get("petId") || null,
       itens: itens,
       totalPrevisto: totalComDesconto,
-      desconto: temDesconto && valorDesconto > 0 ? {
-        valor: valorDesconto,
-        aplicado: true
-      } : null,
+      desconto:
+        temDesconto && valorDesconto > 0
+          ? {
+              valor: valorDesconto,
+              aplicado: true,
+            }
+          : null,
       dataHoraInicio: dataHoraInicio,
       duracaoMin: parseInt(formData.get("duracaoMin")),
       profissionalId: null, // Sempre null pois só trabalha uma pessoa
@@ -5700,7 +5745,8 @@ Entre em contato conosco para agendar o reforço!`;
           formData.get("paymentStatus") === "pago"
             ? new Date().toISOString().split("T")[0]
             : null,
-        valorPago: formData.get("paymentStatus") === "pago" ? totalComDesconto : 0,
+        valorPago:
+          formData.get("paymentStatus") === "pago" ? totalComDesconto : 0,
       },
       observacoes: formData.get("observacoes") || "",
     };
@@ -6096,8 +6142,6 @@ Entre em contato conosco para agendar o reforço!`;
     const container = document.querySelector(".data-container");
     container.innerHTML = this.renderAppointmentsTable(filtered);
   }
-
-
 
   // ===== PRONTUÁRIOS VETERINÁRIOS =====
   renderProntuarios() {
@@ -7875,7 +7919,7 @@ Entre em contato conosco para agendar o reforço!`;
 
     document.getElementById("totalValue").textContent =
       MoneyUtils.formatBRL(total);
-    
+
     // Atualizar total com desconto se aplicável
     this.updateTotalWithDiscount();
   }
@@ -7885,7 +7929,7 @@ Entre em contato conosco para agendar o reforço!`;
     const temDesconto = document.getElementById("temDesconto");
     const descontoGroup = document.getElementById("descontoGroup");
     const discountPreview = document.getElementById("discountPreview");
-    
+
     if (temDesconto.checked) {
       descontoGroup.style.display = "block";
       this.updateTotalWithDiscount();
@@ -7903,7 +7947,7 @@ Entre em contato conosco para agendar o reforço!`;
     const discountPreview = document.getElementById("discountPreview");
     const discountValue = document.getElementById("discountValue");
     const finalTotalValue = document.getElementById("finalTotalValue");
-    
+
     if (!temDesconto || !temDesconto.checked) {
       discountPreview.style.display = "none";
       return;
@@ -7911,10 +7955,10 @@ Entre em contato conosco para agendar o reforço!`;
 
     const desconto = MoneyUtils.parseBRL(valorDesconto.value);
     const totalBase = this.getCurrentTotal();
-    
+
     if (desconto > 0 && desconto <= totalBase) {
       const totalFinal = totalBase - desconto;
-      
+
       discountValue.textContent = MoneyUtils.formatBRL(desconto);
       finalTotalValue.textContent = MoneyUtils.formatBRL(totalFinal);
       discountPreview.style.display = "block";

@@ -473,17 +473,48 @@ class Store {
     return this.save("clients", client);
   }
 
-  deleteClient(id) {
-    // Verificar se cliente tem agendamentos vinculados (pets são excluídos automaticamente)
+  async deleteClient(id) {
+    // Verificar se cliente tem agendamentos vinculados
     const appointments = this.getAppointmentsByClient(id);
 
+    // Verificar se cliente tem pets
+    const pets = this.getPetsByClient(id);
+
     if (appointments.length > 0) {
-      throw new Error(
-        "Não é possível excluir cliente com agendamentos vinculados. Use inativação."
+      console.log(
+        `🔍 Cliente tem ${appointments.length} agendamentos vinculados, cancelando...`
       );
+
+      // Cancelar todos os agendamentos vinculados
+      for (const appointment of appointments) {
+        const updatedAppointment = {
+          ...appointment,
+          status: "cancelado",
+          motivoCancelamento: "Cliente excluído",
+          dataCancelamento: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        await this.save("appointments", updatedAppointment);
+        console.log(`✅ Agendamento ${appointment.id} cancelado`);
+      }
+
+      console.log(`✅ Todos os agendamentos do cliente foram cancelados`);
     }
 
-    return this.delete("clients", id);
+    if (pets.length > 0) {
+      console.log(`🔍 Cliente tem ${pets.length} pet(s), excluindo...`);
+
+      // Excluir todos os pets do cliente (que por sua vez cancelarão seus agendamentos)
+      for (const pet of pets) {
+        await this.deletePet(pet.id);
+        console.log(`✅ Pet ${pet.nome || pet.id} excluído`);
+      }
+
+      console.log(`✅ Todos os pets do cliente foram excluídos`);
+    }
+
+    return await this.delete("clients", id);
   }
 
   getPetsByClient(clientId) {
