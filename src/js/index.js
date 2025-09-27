@@ -3274,8 +3274,20 @@ class PetShopApp {
   }
 
   async deleteService(serviceId) {
+    console.log("🔍 deleteService chamado com ID:", serviceId);
+    
     const service = await store.getService(serviceId);
-    if (!service) return;
+    console.log("🔍 Serviço encontrado:", service);
+    
+    if (!service) {
+      console.log("❌ Serviço não encontrado");
+      ui.error("Serviço não encontrado!");
+      return;
+    }
+
+    console.log("🔍 Verificando agendamentos vinculados...");
+    const appointments = store.getAppointmentsByService(serviceId);
+    console.log("🔍 Agendamentos vinculados:", appointments);
 
     const confirmed = await ui.confirm(
       `Tem certeza que deseja excluir o serviço "${service.nome}"?`,
@@ -3283,14 +3295,21 @@ class PetShopApp {
       { type: "danger" }
     );
 
+    console.log("🔍 Usuário confirmou:", confirmed);
+
     if (confirmed) {
       try {
+        console.log("🔍 Tentando excluir serviço...");
         store.deleteService(serviceId);
+        console.log("✅ Serviço excluído com sucesso");
         ui.success("Serviço excluído com sucesso!");
         this.renderServicos();
       } catch (error) {
+        console.error("❌ Erro ao excluir serviço:", error);
         ui.error("Erro ao excluir serviço: " + error.message);
       }
+    } else {
+      console.log("❌ Usuário cancelou a exclusão");
     }
   }
 
