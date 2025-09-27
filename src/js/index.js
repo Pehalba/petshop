@@ -927,7 +927,7 @@ class PetShopApp {
               <button class="btn btn-sm btn-danger" onclick="app.deleteClient('${
                 client.id
               }')" title="Excluir">
-                <i class="icon-trash"></i>
+                ✕
               </button>
             </div>
           </td>
@@ -2297,7 +2297,7 @@ class PetShopApp {
               <button class="btn btn-sm btn-danger" onclick="app.deleteService('${
                 service.id
               }')" title="Excluir">
-                <i class="icon-trash"></i>
+                ✕
               </button>
             </div>
           </td>
@@ -3692,7 +3692,7 @@ class PetShopApp {
               <button class="btn btn-sm btn-danger" onclick="app.deletePet('${
                 pet.id
               }')" title="Excluir">
-                <i class="icon-trash"></i>
+                ✕
               </button>
             </div>
           </td>
@@ -4157,7 +4157,7 @@ class PetShopApp {
           }', '${vacina.nomeVacina}', '${
       vacina.dataAplicacao
     }')" title="Deletar vacina">
-            <i class="icon-trash"></i> Deletar
+            ✕ Deletar
           </button>
         </div>
       </div>
@@ -6177,7 +6177,7 @@ Entre em contato conosco para agendar o reforço!`;
                     <button class="btn btn-sm btn-danger" onclick="app.deleteProntuario('${
                       prontuario.id
                     }')" title="Excluir">
-                      <i class="icon-trash"></i>
+                      ✕
                     </button>
                   </td>
                 </tr>
@@ -7098,7 +7098,7 @@ Entre em contato conosco para agendar o reforço!`;
               <button class="btn btn-sm btn-danger" onclick="app.deleteProntuario('${
                 prontuario.id
               }', '${petId}')" title="Deletar prontuário">
-                <i class="icon-trash"></i> Deletar
+                ✕ Deletar
               </button>
             </div>
           </div>

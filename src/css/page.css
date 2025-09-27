@@ -1684,7 +1684,7 @@
 .data-table-actions {
   display: flex;
   gap: var(--spacing-1);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
   padding: var(--spacing-1);
@@ -1693,7 +1693,7 @@
 .data-table-actions .btn {
   padding: var(--spacing-1) var(--spacing-2);
   font-size: 0.75rem;
-  min-width: 60px;
+  min-width: 32px;
   height: 28px;
   display: flex;
   align-items: center;
@@ -3453,14 +3453,12 @@
   color: var(--color-primary);
 }
 
-/* Botões de pagamento com tamanho fixo */
+/* Botões de ação com tamanho flexível */
 .data-table-actions .btn {
-  min-width: 80px !important;
-  width: 80px !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  min-width: 32px;
+  text-align: center;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Campo de cliente no formulário de prontuário */
