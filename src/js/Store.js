@@ -189,12 +189,12 @@ class Store {
   // Limpar campos undefined (Firebase não aceita)
   cleanUndefinedFields(obj) {
     if (obj === null || obj === undefined) return obj;
-    
+
     if (Array.isArray(obj)) {
-      return obj.map(item => this.cleanUndefinedFields(item));
+      return obj.map((item) => this.cleanUndefinedFields(item));
     }
-    
-    if (typeof obj === 'object') {
+
+    if (typeof obj === "object") {
       const cleaned = {};
       for (const [key, value] of Object.entries(obj)) {
         if (value !== undefined) {
@@ -203,75 +203,100 @@ class Store {
       }
       return cleaned;
     }
-    
+
     return obj;
   }
 
   // Mesclar dados do Firebase com dados locais, priorizando dados locais mais recentes
   mergeItems(firebaseItems, localItems) {
     const merged = [...firebaseItems];
-    
+
     // Adicionar ou atualizar itens locais que não existem no Firebase ou são mais recentes
-    localItems.forEach(localItem => {
-      const existingIndex = merged.findIndex(item => item.id === localItem.id);
-      
+    localItems.forEach((localItem) => {
+      const existingIndex = merged.findIndex(
+        (item) => item.id === localItem.id
+      );
+
       if (existingIndex >= 0) {
         // Item existe no Firebase, verificar qual é mais recente
         const firebaseItem = merged[existingIndex];
-        const localUpdatedAt = new Date(localItem.updatedAt || localItem.createdAt || 0);
-        const firebaseUpdatedAt = new Date(firebaseItem.updatedAt || firebaseItem.createdAt || 0);
-        
+        const localUpdatedAt = new Date(
+          localItem.updatedAt || localItem.createdAt || 0
+        );
+        const firebaseUpdatedAt = new Date(
+          firebaseItem.updatedAt || firebaseItem.createdAt || 0
+        );
+
         if (localUpdatedAt > firebaseUpdatedAt) {
           // Dados locais são mais recentes, usar dados locais
           merged[existingIndex] = localItem;
-          console.log(`🔄 Usando dados locais mais recentes para ${localItem.id}`);
+          console.log(
+            `🔄 Usando dados locais mais recentes para ${localItem.id}`
+          );
         }
       } else {
         // Item não existe no Firebase, adicionar
         merged.push(localItem);
-        console.log(`➕ Adicionando item local ${localItem.id} que não existe no Firebase`);
+        console.log(
+          `➕ Adicionando item local ${localItem.id} que não existe no Firebase`
+        );
       }
     });
-    
+
     return merged;
   }
 
   async getAll(storeName) {
     console.log(`🔍 getAll chamado para: ${storeName}`);
-    
+
     // Verificar se Firebase está disponível
     if (!window.firebaseService || !window.firebaseService.isConnected()) {
-      console.log(`🔍 Firebase não disponível, usando localStorage para: ${storeName}`);
+      console.log(
+        `🔍 Firebase não disponível, usando localStorage para: ${storeName}`
+      );
       // Fallback para localStorage se Firebase não estiver pronto
       const data = localStorage.getItem(this.stores[storeName]);
       const result = data ? JSON.parse(data) : [];
-      console.log(`🔍 ${storeName} do localStorage:`, result.length, 'itens');
+      console.log(`🔍 ${storeName} do localStorage:`, result.length, "itens");
       return result;
     }
 
     try {
       // Buscar dados diretamente do Firebase
-      const firebaseItems = await window.firebaseService.getAllDocuments(storeName);
-      console.log(`✅ ${storeName} carregados da nuvem:`, firebaseItems.length, 'itens');
-      
+      const firebaseItems = await window.firebaseService.getAllDocuments(
+        storeName
+      );
+      console.log(
+        `✅ ${storeName} carregados da nuvem:`,
+        firebaseItems.length,
+        "itens"
+      );
+
       // Buscar dados locais para comparação
       const localData = localStorage.getItem(this.stores[storeName]);
       const localItems = localData ? JSON.parse(localData) : [];
-      
+
       // Mesclar dados: priorizar dados locais mais recentes
       const mergedItems = this.mergeItems(firebaseItems, localItems);
-      
+
       // Sincronizar com localStorage para manter consistência
       localStorage.setItem(this.stores[storeName], JSON.stringify(mergedItems));
       console.log(`🔄 ${storeName} sincronizado com localStorage`);
-      
+
       return mergedItems;
     } catch (error) {
-      console.error(`❌ Erro ao carregar ${storeName} da nuvem, usando localStorage:`, error);
+      console.error(
+        `❌ Erro ao carregar ${storeName} da nuvem, usando localStorage:`,
+        error
+      );
       // Fallback para localStorage em caso de erro
       const data = localStorage.getItem(this.stores[storeName]);
       const result = data ? JSON.parse(data) : [];
-      console.log(`🔍 ${storeName} do localStorage (fallback):`, result.length, 'itens');
+      console.log(
+        `🔍 ${storeName} do localStorage (fallback):`,
+        result.length,
+        "itens"
+      );
       return result;
     }
   }
@@ -289,7 +314,10 @@ class Store {
       const item = await window.firebaseService.getDocument(storeName, id);
       return item;
     } catch (error) {
-      console.error(`❌ Erro ao buscar ${storeName}/${id} da nuvem, usando localStorage:`, error);
+      console.error(
+        `❌ Erro ao buscar ${storeName}/${id} da nuvem, usando localStorage:`,
+        error
+      );
       // Fallback para localStorage em caso de erro
       const items = this.getAllSync(storeName);
       return items.find((item) => item.id === id) || null;
@@ -301,14 +329,14 @@ class Store {
     const itemData = {
       ...item,
       updatedAt: new Date().toISOString(),
-      createdAt: item.createdAt || new Date().toISOString()
+      createdAt: item.createdAt || new Date().toISOString(),
     };
 
     // Limpar campos undefined (Firebase não aceita)
     console.log("🧹 Dados antes da limpeza:", itemData);
     const cleanedData = this.cleanUndefinedFields(itemData);
     console.log("🧹 Dados após limpeza:", cleanedData);
-    
+
     // Usar dados limpos
     Object.assign(itemData, cleanedData);
 
@@ -332,11 +360,14 @@ class Store {
     try {
       // Salvar diretamente no Firebase
       await window.firebaseService.saveDocument(storeName, item.id, itemData);
-      
+
       console.log(`✅ ${storeName} salvo na nuvem:`, item.id);
       return item;
     } catch (error) {
-      console.error(`❌ Erro ao salvar ${storeName} na nuvem, salvando localmente:`, error);
+      console.error(
+        `❌ Erro ao salvar ${storeName} na nuvem, salvando localmente:`,
+        error
+      );
       // Fallback para localStorage em caso de erro
       const items = this.getAllSync(storeName);
       const existingIndex = items.findIndex((i) => i.id === item.id);
@@ -359,7 +390,10 @@ class Store {
       // Fallback para localStorage se Firebase não estiver pronto
       const items = this.getAllSync(storeName);
       const filteredItems = items.filter((item) => item.id !== id);
-      localStorage.setItem(this.stores[storeName], JSON.stringify(filteredItems));
+      localStorage.setItem(
+        this.stores[storeName],
+        JSON.stringify(filteredItems)
+      );
       console.log(`✅ ${storeName} excluído localmente:`, id);
       return true;
     }
@@ -367,15 +401,21 @@ class Store {
     try {
       // Excluir diretamente do Firebase
       await window.firebaseService.deleteDocument(storeName, id);
-      
+
       console.log(`✅ ${storeName} excluído da nuvem:`, id);
       return true;
     } catch (error) {
-      console.error(`❌ Erro ao excluir ${storeName} da nuvem, excluindo localmente:`, error);
+      console.error(
+        `❌ Erro ao excluir ${storeName} da nuvem, excluindo localmente:`,
+        error
+      );
       // Fallback para localStorage em caso de erro
       const items = this.getAllSync(storeName);
       const filteredItems = items.filter((item) => item.id !== id);
-      localStorage.setItem(this.stores[storeName], JSON.stringify(filteredItems));
+      localStorage.setItem(
+        this.stores[storeName],
+        JSON.stringify(filteredItems)
+      );
       console.log(`✅ ${storeName} excluído localmente:`, id);
       return true;
     }
@@ -464,7 +504,7 @@ class Store {
     return this.save("services", service);
   }
 
-  deleteService(id) {
+  async deleteService(id) {
     // Verificar se serviço tem agendamentos vinculados
     const appointments = this.getAppointmentsByService(id);
 
@@ -474,7 +514,7 @@ class Store {
       );
     }
 
-    return this.delete("services", id);
+    return await this.delete("services", id);
   }
 
   getAppointmentsByService(serviceId) {
@@ -513,8 +553,6 @@ class Store {
       (apt) => apt.profissionalId === professionalId
     );
   }
-
-
 
   // Configurações
   getSettings() {
@@ -646,8 +684,8 @@ class Store {
       const appointments = await this.getAppointments();
       const fromDate = new Date(from);
       const toDate = new Date(to);
-      
-      return appointments.filter(appointment => {
+
+      return appointments.filter((appointment) => {
         const appointmentDate = new Date(appointment.dataHoraInicio);
         return appointmentDate >= fromDate && appointmentDate <= toDate;
       });
@@ -705,12 +743,12 @@ class Store {
   // Função para limpar cache e forçar sincronização
   async clearCacheAndSync() {
     console.log("🧹 Limpando cache e forçando sincronização...");
-    
+
     // Limpar localStorage
-    Object.values(this.stores).forEach(storeKey => {
+    Object.values(this.stores).forEach((storeKey) => {
       localStorage.removeItem(storeKey);
     });
-    
+
     console.log("✅ Cache limpo, dados serão recarregados do Firebase");
   }
 
@@ -734,25 +772,33 @@ class Store {
   // Buscar lembretes vencidos ou próximos do vencimento
   async getDueReminders() {
     const reminders = await this.getReminders();
-    const today = new Date().toISOString().split('T')[0];
-    
-    return reminders.filter(reminder => {
+    const today = new Date().toISOString().split("T")[0];
+
+    return reminders.filter((reminder) => {
       if (!reminder.ativo) return false;
-      
+
       const notifyFrom = reminder.notifyFrom;
       const proximaDose = reminder.proximaDose;
-      
+
       // Lembretes que devem ser notificados hoje ou estão atrasados
-      return (notifyFrom <= today && today <= proximaDose) || today > proximaDose;
+      return (
+        (notifyFrom <= today && today <= proximaDose) || today > proximaDose
+      );
     });
   }
 
   // Criar/atualizar lembrete de vacina
-  async upsertVaccineReminder({ petId, clienteId, nomeVacina, proximaDose, antecedenciaDias = 7 }) {
+  async upsertVaccineReminder({
+    petId,
+    clienteId,
+    nomeVacina,
+    proximaDose,
+    antecedenciaDias = 7,
+  }) {
     const notifyFrom = this.addDays(proximaDose, -antecedenciaDias);
-    
+
     const reminderData = {
-      tipo: 'vacina',
+      tipo: "vacina",
       petId,
       clienteId,
       nomeVacina,
@@ -760,16 +806,17 @@ class Store {
       antecedenciaDias,
       notifyFrom,
       notifiedAt: null,
-      ativo: true
+      ativo: true,
     };
 
     // Verificar se já existe lembrete para esta vacina
     const existingReminders = await this.getReminders();
-    const existing = existingReminders.find(r => 
-      r.petId === petId && 
-      r.nomeVacina === nomeVacina && 
-      r.tipo === 'vacina' &&
-      r.ativo
+    const existing = existingReminders.find(
+      (r) =>
+        r.petId === petId &&
+        r.nomeVacina === nomeVacina &&
+        r.tipo === "vacina" &&
+        r.ativo
     );
 
     if (existing) {
@@ -788,10 +835,10 @@ class Store {
     if (!reminder) return null;
 
     const newNotifyFrom = this.addDays(reminder.notifyFrom, days);
-    return await this.saveReminder({ 
-      ...reminder, 
+    return await this.saveReminder({
+      ...reminder,
       notifyFrom: newNotifyFrom,
-      notifiedAt: null 
+      notifiedAt: null,
     });
   }
 
@@ -800,10 +847,10 @@ class Store {
     const reminder = await this.getReminder(id);
     if (!reminder) return null;
 
-    return await this.saveReminder({ 
-      ...reminder, 
-      notifiedAt: new Date().toISOString().split('T')[0],
-      ativo: false 
+    return await this.saveReminder({
+      ...reminder,
+      notifiedAt: new Date().toISOString().split("T")[0],
+      ativo: false,
     });
   }
 
@@ -812,9 +859,9 @@ class Store {
     const reminder = await this.getReminder(id);
     if (!reminder) return null;
 
-    return await this.saveReminder({ 
-      ...reminder, 
-      ativo: false 
+    return await this.saveReminder({
+      ...reminder,
+      ativo: false,
     });
   }
 
@@ -822,7 +869,7 @@ class Store {
   addDays(dateString, days) {
     const date = new Date(dateString);
     date.setDate(date.getDate() + days);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   }
 
   // Função para limpar dados corrompidos
