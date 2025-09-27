@@ -1681,7 +1681,7 @@
 }
 
 /* Botões da tabela de agendamentos com largura uniforme */
-.data-table-actions .btn {
+.agendamentos-page .data-table-actions .btn {
   width: 80px !important;
   min-width: 80px !important;
   max-width: 80px !important;

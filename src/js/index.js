@@ -3297,6 +3297,9 @@ class PetShopApp {
   // ===== MÉTODOS DE AGENDAMENTOS =====
   async renderAgendamentos() {
     const content = document.getElementById("content");
+    
+    // Adicionar classe específica para página de agendamentos
+    content.className = "agendamentos-page";
 
     try {
       const allAppointments = await store.getAppointments();
