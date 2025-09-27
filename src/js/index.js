@@ -13,7 +13,6 @@ class PetShopApp {
       pets: this.renderPets.bind(this),
       servicos: this.renderServicos.bind(this),
       agendamentos: this.renderAgendamentos.bind(this),
-      prontuarios: this.renderProntuarios.bind(this),
       relatorios: this.renderRelatorios.bind(this),
       configuracoes: this.renderConfiguracoes.bind(this),
     };
@@ -156,10 +155,6 @@ class PetShopApp {
                         <span class="nav-link-icon">📅</span>
                         Agendamentos
                     </a>
-                    <a href="#" class="nav-link" data-page="prontuarios">
-                        <span class="nav-link-icon">📋</span>
-                        Prontuários
-                    </a>
                     <a href="#" class="nav-link" data-page="relatorios">
                         <span class="nav-link-icon">📈</span>
                         Relatórios
@@ -220,7 +215,6 @@ class PetShopApp {
             <li><a href="#" data-page="pets">Pets</a></li>
             <li><a href="#" data-page="servicos">Serviços</a></li>
             <li><a href="#" data-page="agendamentos">Agendamentos</a></li>
-            <li><a href="#" data-page="prontuarios">Prontuários</a></li>
                         </ul>
                     </div>
                     <div class="footer-section">
@@ -3466,7 +3460,7 @@ class PetShopApp {
               }')" title="Editar">
                 ✏️ Editar
               </button>
-              <button class="btn btn-info" onclick="app.sendConfirmationWhatsApp('${
+              <button class="btn btn-outline" onclick="app.sendConfirmationWhatsApp('${
                 appointment.id
               }')" title="Enviar confirmação via WhatsApp">
                 📱 WhatsApp
@@ -3489,7 +3483,7 @@ class PetShopApp {
                     : "💰 A Receber"
                 }
               </button>
-              <button class="btn btn-danger" onclick="app.cancelAppointment('${
+              <button class="btn btn-outline" onclick="app.cancelAppointment('${
                 appointment.id
               }')" title="Cancelar">
                 ❌ Cancelar
