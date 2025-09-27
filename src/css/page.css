@@ -1680,6 +1680,19 @@
   text-align: center;
 }
 
+/* Botões da tabela de agendamentos com largura uniforme */
+.data-table-actions .btn {
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 0.7rem !important;
+  padding: var(--spacing-1) var(--spacing-1) !important;
+}
+
 /* Melhorar botões de ação */
 .data-table-actions {
   display: flex;
