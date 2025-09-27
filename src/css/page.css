@@ -1587,15 +1587,17 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 120px;
 }
 
 .appointment-datetime strong {
   font-size: 0.9rem;
-  color: var(--gray-900);
+  color: var(--text-900);
+  font-weight: 600;
 }
 
 .appointment-datetime small {
-  color: var(--gray-600);
+  color: var(--text-500);
   font-size: 0.8rem;
 }
 
@@ -1603,11 +1605,139 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 180px;
+}
+
+.appointment-client strong {
+  font-size: 0.9rem;
+  color: var(--text-900);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.appointment-client strong:hover {
+  color: var(--primary);
 }
 
 .appointment-client small {
-  color: var(--gray-600);
+  color: var(--text-500);
   font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* Melhorar layout da tabela de agendamentos */
+.data-table table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* Ajustar larguras das colunas da tabela de agendamentos */
+.data-table th:nth-child(1), /* Data/Hora */
+.data-table td:nth-child(1) {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
+}
+
+.data-table th:nth-child(2), /* Cliente */
+.data-table td:nth-child(2) {
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
+}
+
+.data-table th:nth-child(3), /* Serviços */
+.data-table td:nth-child(3) {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+}
+
+.data-table th:nth-child(4), /* Total */
+.data-table td:nth-child(4) {
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-900);
+}
+
+.data-table th:nth-child(5), /* Pagamento */
+.data-table td:nth-child(5) {
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+  text-align: center;
+}
+
+.data-table th:nth-child(6), /* Ações */
+.data-table td:nth-child(6) {
+  width: 400px;
+  min-width: 400px;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Melhorar botões de ação */
+.data-table-actions {
+  display: flex;
+  gap: var(--spacing-1);
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-1);
+}
+
+.data-table-actions .btn {
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: 0.75rem;
+  min-width: 60px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  font-weight: 500;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.data-table-actions .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Responsividade para tabela de agendamentos */
+@media (max-width: 1200px) {
+  .data-table {
+    min-width: 1000px;
+  }
+  
+  .data-table-actions {
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+  
+  .data-table-actions .btn {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .data-table th:nth-child(3), /* Serviços */
+  .data-table td:nth-child(3) {
+    display: none;
+  }
+  
+  .data-table th:nth-child(4), /* Total */
+  .data-table td:nth-child(4) {
+    display: none;
+  }
 }
 
 /* Grid de serviços no formulário */

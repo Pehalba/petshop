@@ -3180,15 +3180,6 @@ class PetShopApp {
         </div>
       </div>
 
-      <div class="view-tabs">
-        <button class="tab-btn active" onclick="app.switchAppointmentView('list')">
-          <i class="icon-list"></i> Lista
-        </button>
-        <button class="tab-btn" onclick="app.switchAppointmentView('calendar')">
-          <i class="icon-calendar"></i> Calendário
-        </button>
-      </div>
-
       <div class="data-container">
         ${await this.renderAppointmentsTable(appointments)}
       </div>
@@ -5742,118 +5733,7 @@ Entre em contato conosco para agendar o reforço!`;
     container.innerHTML = this.renderAppointmentsTable(filtered);
   }
 
-  // Alternar visualização (lista/calendário)
-  switchAppointmentView(view) {
-    const tabButtons = document.querySelectorAll(".tab-btn");
-    tabButtons.forEach((btn) => btn.classList.remove("active"));
 
-    if (view === "list") {
-      document
-        .querySelector('.tab-btn[onclick*="list"]')
-        .classList.add("active");
-      // Implementar visualização de lista (já implementada)
-    } else if (view === "calendar") {
-      document
-        .querySelector('.tab-btn[onclick*="calendar"]')
-        .classList.add("active");
-      this.renderAppointmentCalendar();
-    }
-  }
-
-  // Renderizar calendário de agendamentos
-  async renderAppointmentCalendar() {
-    const appointments = await store.getAppointments();
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-
-    const weeks = DateUtils.getWeeksInMonth(today);
-
-    const content = `
-      <div class="calendar-container">
-        <div class="calendar-header">
-          <button class="btn btn-outline" onclick="app.previousMonth()">
-            <i class="icon-arrow-left"></i>
-          </button>
-          <h3>${DateUtils.getMonthName(today)} ${currentYear}</h3>
-          <button class="btn btn-outline" onclick="app.nextMonth()">
-            <i class="icon-arrow-right"></i>
-          </button>
-        </div>
-        
-        <div class="calendar-grid">
-          <div class="calendar-weekdays">
-            <div class="weekday">Dom</div>
-            <div class="weekday">Seg</div>
-            <div class="weekday">Ter</div>
-            <div class="weekday">Qua</div>
-            <div class="weekday">Qui</div>
-            <div class="weekday">Sex</div>
-            <div class="weekday">Sáb</div>
-          </div>
-          
-          <div class="calendar-days">
-            ${weeks
-              .map(
-                (week) => `
-              <div class="calendar-week">
-                ${week
-                  .map((day) => {
-                    if (!day) return '<div class="calendar-day empty"></div>';
-
-                    const dayAppointments = appointments.filter((apt) =>
-                      DateUtils.isSameDay(apt.dataHoraInicio, day)
-                    );
-
-                    const isToday = DateUtils.isSameDay(day, new Date());
-
-                    return `
-                    <div class="calendar-day ${
-                      isToday ? "today" : ""
-                    }" onclick="app.showDayAppointments('${day.toISOString()}')">
-                      <div class="day-number">${day.getDate()}</div>
-                      <div class="day-appointments">
-                        ${dayAppointments
-                          .slice(0, 3)
-                          .map((apt) => {
-                            const client = store.getClient(apt.clienteId);
-                            return `
-                            <div class="appointment-mini ${
-                              apt.status
-                            }" title="${
-                              client?.nomeCompleto
-                            } - ${DateUtils.formatTime(apt.dataHoraInicio)}">
-                              ${DateUtils.formatTime(apt.dataHoraInicio)} ${
-                              client?.nomeCompleto?.split(" ")[0] || ""
-                            }
-                            </div>
-                          `;
-                          })
-                          .join("")}
-                        ${
-                          dayAppointments.length > 3
-                            ? `<div class="more-appointments">+${
-                                dayAppointments.length - 3
-                              } mais</div>`
-                            : ""
-                        }
-                      </div>
-                    </div>
-                  `;
-                  })
-                  .join("")}
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-      </div>
-    `;
-
-    const container = document.querySelector(".data-container");
-    container.innerHTML = content;
-  }
 
   // ===== PRONTUÁRIOS VETERINÁRIOS =====
   renderProntuarios() {
