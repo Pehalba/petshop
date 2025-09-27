@@ -3300,9 +3300,13 @@ class PetShopApp {
     if (confirmed) {
       try {
         console.log("🔍 Tentando excluir serviço...");
-        store.deleteService(serviceId);
+        await store.deleteService(serviceId);
         console.log("✅ Serviço excluído com sucesso");
         ui.success("Serviço excluído com sucesso!");
+        
+        // Aguardar um pouco para garantir que a sincronização seja concluída
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         this.renderServicos();
       } catch (error) {
         console.error("❌ Erro ao excluir serviço:", error);
