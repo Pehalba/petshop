@@ -2751,6 +2751,49 @@
   font-style: normal;
 }
 
+/* ===== DESCONTO ===== */
+.discount-preview {
+  background-color: var(--brand-rose-50);
+  border: 1px solid var(--brand-rose-200);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-4);
+  margin-top: var(--spacing-3);
+}
+
+.discount-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2);
+}
+
+.discount-label {
+  font-weight: 500;
+  color: var(--text-700);
+}
+
+.discount-value {
+  font-weight: 600;
+  color: var(--success-600);
+  font-size: 1.1rem;
+}
+
+.final-total {
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--brand-rose-200);
+  text-align: center;
+}
+
+.final-total strong {
+  color: var(--text-900);
+  font-size: 1.1rem;
+}
+
+#finalTotalValue {
+  color: var(--primary);
+  font-size: 1.2rem;
+}
+
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 1024px) {
   .data-table th:nth-child(3), /* Email */

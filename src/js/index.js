@@ -2481,7 +2481,7 @@ class PetShopApp {
           </div>
 
           <div class="form-section">
-            <h3>Variações por Porte</h3>
+            <h3>Variações de Preço</h3>
             <div class="form-group">
               <label class="checkbox-label">
                 <input 
@@ -2491,73 +2491,183 @@ class PetShopApp {
                   ${service?.temVariacoes ? "checked" : ""}
                 >
                 <span class="checkmark"></span>
-                Este serviço tem preços diferentes por porte do pet
+                Este serviço tem preços diferentes por porte ou peso do pet
               </label>
             </div>
 
             <div id="variacoesGroup" style="display: ${
               service?.temVariacoes ? "block" : "none"
             };">
-              <div class="variacoes-grid">
-                <div class="variacao-item">
-                  <label for="precoPequeno">Pequeno</label>
-                  <div class="input-group">
-                    <span class="input-group-text">R$</span>
-                    <input 
-                      type="text" 
-                      id="precoPequeno" 
-                      name="precoPequeno" 
-                      class="form-input" 
-                      value="${
-                        service?.variacoes?.pequeno
-                          ? MoneyUtils.formatBRL(service.variacoes.pequeno)
-                          : MoneyUtils.formatBRL(service?.preco || 0)
-                      }"
-                      placeholder="0,00"
-                    >
+              <div class="form-group">
+                <label for="tipoVariacao">Tipo de Variação *</label>
+                <select 
+                  id="tipoVariacao" 
+                  name="tipoVariacao" 
+                  class="form-select"
+                  required
+                >
+                  <option value="">Selecione o tipo de variação</option>
+                  <option value="porte" ${
+                    service?.tipoVariacao === "porte" ? "selected" : ""
+                  }>Por Porte (Pequeno, Médio, Grande)</option>
+                  <option value="peso" ${
+                    service?.tipoVariacao === "peso" ? "selected" : ""
+                  }>Por Peso (Faixas de peso em kg)</option>
+                </select>
+                <div class="form-error" id="tipoVariacao-error"></div>
+              </div>
+
+              <!-- Variações por Porte -->
+              <div id="variacoesPorte" style="display: ${
+                service?.tipoVariacao === "porte" ? "block" : "none"
+              };">
+                <div class="variacoes-grid">
+                  <div class="variacao-item">
+                    <label for="precoPequeno">Pequeno</label>
+                    <div class="input-group">
+                      <span class="input-group-text">R$</span>
+                      <input 
+                        type="text" 
+                        id="precoPequeno" 
+                        name="precoPequeno" 
+                        class="form-input" 
+                        value="${
+                          service?.variacoes?.pequeno
+                            ? MoneyUtils.formatBRL(service.variacoes.pequeno)
+                            : MoneyUtils.formatBRL(service?.preco || 0)
+                        }"
+                        placeholder="0,00"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="variacao-item">
+                    <label for="precoMedio">Médio</label>
+                    <div class="input-group">
+                      <span class="input-group-text">R$</span>
+                      <input 
+                        type="text" 
+                        id="precoMedio" 
+                        name="precoMedio" 
+                        class="form-input" 
+                        value="${
+                          service?.variacoes?.medio
+                            ? MoneyUtils.formatBRL(service.variacoes.medio)
+                            : MoneyUtils.formatBRL(service?.preco || 0)
+                        }"
+                        placeholder="0,00"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="variacao-item">
+                    <label for="precoGrande">Grande</label>
+                    <div class="input-group">
+                      <span class="input-group-text">R$</span>
+                      <input 
+                        type="text" 
+                        id="precoGrande" 
+                        name="precoGrande" 
+                        class="form-input" 
+                        value="${
+                          service?.variacoes?.grande
+                            ? MoneyUtils.formatBRL(service.variacoes.grande)
+                            : MoneyUtils.formatBRL(service?.preco || 0)
+                        }"
+                        placeholder="0,00"
+                      >
+                    </div>
                   </div>
                 </div>
-
-                <div class="variacao-item">
-                  <label for="precoMedio">Médio</label>
-                  <div class="input-group">
-                    <span class="input-group-text">R$</span>
-                    <input 
-                      type="text" 
-                      id="precoMedio" 
-                      name="precoMedio" 
-                      class="form-input" 
-                      value="${
-                        service?.variacoes?.medio
-                          ? MoneyUtils.formatBRL(service.variacoes.medio)
-                          : MoneyUtils.formatBRL(service?.preco || 0)
-                      }"
-                      placeholder="0,00"
-                    >
-                  </div>
-                </div>
-
-                <div class="variacao-item">
-                  <label for="precoGrande">Grande</label>
-                  <div class="input-group">
-                    <span class="input-group-text">R$</span>
-                    <input 
-                      type="text" 
-                      id="precoGrande" 
-                      name="precoGrande" 
-                      class="form-input" 
-                      value="${
-                        service?.variacoes?.grande
-                          ? MoneyUtils.formatBRL(service.variacoes.grande)
-                          : MoneyUtils.formatBRL(service?.preco || 0)
-                      }"
-                      placeholder="0,00"
-                    >
-                  </div>
+                <div class="form-help">
+                  💡 Dica: O preço base será usado como referência. Ajuste os valores conforme necessário para cada porte.
                 </div>
               </div>
-              <div class="form-help">
-                💡 Dica: O preço base será usado como referência. Ajuste os valores conforme necessário para cada porte.
+
+              <!-- Variações por Peso -->
+              <div id="variacoesPeso" style="display: ${
+                service?.tipoVariacao === "peso" ? "block" : "none"
+              };">
+                <div class="variacoes-grid">
+                  <div class="variacao-item">
+                    <label for="precoAte5kg">Até 5kg</label>
+                    <div class="input-group">
+                      <span class="input-group-text">R$</span>
+                      <input 
+                        type="text" 
+                        id="precoAte5kg" 
+                        name="precoAte5kg" 
+                        class="form-input" 
+                        value="${
+                          service?.variacoes?.ate5kg
+                            ? MoneyUtils.formatBRL(service.variacoes.ate5kg)
+                            : MoneyUtils.formatBRL(service?.preco || 0)
+                        }"
+                        placeholder="0,00"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="variacao-item">
+                    <label for="preco5a15kg">5kg a 15kg</label>
+                    <div class="input-group">
+                      <span class="input-group-text">R$</span>
+                      <input 
+                        type="text" 
+                        id="preco5a15kg" 
+                        name="preco5a15kg" 
+                        class="form-input" 
+                        value="${
+                          service?.variacoes?.de5a15kg
+                            ? MoneyUtils.formatBRL(service.variacoes.de5a15kg)
+                            : MoneyUtils.formatBRL(service?.preco || 0)
+                        }"
+                        placeholder="0,00"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="variacao-item">
+                    <label for="preco15a30kg">15kg a 30kg</label>
+                    <div class="input-group">
+                      <span class="input-group-text">R$</span>
+                      <input 
+                        type="text" 
+                        id="preco15a30kg" 
+                        name="preco15a30kg" 
+                        class="form-input" 
+                        value="${
+                          service?.variacoes?.de15a30kg
+                            ? MoneyUtils.formatBRL(service.variacoes.de15a30kg)
+                            : MoneyUtils.formatBRL(service?.preco || 0)
+                        }"
+                        placeholder="0,00"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="variacao-item">
+                    <label for="precoAcima30kg">Acima de 30kg</label>
+                    <div class="input-group">
+                      <span class="input-group-text">R$</span>
+                      <input 
+                        type="text" 
+                        id="precoAcima30kg" 
+                        name="precoAcima30kg" 
+                        class="form-input" 
+                        value="${
+                          service?.variacoes?.acima30kg
+                            ? MoneyUtils.formatBRL(service.variacoes.acima30kg)
+                            : MoneyUtils.formatBRL(service?.preco || 0)
+                        }"
+                        placeholder="0,00"
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="form-help">
+                  💡 Dica: O preço base será usado como referência. Ajuste os valores conforme necessário para cada faixa de peso.
+                </div>
               </div>
             </div>
           </div>
@@ -2609,28 +2719,38 @@ class PetShopApp {
     // Toggle de variações
     const temVariacoesCheckbox = document.getElementById("temVariacoes");
     const variacoesGroup = document.getElementById("variacoesGroup");
+    const tipoVariacaoSelect = document.getElementById("tipoVariacao");
+    const variacoesPorte = document.getElementById("variacoesPorte");
+    const variacoesPeso = document.getElementById("variacoesPeso");
 
     if (temVariacoesCheckbox) {
       temVariacoesCheckbox.addEventListener("change", (e) => {
         variacoesGroup.style.display = e.target.checked ? "block" : "none";
         if (!e.target.checked) {
           // Limpar variações se desmarcar
-          document.getElementById("precoPequeno").value = "";
-          document.getElementById("precoMedio").value = "";
-          document.getElementById("precoGrande").value = "";
+          this.clearVariationInputs();
         } else {
           // Preencher com preço base se marcar
-          const precoBase = MoneyUtils.parseBRL(
-            document.getElementById("preco").value
-          );
-          if (precoBase > 0) {
-            document.getElementById("precoPequeno").value =
-              MoneyUtils.formatBRL(precoBase);
-            document.getElementById("precoMedio").value =
-              MoneyUtils.formatBRL(precoBase);
-            document.getElementById("precoGrande").value =
-              MoneyUtils.formatBRL(precoBase);
-          }
+          this.fillVariationInputs();
+        }
+      });
+    }
+
+    // Controle de tipo de variação
+    if (tipoVariacaoSelect) {
+      tipoVariacaoSelect.addEventListener("change", (e) => {
+        const tipo = e.target.value;
+        if (tipo === "porte") {
+          variacoesPorte.style.display = "block";
+          variacoesPeso.style.display = "none";
+          this.fillVariationInputs("porte");
+        } else if (tipo === "peso") {
+          variacoesPorte.style.display = "none";
+          variacoesPeso.style.display = "block";
+          this.fillVariationInputs("peso");
+        } else {
+          variacoesPorte.style.display = "none";
+          variacoesPeso.style.display = "none";
         }
       });
     }
@@ -2672,7 +2792,10 @@ class PetShopApp {
     }
 
     // Formatação dos campos de variações
-    const variacaoInputs = ["precoPequeno", "precoMedio", "precoGrande"];
+    const variacaoInputs = [
+      "precoPequeno", "precoMedio", "precoGrande",
+      "precoAte5kg", "preco5a15kg", "preco15a30kg", "precoAcima30kg"
+    ];
 
     variacaoInputs.forEach((inputId) => {
       const input = document.getElementById(inputId);
@@ -2726,6 +2849,66 @@ class PetShopApp {
     }
   }
 
+  // Limpar inputs de variação
+  clearVariationInputs() {
+    const inputs = [
+      "precoPequeno", "precoMedio", "precoGrande",
+      "precoAte5kg", "preco5a15kg", "preco15a30kg", "precoAcima30kg"
+    ];
+    
+    inputs.forEach(inputId => {
+      const input = document.getElementById(inputId);
+      if (input) input.value = "";
+    });
+  }
+
+  // Preencher inputs de variação com preço base
+  fillVariationInputs(tipo = null) {
+    const precoBase = MoneyUtils.parseBRL(document.getElementById("preco").value);
+    
+    if (precoBase <= 0) return;
+
+    const precoFormatado = MoneyUtils.formatBRL(precoBase);
+
+    if (tipo === "porte" || !tipo) {
+      const inputsPorte = ["precoPequeno", "precoMedio", "precoGrande"];
+      inputsPorte.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) input.value = precoFormatado;
+      });
+    }
+
+    if (tipo === "peso" || !tipo) {
+      const inputsPeso = ["precoAte5kg", "preco5a15kg", "preco15a30kg", "precoAcima30kg"];
+      inputsPeso.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) input.value = precoFormatado;
+      });
+    }
+  }
+
+  // Construir dados de variações baseado no tipo
+  buildVariationsData(formData) {
+    const tipoVariacao = formData.get("tipoVariacao");
+    
+    if (tipoVariacao === "porte") {
+      return {
+        pequeno: MoneyUtils.parseBRL(formData.get("precoPequeno")),
+        medio: MoneyUtils.parseBRL(formData.get("precoMedio")),
+        grande: MoneyUtils.parseBRL(formData.get("precoGrande")),
+      };
+    } else if (tipoVariacao === "peso") {
+      return {
+        ate5kg: MoneyUtils.parseBRL(formData.get("precoAte5kg")),
+        de5a15kg: MoneyUtils.parseBRL(formData.get("preco5a15kg")),
+        de15a30kg: MoneyUtils.parseBRL(formData.get("preco15a30kg")),
+        acima30kg: MoneyUtils.parseBRL(formData.get("precoAcima30kg")),
+      };
+    }
+    
+    return null;
+  }
+
   // Salvar serviço
   async saveService(event, serviceId = null) {
     event.preventDefault();
@@ -2743,13 +2926,10 @@ class PetShopApp {
       descricao: formData.get("descricao").trim(),
       ativo: true, // Sempre ativo - se não quiser, pode excluir
       temVariacoes: formData.get("temVariacoes") === "on",
+      tipoVariacao: formData.get("temVariacoes") === "on" ? formData.get("tipoVariacao") : null,
       variacoes:
         formData.get("temVariacoes") === "on"
-          ? {
-              pequeno: MoneyUtils.parseBRL(formData.get("precoPequeno")),
-              medio: MoneyUtils.parseBRL(formData.get("precoMedio")),
-              grande: MoneyUtils.parseBRL(formData.get("precoGrande")),
-            }
+          ? this.buildVariationsData(formData)
           : null,
     };
 
@@ -4962,8 +5142,59 @@ Entre em contato conosco para agendar o reforço!`;
                     <div class="service-variations" id="variations-${
                       service.id
                     }" style="display: none;">
-                      <h4 class="variation-title">Selecione o porte:</h4>
+                      <h4 class="variation-title">Selecione ${
+                        service.tipoVariacao === "peso" ? "a faixa de peso" : "o porte"
+                      }:</h4>
                       <div class="variation-group">
+                        ${
+                          service.tipoVariacao === "peso"
+                            ? `
+                        <label class="variation-label">
+                          <input type="radio" name="variation-${
+                            service.id
+                          }" value="ate5kg" checked>
+                          <span class="variation-option">
+                            <span class="variation-name">Até 5kg</span>
+                            <span class="variation-price">${MoneyUtils.formatBRL(
+                              service.variacoes?.ate5kg || service.preco
+                            )}</span>
+                          </span>
+                        </label>
+                        <label class="variation-label">
+                          <input type="radio" name="variation-${
+                            service.id
+                          }" value="de5a15kg">
+                          <span class="variation-option">
+                            <span class="variation-name">5kg a 15kg</span>
+                            <span class="variation-price">${MoneyUtils.formatBRL(
+                              service.variacoes?.de5a15kg || service.preco
+                            )}</span>
+                          </span>
+                        </label>
+                        <label class="variation-label">
+                          <input type="radio" name="variation-${
+                            service.id
+                          }" value="de15a30kg">
+                          <span class="variation-option">
+                            <span class="variation-name">15kg a 30kg</span>
+                            <span class="variation-price">${MoneyUtils.formatBRL(
+                              service.variacoes?.de15a30kg || service.preco
+                            )}</span>
+                          </span>
+                        </label>
+                        <label class="variation-label">
+                          <input type="radio" name="variation-${
+                            service.id
+                          }" value="acima30kg">
+                          <span class="variation-option">
+                            <span class="variation-name">Acima de 30kg</span>
+                            <span class="variation-price">${MoneyUtils.formatBRL(
+                              service.variacoes?.acima30kg || service.preco
+                            )}</span>
+                          </span>
+                        </label>
+                        `
+                            : `
                         <label class="variation-label">
                           <input type="radio" name="variation-${
                             service.id
@@ -4997,6 +5228,8 @@ Entre em contato conosco para agendar o reforço!`;
                             )}</span>
                           </span>
                         </label>
+                        `
+                        }
                       </div>
                     </div>
                     `
@@ -5120,9 +5353,61 @@ Entre em contato conosco para agendar o reforço!`;
             </div>
           </div>
 
+          <!-- Desconto -->
+          <div class="form-section">
+            <h3>6. Desconto</h3>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  id="temDesconto" 
+                  name="temDesconto" 
+                  ${appointment?.desconto?.valor ? "checked" : ""}
+                  onchange="app.toggleDesconto()"
+                >
+                <span class="checkmark"></span>
+                Aplicar desconto para este agendamento
+              </label>
+            </div>
+            <div class="form-group" id="descontoGroup" style="display: ${
+              appointment?.desconto?.valor ? "block" : "none"
+            };">
+              <label for="valorDesconto">Valor do Desconto (R$) *</label>
+              <div class="input-group">
+                <span class="input-group-text">R$</span>
+                <input 
+                  type="text" 
+                  id="valorDesconto" 
+                  name="valorDesconto" 
+                  class="form-input" 
+                  value="${
+                    appointment?.desconto?.valor 
+                      ? MoneyUtils.formatBRL(appointment.desconto.valor)
+                      : ""
+                  }"
+                  placeholder="0,00"
+                  onchange="app.updateTotalWithDiscount()"
+                >
+              </div>
+              <div class="form-help">
+                💡 Dica: Digite o valor em reais que será descontado do total
+              </div>
+              <div class="form-error" id="valorDesconto-error"></div>
+            </div>
+            <div class="discount-preview" id="discountPreview" style="display: none;">
+              <div class="discount-info">
+                <span class="discount-label">Desconto aplicado:</span>
+                <span class="discount-value" id="discountValue">R$ 0,00</span>
+              </div>
+              <div class="final-total">
+                <strong>Total final: <span id="finalTotalValue">R$ 0,00</span></strong>
+              </div>
+            </div>
+          </div>
+
           <!-- Observações -->
           <div class="form-section">
-            <h3>6. Observações</h3>
+            <h3>7. Observações</h3>
             <div class="form-group">
               <label for="observacoes">Observações</label>
               <textarea 
@@ -5193,6 +5478,23 @@ Entre em contato conosco para agendar o reforço!`;
     // Inicializar campos de pagamento
     if (paymentStatusSelect) {
       this.togglePaymentFields(paymentStatusSelect.value);
+    }
+
+    // Formatação do campo de desconto
+    const valorDescontoInput = document.getElementById("valorDesconto");
+    if (valorDescontoInput) {
+      valorDescontoInput.addEventListener("input", (e) => {
+        const cursorPosition = e.target.selectionStart;
+        const oldValue = e.target.value;
+        const newValue = MoneyUtils.formatInput(e.target.value);
+
+        if (oldValue !== newValue) {
+          e.target.value = newValue;
+          e.target.setSelectionRange(cursorPosition, cursorPosition);
+        }
+
+        this.updateTotalWithDiscount();
+      });
     }
 
     // Carregar pets se já houver cliente selecionado
@@ -5317,13 +5619,24 @@ Entre em contato conosco para agendar o reforço!`;
       })
     );
 
+    // Calcular desconto
+    const temDesconto = formData.get("temDesconto") === "on";
+    const valorDesconto = temDesconto ? MoneyUtils.parseBRL(formData.get("valorDesconto")) : 0;
+    const totalComDesconto = temDesconto && valorDesconto > 0 ? totalPrevisto - valorDesconto : totalPrevisto;
+
     console.log("🔍 Itens processados:", itens);
+    console.log("🔍 Desconto aplicado:", valorDesconto);
+    console.log("🔍 Total final:", totalComDesconto);
 
     const appointmentData = {
       clienteId: formData.get("clienteId"),
       petId: formData.get("petId") || null,
       itens: itens,
-      totalPrevisto: totalPrevisto,
+      totalPrevisto: totalComDesconto,
+      desconto: temDesconto && valorDesconto > 0 ? {
+        valor: valorDesconto,
+        aplicado: true
+      } : null,
       dataHoraInicio: dataHoraInicio,
       duracaoMin: parseInt(formData.get("duracaoMin")),
       profissionalId: null, // Sempre null pois só trabalha uma pessoa
@@ -5336,7 +5649,7 @@ Entre em contato conosco para agendar o reforço!`;
           formData.get("paymentStatus") === "pago"
             ? new Date().toISOString().split("T")[0]
             : null,
-        valorPago: formData.get("paymentStatus") === "pago" ? totalPrevisto : 0,
+        valorPago: formData.get("paymentStatus") === "pago" ? totalComDesconto : 0,
       },
       observacoes: formData.get("observacoes") || "",
     };
@@ -7511,6 +7824,82 @@ Entre em contato conosco para agendar o reforço!`;
 
     document.getElementById("totalValue").textContent =
       MoneyUtils.formatBRL(total);
+    
+    // Atualizar total com desconto se aplicável
+    this.updateTotalWithDiscount();
+  }
+
+  // Toggle do desconto
+  toggleDesconto() {
+    const temDesconto = document.getElementById("temDesconto");
+    const descontoGroup = document.getElementById("descontoGroup");
+    const discountPreview = document.getElementById("discountPreview");
+    
+    if (temDesconto.checked) {
+      descontoGroup.style.display = "block";
+      this.updateTotalWithDiscount();
+    } else {
+      descontoGroup.style.display = "none";
+      discountPreview.style.display = "none";
+      document.getElementById("valorDesconto").value = "";
+    }
+  }
+
+  // Atualizar total com desconto
+  updateTotalWithDiscount() {
+    const temDesconto = document.getElementById("temDesconto");
+    const valorDesconto = document.getElementById("valorDesconto");
+    const discountPreview = document.getElementById("discountPreview");
+    const discountValue = document.getElementById("discountValue");
+    const finalTotalValue = document.getElementById("finalTotalValue");
+    
+    if (!temDesconto || !temDesconto.checked) {
+      discountPreview.style.display = "none";
+      return;
+    }
+
+    const desconto = MoneyUtils.parseBRL(valorDesconto.value);
+    const totalBase = this.getCurrentTotal();
+    
+    if (desconto > 0 && desconto <= totalBase) {
+      const totalFinal = totalBase - desconto;
+      
+      discountValue.textContent = MoneyUtils.formatBRL(desconto);
+      finalTotalValue.textContent = MoneyUtils.formatBRL(totalFinal);
+      discountPreview.style.display = "block";
+    } else {
+      discountPreview.style.display = "none";
+    }
+  }
+
+  // Obter total atual sem desconto
+  getCurrentTotal() {
+    let total = 0;
+    const selectedServices = document.querySelectorAll(
+      'input[name="services"]:checked'
+    );
+
+    selectedServices.forEach((checkbox) => {
+      const serviceId = checkbox.value;
+      const basePrice = parseFloat(checkbox.dataset.preco);
+      const variationInput = document.querySelector(
+        `input[name="variation-${serviceId}"]:checked`
+      );
+
+      if (variationInput) {
+        // Usar preço da variação selecionada
+        const variationPrice = variationInput
+          .closest(".variation-label")
+          .querySelector(".variation-price").textContent;
+        const price = MoneyUtils.parseBRL(variationPrice);
+        total += price;
+      } else {
+        // Usar preço base se não há variações
+        total += basePrice;
+      }
+    });
+
+    return total;
   }
 
   logout() {
