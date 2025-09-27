@@ -321,6 +321,18 @@ class Store {
       console.log(`🔍 Buscando ${storeName}/${id} do Firebase...`);
       const item = await window.firebaseService.getDocument(storeName, id);
       console.log(`🔍 Resultado do Firebase:`, item);
+
+      // Se Firebase retornou null, fazer fallback para localStorage
+      if (item === null) {
+        console.log(
+          `🔍 Firebase retornou null, fazendo fallback para localStorage...`
+        );
+        const items = this.getAllSync(storeName);
+        const result = items.find((item) => item.id === id) || null;
+        console.log(`🔍 Resultado do fallback localStorage:`, result);
+        return result;
+      }
+
       return item;
     } catch (error) {
       console.error(
@@ -508,7 +520,10 @@ class Store {
   }
 
   async getService(id) {
-    return await this.getById("services", id);
+    console.log(`🔍 getService chamado com ID: ${id}`);
+    const result = await this.getById("services", id);
+    console.log(`🔍 getService resultado:`, result);
+    return result;
   }
 
   saveService(service) {
