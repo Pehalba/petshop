@@ -27,7 +27,6 @@ class PetShopApp {
     this.setupFooter();
     this.setupNavigation();
     this.cleanupCorruptedData();
-    
 
     // Processar hash da URL
     this.processHash();
@@ -125,17 +124,18 @@ class PetShopApp {
     const header = document.getElementById("header");
     if (!header) return;
 
-    const settings = store.getSettings();
-    const businessName = settings ? settings.businessName : "Pet Shop";
-
+    header.className = "header-brand--light";
     header.innerHTML = `
             <div class="header-container">
-                <a href="#" class="header-logo" data-page="dashboard">
-                    <div class="header-logo-icon">🐾</div>
-                    <div class="header-logo-text">${businessName}</div>
+                <a href="#" class="brand" data-page="dashboard" aria-label="Página inicial — Dra. Karianny">
+                    <img src="logo.jpg" alt="Logo Dra. Karianny — Dermatologia Veterinária" width="36" height="36">
+                    <div class="brand-text">
+                        <strong class="brand-title">Dra. Karianny Tolentino Sabatini</strong>
+                        <small class="brand-subtitle">Dermatologia Veterinária</small>
+                    </div>
                 </a>
                 
-                <nav class="header-nav">
+                <nav class="header-nav main-nav">
                     <a href="#" class="nav-link" data-page="dashboard">
                         <span class="nav-link-icon">📊</span>
                         Dashboard
@@ -155,6 +155,10 @@ class PetShopApp {
                     <a href="#" class="nav-link" data-page="agendamentos">
                         <span class="nav-link-icon">📅</span>
                         Agendamentos
+                    </a>
+                    <a href="#" class="nav-link" data-page="prontuarios">
+                        <span class="nav-link-icon">📋</span>
+                        Prontuários
                     </a>
                     <a href="#" class="nav-link" data-page="relatorios">
                         <span class="nav-link-icon">📈</span>
@@ -201,12 +205,13 @@ class PetShopApp {
     const footer = document.getElementById("footer");
     if (!footer) return;
 
+    footer.className = "footer-brand";
     footer.innerHTML = `
             <div class="footer-container">
                 <div class="footer-content">
                     <div class="footer-section">
-                        <h3>Sistema Pet Shop</h3>
-                        <p>Gerencie seu pet shop de forma eficiente e profissional.</p>
+                        <h3>Dra. Karianny Tolentino Sabatini</h3>
+                        <p>Dermatologia Veterinária - Sistema de Gestão Clínica</p>
                     </div>
                     <div class="footer-section">
                         <h3>Recursos</h3>
@@ -569,7 +574,6 @@ class PetShopApp {
         currentMonth,
         currentYear
       );
-      
 
       content.innerHTML = `
             <div class="page-header">
@@ -635,14 +639,14 @@ class PetShopApp {
       // Inicializar calendário após renderizar o HTML
       setTimeout(() => {
         this.initCalendar();
-        
+
         // Forçar limpeza de cache se existe
         setTimeout(async () => {
           // Corrigir dados após Firebase sincronizar
           await this.fixExistingVaccineDates();
-          
+
           if (window.calendarController) {
-            console.log('🔄 Forçando atualização do calendário no dashboard');
+            console.log("🔄 Forçando atualização do calendário no dashboard");
             window.calendarController.clearCache();
             window.calendarController.refresh();
           }
@@ -1383,7 +1387,9 @@ class PetShopApp {
         </div>
         <div class="form-group">
           <label>Data de Nascimento</label>
-          <input type="date" name="petDataNascimento[]" class="form-input">
+          <input type="date" name="petDataNascimento[]" class="form-input" value="${
+            new Date().toISOString().split("T")[0]
+          }">
         </div>
       </div>
       <div class="form-row">
@@ -1464,9 +1470,13 @@ class PetShopApp {
 
   // Toggle da seção de vacinas para pets no formulário de cliente
   togglePetVaccineSection(petIndex) {
-    const select = document.querySelector(`select[name="petStatusVacinal[]"]:nth-of-type(${petIndex + 1})`);
-    const vaccinesSection = document.getElementById(`petVaccinesSection${petIndex}`);
-    
+    const select = document.querySelector(
+      `select[name="petStatusVacinal[]"]:nth-of-type(${petIndex + 1})`
+    );
+    const vaccinesSection = document.getElementById(
+      `petVaccinesSection${petIndex}`
+    );
+
     if (select && vaccinesSection) {
       if (select.value === "registrar_agora") {
         vaccinesSection.style.display = "block";
@@ -1478,8 +1488,10 @@ class PetShopApp {
 
   // Adicionar vacina para pet no formulário de cliente
   addPetVaccine(petIndex) {
-    const container = document.getElementById(`petVaccinesContainer${petIndex}`);
-    
+    const container = document.getElementById(
+      `petVaccinesContainer${petIndex}`
+    );
+
     // Remover o botão original do topo se existir
     const originalButton = container.querySelector(".add-pet-vaccine-button");
     if (originalButton) {
@@ -1487,24 +1499,29 @@ class PetShopApp {
     }
 
     // Contar vacinas existentes ANTES de adicionar
-    const currentVaccineCount = container.querySelectorAll(".pet-vaccine-item").length;
+    const currentVaccineCount =
+      container.querySelectorAll(".pet-vaccine-item").length;
     const vaccineIndex = currentVaccineCount;
 
     // Criar elemento de vacina usando o método render
     const vaccineItemHTML = this.renderPetVaccineItem(vaccineIndex, petIndex);
-    container.insertAdjacentHTML('beforeend', vaccineItemHTML);
+    container.insertAdjacentHTML("beforeend", vaccineItemHTML);
 
     // Re-numerar todas as vacinas para garantir sequência correta
     this.renumberPetVaccines(petIndex);
-    
+
     // Atualizar botão
     this.updateAddPetVaccineButton(petIndex);
   }
 
   // Remover vacina de pet no formulário de cliente
   removePetVaccine(petIndex, vaccineIndex) {
-    const container = document.getElementById(`petVaccinesContainer${petIndex}`);
-    const vaccineItem = container.querySelector(`[data-vaccine-index="${vaccineIndex}"]`);
+    const container = document.getElementById(
+      `petVaccinesContainer${petIndex}`
+    );
+    const vaccineItem = container.querySelector(
+      `[data-vaccine-index="${vaccineIndex}"]`
+    );
 
     if (vaccineItem) {
       vaccineItem.remove();
@@ -1517,30 +1534,37 @@ class PetShopApp {
 
   // Re-numerar todas as vacinas de pet para manter sequência correta
   renumberPetVaccines(petIndex) {
-    const container = document.getElementById(`petVaccinesContainer${petIndex}`);
+    const container = document.getElementById(
+      `petVaccinesContainer${petIndex}`
+    );
     const vaccineItems = container.querySelectorAll(".pet-vaccine-item");
-    
+
     vaccineItems.forEach((item, index) => {
       // Atualizar data-vaccine-index
       item.setAttribute("data-vaccine-index", index);
-      
+
       // Atualizar o título da vacina
       const title = item.querySelector("h5");
       if (title) {
         title.textContent = `Vacina ${index + 1}`;
       }
-      
+
       // Atualizar o onclick do botão remover
       const removeButton = item.querySelector(".btn-danger");
       if (removeButton) {
-        removeButton.setAttribute("onclick", `app.removePetVaccine(${petIndex}, ${index})`);
+        removeButton.setAttribute(
+          "onclick",
+          `app.removePetVaccine(${petIndex}, ${index})`
+        );
       }
     });
   }
 
   // Atualizar botão de adicionar vacina para pet
   updateAddPetVaccineButton(petIndex) {
-    const container = document.getElementById(`petVaccinesContainer${petIndex}`);
+    const container = document.getElementById(
+      `petVaccinesContainer${petIndex}`
+    );
     const vaccineCount = container.querySelectorAll(".pet-vaccine-item").length;
     const addButton = container.querySelector(".add-pet-vaccine-button");
 
@@ -1604,6 +1628,7 @@ class PetShopApp {
               type="date" 
               name="petVacinaDataAplicacao[${petIndex}][]" 
               class="form-input" 
+              value="${new Date().toISOString().split("T")[0]}"
               required
             >
           </div>
@@ -1616,6 +1641,7 @@ class PetShopApp {
               type="date" 
               name="petVacinaProximaDose[${petIndex}][]" 
               class="form-input"
+              value="${new Date().toISOString().split("T")[0]}"
             >
           </div>
           <div class="form-group">
@@ -3056,15 +3082,24 @@ class PetShopApp {
               }')" title="Enviar confirmação via WhatsApp">
                 📱 WhatsApp
               </button>
-              ${
-                appointment.pagamento && appointment.pagamento.status !== "pago"
-                  ? `
-                <button class="btn btn-success" onclick="app.markAppointmentPaid('${appointment.id}')" title="Marcar como pago">
-                  ✅ Pago
-                </button>
-              `
-                  : ""
-              }
+              <button class="btn ${
+                appointment.pagamento && appointment.pagamento.status === "pago"
+                  ? "btn-success"
+                  : "btn-outline"
+              }" onclick="app.toggleAppointmentPayment('${
+          appointment.id
+        }')" title="${
+          appointment.pagamento && appointment.pagamento.status === "pago"
+            ? "Marcar como A Receber"
+            : "Marcar como Pago"
+        }">
+                ${
+                  appointment.pagamento &&
+                  appointment.pagamento.status === "pago"
+                    ? "✅ Pago"
+                    : "💰 A Receber"
+                }
+              </button>
               <button class="btn btn-danger" onclick="app.cancelAppointment('${
                 appointment.id
               }')" title="Cancelar">
@@ -3123,9 +3158,7 @@ class PetShopApp {
 
     const paymentConfig = {
       pago: { class: "badge-success", text: "Pago" },
-      nao_pago: { class: "badge-danger", text: "Não Pago" },
-      previsto: { class: "badge-warning", text: "Previsto" },
-      parcial: { class: "badge-info", text: "Parcial" },
+      nao_pago: { class: "badge-danger", text: "A Receber" },
     };
 
     const config = paymentConfig[payment.status] || {
@@ -3406,7 +3439,7 @@ class PetShopApp {
 
   addVaccine() {
     const container = document.getElementById("vaccinesContainer");
-    
+
     // Remover o botão original do topo se existir
     const originalButton = container.querySelector(".add-vaccine-button");
     if (originalButton) {
@@ -3414,16 +3447,17 @@ class PetShopApp {
     }
 
     // Contar vacinas existentes ANTES de adicionar
-    const currentVaccineCount = container.querySelectorAll(".vaccine-item").length;
+    const currentVaccineCount =
+      container.querySelectorAll(".vaccine-item").length;
     const vaccineIndex = currentVaccineCount;
 
     // Criar elemento de vacina usando o método render
     const vaccineItemHTML = this.renderVaccineItem(null, vaccineIndex);
-    container.insertAdjacentHTML('beforeend', vaccineItemHTML);
+    container.insertAdjacentHTML("beforeend", vaccineItemHTML);
 
     // Re-numerar todas as vacinas para garantir sequência correta
     this.renumberVaccines();
-    
+
     // Atualizar botão
     this.updateAddVaccineButton();
   }
@@ -3447,17 +3481,17 @@ class PetShopApp {
   renumberVaccines() {
     const container = document.getElementById("vaccinesContainer");
     const vaccineItems = container.querySelectorAll(".vaccine-item");
-    
+
     vaccineItems.forEach((item, index) => {
       // Atualizar data-vaccine-index
       item.setAttribute("data-vaccine-index", index);
-      
+
       // Atualizar o título da vacina
       const title = item.querySelector("h5");
       if (title) {
         title.textContent = `Vacina ${index + 1}`;
       }
-      
+
       // Atualizar o onclick do botão remover
       const removeButton = item.querySelector(".btn-danger");
       if (removeButton) {
@@ -3554,7 +3588,9 @@ class PetShopApp {
               type="date" 
               name="vacinaDataAplicacao[]" 
               class="form-input" 
-              value="${vaccine?.dataAplicacao || ""}"
+              value="${
+                vaccine?.dataAplicacao || new Date().toISOString().split("T")[0]
+              }"
               required
             >
           </div>
@@ -3567,7 +3603,9 @@ class PetShopApp {
               type="date" 
               name="vacinaProximaDose[]" 
               class="form-input" 
-              value="${vaccine?.proximaDose || ""}"
+              value="${
+                vaccine?.proximaDose || new Date().toISOString().split("T")[0]
+              }"
               onchange="app.toggleVaccineReminder(${index})"
             >
           </div>
@@ -3672,7 +3710,7 @@ class PetShopApp {
         <div class="empty-state">
           <div class="empty-icon">💉</div>
           <p>Nenhuma vacina registrada</p>
-          <button class="btn btn-primary btn-sm" onclick="app.editPet('${pet.id}')">
+          <button class="btn btn-primary btn-sm" onclick="app.showVaccineFormForPet('${pet.id}')">
             <i class="icon-plus"></i> Registrar Vacinas
           </button>
         </div>
@@ -3945,7 +3983,10 @@ Entre em contato conosco para agendar o reforço!`;
                   id="petDataNascimento" 
                   name="dataNascimento" 
                   class="form-input" 
-                  value="${pet?.dataNascimento || ""}"
+                  value="${
+                    pet?.dataNascimento ||
+                    new Date().toISOString().split("T")[0]
+                  }"
                 >
                 <div class="form-error" id="petDataNascimento-error"></div>
               </div>
@@ -4478,7 +4519,7 @@ Entre em contato conosco para agendar o reforço!`;
                   .map(
                     (service) => `
                   <div class="service-item">
-                    <label class="checkbox-label">
+                    <label class="service-checkbox-label">
                       <input 
                         type="checkbox" 
                         name="services" 
@@ -4492,15 +4533,61 @@ Entre em contato conosco para agendar o reforço!`;
                             ? "checked"
                             : ""
                         }
+                        onchange="app.updateServiceSelection('${service.id}')"
                       >
-                      <span class="checkmark"></span>
+                      <span class="service-checkmark"></span>
                       <div class="service-info">
                         <strong>${service.nome}</strong>
-                        <span class="service-price">${MoneyUtils.formatBRL(
-                          service.preco
-                        )}</span>
                       </div>
                     </label>
+                    
+                    <!-- Variações do serviço (aparece quando selecionado) -->
+                    ${
+                      service.temVariacoes
+                        ? `
+                    <div class="service-variations" id="variations-${
+                      service.id
+                    }" style="display: none;">
+                      <h4 class="variation-title">Selecione o porte:</h4>
+                      <div class="variation-group">
+                        <label class="variation-label">
+                          <input type="radio" name="variation-${
+                            service.id
+                          }" value="pequeno" checked>
+                          <span class="variation-option">
+                            <span class="variation-name">Pequeno</span>
+                            <span class="variation-price">${MoneyUtils.formatBRL(
+                              service.variacoes?.pequeno || service.preco
+                            )}</span>
+                          </span>
+                        </label>
+                        <label class="variation-label">
+                          <input type="radio" name="variation-${
+                            service.id
+                          }" value="medio">
+                          <span class="variation-option">
+                            <span class="variation-name">Médio</span>
+                            <span class="variation-price">${MoneyUtils.formatBRL(
+                              service.variacoes?.medio || service.preco
+                            )}</span>
+                          </span>
+                        </label>
+                        <label class="variation-label">
+                          <input type="radio" name="variation-${
+                            service.id
+                          }" value="grande">
+                          <span class="variation-option">
+                            <span class="variation-name">Grande</span>
+                            <span class="variation-price">${MoneyUtils.formatBRL(
+                              service.variacoes?.grande || service.preco
+                            )}</span>
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                    `
+                        : ""
+                    }
                   </div>
                 `
                   )
@@ -4513,27 +4600,50 @@ Entre em contato conosco para agendar o reforço!`;
             </div>
           </div>
 
-          <!-- Passo 3: Data/Hora e Profissional -->
+          <!-- Passo 3: Data -->
           <div class="form-section">
-            <h3>3. Data/Hora e Profissional</h3>
-            <div class="form-row">
-              <div class="form-group required">
-                <label for="dataHoraInicio">Data e Hora de Início *</label>
+            <h3>3. Data</h3>
+            <div class="form-group required">
+              <label for="dataAgendamento">Data do Agendamento *</label>
                 <input 
-                  type="datetime-local" 
-                  id="dataHoraInicio" 
-                  name="dataHoraInicio" 
+                  type="date" 
+                  id="dataAgendamento" 
+                  name="dataAgendamento" 
                   class="form-input" 
                   value="${
                     appointment
-                      ? DateUtils.toISOStringDateTime(
-                          appointment.dataHoraInicio
-                        )
+                      ? new Date(appointment.dataHoraInicio)
+                          .toISOString()
+                          .split("T")[0]
+                      : new Date().toISOString().split("T")[0]
+                  }"
+                  required
+                >
+              <div class="form-error" id="dataAgendamento-error"></div>
+            </div>
+          </div>
+
+          <!-- Passo 4: Horário -->
+          <div class="form-section">
+            <h3>4. Horário</h3>
+            <div class="form-row">
+              <div class="form-group required">
+                <label for="horaInicio">Hora de Início *</label>
+                <input 
+                  type="time" 
+                  id="horaInicio" 
+                  name="horaInicio" 
+                  class="form-input" 
+                  value="${
+                    appointment
+                      ? new Date(appointment.dataHoraInicio)
+                          .toTimeString()
+                          .slice(0, 5)
                       : ""
                   }"
                   required
                 >
-                <div class="form-error" id="dataHoraInicio-error"></div>
+                <div class="form-error" id="horaInicio-error"></div>
               </div>
               <div class="form-group required">
                 <label for="duracaoMin">Duração (minutos) *</label>
@@ -4550,28 +4660,12 @@ Entre em contato conosco para agendar o reforço!`;
                 <div class="form-error" id="duracaoMin-error"></div>
               </div>
             </div>
-            <div class="form-group">
-              <label for="profissionalId">Profissional (opcional)</label>
-              <select id="profissionalId" name="profissionalId" class="form-select">
-                <option value="">Selecione um profissional</option>
-                ${professionals
-                  .map(
-                    (prof) => `
-                  <option value="${prof.id}" ${
-                      appointment?.profissionalId === prof.id ? "selected" : ""
-                    }>
-                    ${prof.nome}
-                  </option>
-                `
-                  )
-                  .join("")}
-              </select>
-            </div>
           </div>
 
-          <!-- Passo 4: Pagamento -->
+
+          <!-- Passo 5: Pagamento -->
           <div class="form-section">
-            <h3>4. Pagamento</h3>
+            <h3>5. Pagamento</h3>
             <div class="form-row">
               <div class="form-group required">
                 <label for="paymentStatus">Status do Pagamento *</label>
@@ -4580,15 +4674,10 @@ Entre em contato conosco para agendar o reforço!`;
                     appointment?.pagamento?.status === "nao_pago"
                       ? "selected"
                       : ""
-                  }>Não Pago</option>
-                  <option value="previsto" ${
-                    appointment?.pagamento?.status === "previsto"
-                      ? "selected"
-                      : ""
-                  }>Será pago em</option>
+                  }>Será pago na hora</option>
                   <option value="pago" ${
                     appointment?.pagamento?.status === "pago" ? "selected" : ""
-                  }>Pago agora</option>
+                  }>Pagamento recebido</option>
                 </select>
               </div>
               <div class="form-group" id="paymentMethodGroup" style="display: none;">
@@ -4619,7 +4708,7 @@ Entre em contato conosco para agendar o reforço!`;
 
           <!-- Observações -->
           <div class="form-section">
-            <h3>5. Observações</h3>
+            <h3>6. Observações</h3>
             <div class="form-group">
               <label for="observacoes">Observações</label>
               <textarea 
@@ -4636,9 +4725,6 @@ Entre em contato conosco para agendar o reforço!`;
             <button type="button" class="btn btn-outline" onclick="app.renderAgendamentos()">
               Cancelar
             </button>
-            <button type="button" class="btn btn-outline" onclick="app.saveAppointmentAndNew()">
-              Salvar e Novo
-            </button>
             <button type="submit" class="btn btn-primary">
               ${isEdit ? "Atualizar" : "Salvar"} Agendamento
             </button>
@@ -4649,6 +4735,7 @@ Entre em contato conosco para agendar o reforço!`;
 
     document.getElementById("content").innerHTML = content;
     await this.setupAppointmentFormEvents();
+    this.setupServiceVariationEvents();
   }
 
   // Eventos do formulário de agendamento
@@ -4750,10 +4837,6 @@ Entre em contato conosco para agendar o reforço!`;
         methodGroup.style.display = "block";
         dateGroup.style.display = "none";
         methodSelect.required = true;
-      } else if (paymentStatus === "previsto") {
-        methodGroup.style.display = "none";
-        dateGroup.style.display = "block";
-        methodSelect.required = false;
       } else {
         methodGroup.style.display = "none";
         dateGroup.style.display = "none";
@@ -4776,13 +4859,32 @@ Entre em contato conosco para agendar o reforço!`;
       return;
     }
 
-    // Calcular total
+    // Combinar data e hora
+    const dataAgendamento = formData.get("dataAgendamento");
+    const horaInicio = formData.get("horaInicio");
+    const dataHoraInicio = `${dataAgendamento}T${horaInicio}:00`;
+
+    // Calcular total com variações
     let totalPrevisto = 0;
     const itens = await Promise.all(
       selectedServices.map(async (checkbox) => {
         const serviceId = checkbox.value;
         const service = await store.getService(serviceId);
-        const preco = parseFloat(checkbox.dataset.preco) || 0;
+        const basePrice = parseFloat(checkbox.dataset.preco) || 0;
+
+        // Verificar variação selecionada
+        const variationInput = document.querySelector(
+          `input[name="variation-${serviceId}"]:checked`
+        );
+        let preco = basePrice;
+
+        if (variationInput) {
+          // Usar preço da variação selecionada
+          const variationPrice = variationInput
+            .closest(".variation-label")
+            .querySelector(".variation-price").textContent;
+          preco = MoneyUtils.parseBRL(variationPrice);
+        }
         totalPrevisto += preco;
 
         console.log("🔍 Serviço encontrado:", service);
@@ -4796,6 +4898,7 @@ Entre em contato conosco para agendar o reforço!`;
           custoAproxAplicado: service?.temCusto
             ? service.custoAproximado
             : null,
+          variacao: variationInput ? variationInput.value : "pequeno",
         };
       })
     );
@@ -4807,9 +4910,9 @@ Entre em contato conosco para agendar o reforço!`;
       petId: formData.get("petId") || null,
       itens: itens,
       totalPrevisto: totalPrevisto,
-      dataHoraInicio: formData.get("dataHoraInicio"),
+      dataHoraInicio: dataHoraInicio,
       duracaoMin: parseInt(formData.get("duracaoMin")),
-      profissionalId: formData.get("profissionalId") || null,
+      profissionalId: null, // Sempre null pois só trabalha uma pessoa
       status: "pendente",
       pagamento: {
         status: formData.get("paymentStatus"),
@@ -4908,81 +5011,6 @@ Entre em contato conosco para agendar o reforço!`;
     }
 
     return isValid;
-  }
-
-  // Salvar e criar novo
-  async saveAppointmentAndNew() {
-    const form = document.getElementById("appointmentForm");
-    const formData = new FormData(form);
-    const selectedServices = Array.from(
-      document.querySelectorAll('input[name="services"]:checked')
-    );
-
-    if (selectedServices.length === 0) {
-      this.showFieldError("services", "Selecione pelo menos um serviço");
-      return;
-    }
-
-    // Calcular total
-    let totalPrevisto = 0;
-    const itens = await Promise.all(
-      selectedServices.map(async (checkbox) => {
-        const serviceId = checkbox.value;
-        const service = await store.getService(serviceId);
-        const preco = parseFloat(checkbox.dataset.preco) || 0;
-        totalPrevisto += preco;
-
-        console.log("🔍 Serviço encontrado:", service);
-        console.log("🔍 ServiceId:", serviceId);
-        console.log("🔍 Preço:", preco);
-
-        return {
-          serviceId: serviceId,
-          nome: service?.nome || "Serviço não encontrado",
-          precoAplicado: preco,
-          custoAproxAplicado: service?.temCusto
-            ? service.custoAproximado
-            : null,
-        };
-      })
-    );
-
-    console.log("🔍 Itens processados:", itens);
-
-    const appointmentData = {
-      clienteId: formData.get("clienteId"),
-      petId: formData.get("petId") || null,
-      itens: itens,
-      totalPrevisto: totalPrevisto,
-      dataHoraInicio: formData.get("dataHoraInicio"),
-      duracaoMin: parseInt(formData.get("duracaoMin")),
-      profissionalId: formData.get("profissionalId") || null,
-      status: "pendente",
-      pagamento: {
-        status: formData.get("paymentStatus"),
-        metodo: formData.get("paymentMethod") || null,
-        dataPrevista: formData.get("paymentDate") || null,
-        dataPago:
-          formData.get("paymentStatus") === "pago"
-            ? new Date().toISOString().split("T")[0]
-            : null,
-        valorPago: formData.get("paymentStatus") === "pago" ? totalPrevisto : 0,
-      },
-      observacoes: formData.get("observacoes") || "",
-    };
-
-    if (!this.validateAppointment(appointmentData)) {
-      return;
-    }
-
-    try {
-      const newAppointmentId = store.generateId("app");
-      await store.saveAppointment({ ...appointmentData, id: newAppointmentId });
-      ui.success("Agendamento criado com sucesso!");
-      await this.showAppointmentForm(); // Abrir formulário limpo
-    } catch (error) {
-      ui.error("Erro ao salvar agendamento: " + error.message);
-    }
   }
 
   // Ações de agendamento
@@ -5114,15 +5142,17 @@ Entre em contato conosco para agendar o reforço!`;
             <button class="btn btn-outline" onclick="app.editAppointment('${appointmentId}')">
               <i class="icon-edit"></i> Editar
             </button>
-            ${
-              appointment.pagamento.status !== "pago"
-                ? `
-              <button class="btn btn-success" onclick="app.markAppointmentPaid('${appointmentId}')">
-                <i class="icon-check"></i> Marcar como Pago
-              </button>
-            `
-                : ""
-            }
+            <button class="btn ${
+              appointment.pagamento.status === "pago"
+                ? "btn-success"
+                : "btn-outline"
+            }" onclick="app.toggleAppointmentPayment('${appointmentId}')">
+              <i class="icon-check"></i> ${
+                appointment.pagamento.status === "pago"
+                  ? "Marcado como Pago"
+                  : "Marcar como Pago"
+              }
+            </button>
             <button class="btn btn-danger" onclick="app.cancelAppointment('${appointmentId}')">
               <i class="icon-x"></i> Cancelar
             </button>
@@ -5134,16 +5164,21 @@ Entre em contato conosco para agendar o reforço!`;
     document.getElementById("content").innerHTML = content;
   }
 
-  async markAppointmentPaid(appointmentId) {
+  async toggleAppointmentPayment(appointmentId) {
     const appointment = await store.getAppointment(appointmentId);
     if (!appointment) return;
 
+    const isCurrentlyPaid =
+      appointment.pagamento && appointment.pagamento.status === "pago";
+    const action = isCurrentlyPaid ? "A Receber" : "Pago";
+    const actionText = isCurrentlyPaid ? "A Receber" : "Pago";
+
     const confirmed = await ui.confirm(
-      `Marcar agendamento como pago?\n\nCliente: ${
+      `Marcar agendamento como ${actionText}?\n\nCliente: ${
         store.getClient(appointment.clienteId)?.nomeCompleto
       }\nTotal: ${MoneyUtils.formatBRL(appointment.totalPrevisto)}`,
-      "Confirmar Pagamento",
-      { type: "success" }
+      `Confirmar ${actionText === "Pago" ? "Pagamento" : "A Receber"}`,
+      { type: isCurrentlyPaid ? "warning" : "success" }
     );
 
     if (confirmed) {
@@ -5152,17 +5187,19 @@ Entre em contato conosco para agendar o reforço!`;
           ...appointment,
           pagamento: {
             ...appointment.pagamento,
-            status: "pago",
-            dataPago: new Date().toISOString().split("T")[0],
-            valorPago: appointment.totalPrevisto,
+            status: isCurrentlyPaid ? "nao_pago" : "pago",
+            dataPagamento: isCurrentlyPaid
+              ? null
+              : new Date().toISOString().split("T")[0],
+            valorPago: isCurrentlyPaid ? 0 : appointment.totalPrevisto,
           },
         };
 
         await store.saveAppointment(updatedAppointment);
-        ui.success("Agendamento marcado como pago!");
+        ui.success(`Agendamento marcado como ${actionText}!`);
         await this.renderAgendamentos();
       } catch (error) {
-        ui.error("Erro ao marcar como pago: " + error.message);
+        ui.error(`Erro ao marcar como ${actionText}: ` + error.message);
       }
     }
   }
@@ -5586,20 +5623,27 @@ Entre em contato conosco para agendar o reforço!`;
                   <option value="">Selecione o pet</option>
                   ${pets
                     .map((pet) => {
-                      const client = store.getClient(pet.clienteId);
                       return `
                       <option value="${pet.id}" ${
                         prontuario?.petId === pet.id ? "selected" : ""
                       }>
-                        ${pet.nome} - ${
-                        client?.nomeCompleto || "Cliente não encontrado"
-                      }
+                        ${pet.nome}
                       </option>
                     `;
                     })
                     .join("")}
                 </select>
                 <div class="form-error" id="prontuarioPetId-error"></div>
+              </div>
+              <div class="form-group">
+                <label>Cliente</label>
+                <div id="prontuarioClienteInfo" class="cliente-info">
+                  <span class="cliente-placeholder">${
+                    prontuario?.petId
+                      ? "Carregando..."
+                      : "Selecione um pet para ver o cliente"
+                  }</span>
+                </div>
               </div>
               <div class="form-group required">
                 <label for="prontuarioDataConsulta">Data da Consulta *</label>
@@ -5750,6 +5794,14 @@ Entre em contato conosco para agendar o reforço!`;
     if (fotoInput) {
       fotoInput.addEventListener("change", (e) => {
         this.handleFotoUpload(e);
+      });
+    }
+
+    // Atualizar cliente quando pet for selecionado
+    const petSelect = document.getElementById("prontuarioPetId");
+    if (petSelect) {
+      petSelect.addEventListener("change", () => {
+        this.updateProntuarioClient();
       });
     }
   }
@@ -5984,6 +6036,13 @@ Entre em contato conosco para agendar o reforço!`;
         </div>
       </div>
     `;
+
+    this.setupProntuarioEvents();
+
+    // Atualizar o cliente após o HTML ser renderizado
+    setTimeout(() => {
+      this.updateProntuarioClient();
+    }, 100);
   }
 
   editProntuario(prontuarioId) {
@@ -6024,6 +6083,47 @@ Entre em contato conosco para agendar o reforço!`;
       dateFilter.addEventListener("change", () => {
         this.filterProntuarios();
       });
+    }
+
+    // Atualizar cliente quando pet for selecionado
+    const petSelect = document.getElementById("prontuarioPetId");
+    if (petSelect) {
+      petSelect.addEventListener("change", () => {
+        this.updateProntuarioClient();
+      });
+    }
+  }
+
+  async updateProntuarioClient() {
+    const petSelect = document.getElementById("prontuarioPetId");
+    const clienteInfo = document.getElementById("prontuarioClienteInfo");
+
+    if (!petSelect || !clienteInfo) {
+      return;
+    }
+
+    const petId = petSelect.value;
+
+    if (petId) {
+      const pet = await store.getPet(petId);
+
+      if (pet) {
+        const client = await store.getClient(pet.clienteId);
+
+        clienteInfo.innerHTML = `
+          <span class="cliente-name">${
+            client?.nomeCompleto || "Cliente não encontrado"
+          }</span>
+        `;
+      } else {
+        clienteInfo.innerHTML = `
+          <span class="cliente-placeholder">Pet não encontrado</span>
+        `;
+      }
+    } else {
+      clienteInfo.innerHTML = `
+        <span class="cliente-placeholder">Selecione um pet para ver o cliente</span>
+      `;
     }
   }
 
@@ -6069,6 +6169,99 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // Métodos auxiliares para prontuários
+  async showVaccineFormForPet(petId) {
+    const content = document.getElementById("content");
+    const pet = await store.getPet(petId);
+
+    content.innerHTML = `
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Registrar Vacinas</h1>
+          <p>Adicione vacinas para ${pet?.nome || "o pet"}</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" onclick="app.viewPet('${petId}')">
+            <i class="icon-arrow-left"></i> Voltar ao Pet
+          </button>
+        </div>
+      </div>
+
+      <form id="vaccineForm" data-pet-id="${petId}">
+        <div class="form-container">
+          <div class="form-section">
+            <h3>Vacinas do Pet</h3>
+            <div id="vaccinesContainer">
+              ${
+                pet?.vacinas && pet.vacinas.length > 0
+                  ? pet.vacinas
+                      .map((vacina, index) =>
+                        this.renderVaccineItem(vacina, index)
+                      )
+                      .join("")
+                  : ""
+              }
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" onclick="app.addVaccine()">
+                <i class="icon-plus"></i> Adicionar Vacina
+              </button>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="app.viewPet('${petId}')">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Salvar Vacinas
+            </button>
+          </div>
+        </div>
+      </form>
+    `;
+
+    this.setupVaccineFormEvents();
+  }
+
+  setupVaccineFormEvents() {
+    const form = document.getElementById("vaccineForm");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.saveVaccinesForPet();
+      });
+    }
+  }
+
+  async saveVaccinesForPet() {
+    const form = document.getElementById("vaccineForm");
+    const petId = form.dataset.petId;
+    const formData = new FormData(form);
+
+    const vacinas = this.processVaccines(formData);
+
+    try {
+      const pet = await store.getPet(petId);
+      pet.vacinas = vacinas;
+
+      await store.savePet(pet);
+
+      // Criar lembretes para as vacinas
+      for (const vacina of vacinas) {
+        if (vacina.habilitarLembrete && vacina.proximaDose) {
+          await store.upsertVaccineReminder(petId, vacina);
+        }
+      }
+
+      ui.showSuccess("Vacinas salvas com sucesso!");
+      this.viewPet(petId);
+    } catch (error) {
+      console.error("Erro ao salvar vacinas:", error);
+      ui.showError("Erro ao salvar vacinas. Tente novamente.");
+    }
+  }
+
   async showProntuarioFormForPet(petId) {
     const content = document.getElementById("content");
     const pet = await store.getPet(petId);
@@ -6098,20 +6291,25 @@ Entre em contato conosco para agendar o reforço!`;
                   <option value="">Selecione o pet</option>
                   ${pets
                     .map((p) => {
-                      const client = store.getClient(p.clienteId);
                       return `
                       <option value="${p.id}" ${
                         p.id === petId ? "selected" : ""
                       }>
-                        ${p.nome} - ${
-                        client?.nomeCompleto || "Cliente não encontrado"
-                      }
+                        ${p.nome}
                       </option>
                     `;
                     })
                     .join("")}
                 </select>
                 <div class="form-error" id="prontuarioPetId-error"></div>
+              </div>
+              <div class="form-group">
+                <label>Cliente</label>
+                <div id="prontuarioClienteInfo" class="cliente-info">
+                  <span class="cliente-name">${
+                    pet?.clienteId ? "Carregando..." : "Cliente não encontrado"
+                  }</span>
+                </div>
               </div>
               <div class="form-group required">
                 <label for="prontuarioDataConsulta">Data da Consulta *</label>
@@ -6205,6 +6403,11 @@ Entre em contato conosco para agendar o reforço!`;
     `;
 
     this.setupProntuarioFormEvents();
+
+    // Atualizar o cliente após o HTML ser renderizado
+    setTimeout(() => {
+      this.updateProntuarioClient();
+    }, 100);
   }
 
   async renderPetProntuarios(petId) {
@@ -6639,6 +6842,7 @@ Entre em contato conosco para agendar o reforço!`;
                 id="petDataNascimento" 
                 name="dataNascimento" 
                 class="form-input"
+                value="${new Date().toISOString().split("T")[0]}"
               >
             </div>
             <div class="form-group">
@@ -6920,6 +7124,81 @@ Entre em contato conosco para agendar o reforço!`;
     input.click();
   }
 
+  // Funções para gerenciar variações de serviço
+  updateServiceSelection(serviceId) {
+    const checkbox = document.querySelector(
+      `input[name="services"][value="${serviceId}"]`
+    );
+    const variationsDiv = document.getElementById(`variations-${serviceId}`);
+    const serviceItem = checkbox.closest(".service-item");
+
+    if (checkbox.checked) {
+      if (variationsDiv) {
+        variationsDiv.style.display = "block";
+      }
+      serviceItem.classList.add("checked");
+    } else {
+      if (variationsDiv) {
+        variationsDiv.style.display = "none";
+      }
+      serviceItem.classList.remove("checked");
+    }
+
+    this.updateTotal();
+  }
+
+  setupServiceVariationEvents() {
+    // Eventos para variações de serviço
+    document.querySelectorAll('input[name^="variation-"]').forEach((input) => {
+      input.addEventListener("change", () => {
+        // Remover classe checked de todos os labels do mesmo grupo
+        const groupName = input.name;
+        document
+          .querySelectorAll(`input[name="${groupName}"]`)
+          .forEach((radio) => {
+            radio.closest(".variation-label").classList.remove("checked");
+          });
+
+        // Adicionar classe checked ao label selecionado
+        if (input.checked) {
+          input.closest(".variation-label").classList.add("checked");
+        }
+
+        this.updateTotal();
+      });
+    });
+  }
+
+  updateTotal() {
+    let total = 0;
+    const selectedServices = document.querySelectorAll(
+      'input[name="services"]:checked'
+    );
+
+    selectedServices.forEach((checkbox) => {
+      const serviceId = checkbox.value;
+      const basePrice = parseFloat(checkbox.dataset.preco);
+      const variationInput = document.querySelector(
+        `input[name="variation-${serviceId}"]:checked`
+      );
+
+      if (variationInput) {
+        // Usar preço da variação selecionada
+        const variationPrice = variationInput
+          .closest(".variation-label")
+          .querySelector(".variation-price").textContent;
+        const price = MoneyUtils.parseBRL(variationPrice);
+        total += price;
+      } else {
+        // Usar preço base se não há variações
+        total += basePrice;
+      }
+    });
+
+    document.getElementById("totalValue").textContent =
+      MoneyUtils.formatBRL(total);
+  }
+
   logout() {
     if (confirm("Tem certeza que deseja sair?")) {
       // Limpar dados locais se necessário
@@ -6933,47 +7212,53 @@ Entre em contato conosco para agendar o reforço!`;
       const pets = await store.getPets();
       let hasChanges = false;
 
-      console.log('🔍 Verificando pets para correção de datas...');
-      
+      console.log("🔍 Verificando pets para correção de datas...");
+
       for (const pet of pets) {
         if (pet.vacinas && pet.vacinas.length > 0) {
           console.log(`🐕 Pet: ${pet.nome} tem ${pet.vacinas.length} vacinas`);
           for (const vacina of pet.vacinas) {
-            console.log(`  💉 ${vacina.nomeVacina} - Data: ${vacina.proximaDose}`);
-            if (vacina.proximaDose === "2025-09-30" && vacina.nomeVacina === "V8") {
+            console.log(
+              `  💉 ${vacina.nomeVacina} - Data: ${vacina.proximaDose}`
+            );
+            if (
+              vacina.proximaDose === "2025-09-30" &&
+              vacina.nomeVacina === "V8"
+            ) {
               // Corrigir esta vacina específica que sabemos que está errada
-              console.log(`🔧 Corrigindo data da vacina ${vacina.nomeVacina}: ${vacina.proximaDose} → 2025-09-29`);
+              console.log(
+                `🔧 Corrigindo data da vacina ${vacina.nomeVacina}: ${vacina.proximaDose} → 2025-09-29`
+              );
               vacina.proximaDose = "2025-09-29";
               hasChanges = true;
             }
           }
-          
+
           if (hasChanges) {
             console.log(`💾 Salvando pet ${pet.nome} com dados corrigidos`);
             await store.savePet(pet);
-            
+
             // Forçar sincronização com localStorage
             const updatedPets = await store.getPets();
-            localStorage.setItem('pets', JSON.stringify(updatedPets));
+            localStorage.setItem("pets", JSON.stringify(updatedPets));
             console.log(`🔄 Pet ${pet.nome} sincronizado com localStorage`);
-            
+
             hasChanges = false; // Reset para próximo pet
           }
         }
       }
 
-      console.log('✅ Verificação de datas concluída');
-      
+      console.log("✅ Verificação de datas concluída");
+
       // Sempre limpar cache do calendário para garantir dados atualizados
       setTimeout(() => {
         if (window.calendarController) {
-          console.log('🗑️ Limpando cache do calendário');
+          console.log("🗑️ Limpando cache do calendário");
           window.calendarController.clearCache();
         }
       }, 1000);
-      
     } catch (error) {
-      console.error('❌ Erro ao corrigir datas de vacinas:', error);
+      console.error("❌ Erro ao corrigir datas de vacinas:", error);
     }
   }
 }

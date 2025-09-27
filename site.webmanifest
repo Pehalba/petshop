@@ -1,0 +1,26 @@
+{
+  "name": "Dra. Karianny Tolentino Sabatini - Dermatologia Veterinária",
+  "short_name": "Dra. Karianny",
+  "description": "Sistema de gestão para clínica de dermatologia veterinária",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#d6938a",
+  "theme_color": "#d6938a",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "16x16",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "32x32",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "180x180",
+      "type": "image/jpeg"
+    }
+  ]
+}

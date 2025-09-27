@@ -204,17 +204,17 @@
 
 /* Tabelas de dados */
 .data-table {
-  background-color: var(--white);
-  border: 1px solid var(--gray-200);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--border-radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
 
 .data-table-header {
-  background-color: var(--gray-50);
+  background-color: var(--surface-muted);
   padding: var(--spacing-4) var(--spacing-6);
-  border-bottom: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -223,7 +223,7 @@
 .data-table-title {
   font-size: var(--font-size-lg);
   font-weight: 600;
-  color: var(--gray-900);
+  color: var(--text-900);
 }
 
 .data-table-actions {
@@ -913,11 +913,11 @@
 
 /* ===== TABELAS ===== */
 .data-table {
-  background-color: var(--white);
+  background-color: var(--surface-card);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  border: 1px solid var(--gray-200);
+  border: 1px solid var(--border-subtle);
 }
 
 .data-table table {
@@ -927,23 +927,23 @@
 }
 
 .data-table th {
-  background-color: var(--gray-50);
-  color: var(--gray-700);
+  background-color: var(--surface-muted);
+  color: var(--text-900);
   font-weight: 600;
   text-align: left;
   padding: var(--spacing-4) var(--spacing-6);
-  border-bottom: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--border-subtle);
   white-space: nowrap;
 }
 
 .data-table td {
   padding: var(--spacing-4) var(--spacing-6);
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border-subtle);
   vertical-align: middle;
 }
 
 .data-table tr:hover {
-  background-color: var(--gray-50);
+  background-color: var(--brand-rose-50);
 }
 
 .data-table tr:last-child td {
@@ -2543,4 +2543,347 @@
     flex: 1;
     min-width: 0;
   }
+}
+
+/* ===== ESTILOS PARA SERVIÇOS COM VARIAÇÕES ===== */
+
+/* Grid de serviços */
+.services-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.service-item {
+  border: 3px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-5);
+  background: white;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.service-item:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+
+.service-item:has(input[type="checkbox"]:checked) {
+  border-color: #22c55e;
+  background-color: #f0fdf4;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1), var(--shadow-lg);
+}
+
+/* Checkbox de serviço */
+.service-checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+}
+
+.service-checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.service-checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  margin-right: var(--spacing-3);
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.service-checkbox-label input[type="checkbox"]:checked + .service-checkmark {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.service-checkbox-label
+  input[type="checkbox"]:checked
+  + .service-checkmark::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.service-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.service-price {
+  font-weight: bold;
+  color: var(--color-primary);
+  font-size: 1.1em;
+}
+
+/* Variações de serviço */
+.service-variations {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-4);
+  background-color: var(--color-primary-light);
+  border-radius: var(--border-radius-md);
+  border: 2px solid var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.variation-title {
+  margin: 0 0 var(--spacing-3) 0;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-align: center;
+}
+
+.variation-group {
+  display: flex;
+  gap: var(--spacing-1);
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.variation-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: var(--spacing-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 0;
+  max-width: 30%;
+  background: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.variation-label:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.variation-label input[type="radio"] {
+  display: none;
+}
+
+.variation-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.variation-name {
+  font-size: 0.8em;
+  font-weight: 600;
+  margin-bottom: var(--spacing-1);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.variation-price {
+  font-size: 0.7em;
+  color: var(--color-primary);
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Estado selecionado - mais específico */
+.variation-label input[type="radio"]:checked {
+  background-color: #4ade80 !important;
+  border-color: #22c55e !important;
+  box-shadow: var(--shadow-lg) !important;
+  transform: translateY(-2px) !important;
+  border-width: 3px !important;
+}
+
+.variation-label input[type="radio"]:checked + .variation-option {
+  color: white !important;
+  font-weight: bold !important;
+}
+
+.variation-label
+  input[type="radio"]:checked
+  + .variation-option
+  .variation-name {
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 0.9em !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.variation-label
+  input[type="radio"]:checked
+  + .variation-option
+  .variation-price {
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 0.8em !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Forçar visibilidade do estado selecionado */
+.service-variations .variation-label:has(input[type="radio"]:checked) {
+  background-color: #4ade80 !important;
+  border-color: #22c55e !important;
+  box-shadow: var(--shadow-lg) !important;
+  transform: translateY(-2px) !important;
+  border-width: 3px !important;
+}
+
+.service-variations
+  .variation-label:has(input[type="radio"]:checked)
+  .variation-option {
+  color: white !important;
+  font-weight: bold !important;
+}
+
+.service-variations
+  .variation-label:has(input[type="radio"]:checked)
+  .variation-name {
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 0.9em !important;
+}
+
+.service-variations
+  .variation-label:has(input[type="radio"]:checked)
+  .variation-price {
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 0.8em !important;
+}
+
+/* Fallback para navegadores sem suporte a :has() */
+.service-item.checked {
+  border-color: #22c55e !important;
+  background-color: #f0fdf4 !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1), var(--shadow-lg) !important;
+}
+
+.variation-label.checked {
+  background-color: #4ade80 !important;
+  border-color: #22c55e !important;
+  box-shadow: var(--shadow-lg) !important;
+  transform: translateY(-2px) !important;
+  border-width: 3px !important;
+}
+
+.variation-label.checked .variation-option {
+  color: white !important;
+  font-weight: bold !important;
+}
+
+.variation-label.checked .variation-name {
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 0.9em !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.variation-label.checked .variation-price {
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 0.8em !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Garantir visibilidade máxima do texto selecionado */
+.variation-label input[type="radio"]:checked + .variation-option,
+.variation-label.checked .variation-option {
+  color: white !important;
+  font-weight: bold !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  filter: contrast(1.1) !important;
+}
+
+.variation-label
+  input[type="radio"]:checked
+  + .variation-option
+  .variation-name,
+.variation-label.checked .variation-name {
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 0.9em !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  filter: contrast(1.1) !important;
+}
+
+.variation-label
+  input[type="radio"]:checked
+  + .variation-option
+  .variation-price,
+.variation-label.checked .variation-price {
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 0.8em !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  filter: contrast(1.1) !important;
+}
+
+/* Preview do total */
+.total-preview {
+  background-color: var(--color-primary-light);
+  padding: var(--spacing-4);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+  margin-top: var(--spacing-4);
+  border: 2px solid var(--color-primary);
+}
+
+.total-preview strong {
+  font-size: 1.2em;
+  color: var(--color-primary);
+}
+
+/* Botões de pagamento com tamanho fixo */
+.data-table-actions .btn {
+  min-width: 80px !important;
+  width: 80px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Campo de cliente no formulário de prontuário */
+.cliente-info {
+  padding: var(--spacing-3);
+  background-color: var(--color-primary-light);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-md);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.cliente-name {
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: 1rem;
+}
+
+.cliente-placeholder {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-size: 0.9rem;
 }

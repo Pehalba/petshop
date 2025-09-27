@@ -1,0 +1,459 @@
+/* ========================================
+   BRAND STYLES - Dra. Karianny Tolentino Sabatini
+   Dermatologia Veterinária
+   ======================================== */
+
+:root {
+  /* Superfícies (base branca) */
+  --surface-base: #ffffff; /* body, páginas */
+  --surface-muted: #fafafa; /* barras secundárias, áreas neutras */
+  --surface-card: #ffffff; /* cards/tabelas */
+  --border-subtle: #e5e7eb; /* bordas discretas */
+
+  /* Texto neutro */
+  --text-900: #1f2937; /* principal em fundo claro */
+  --text-700: #374151; /* secundário */
+  --text-500: #6b7280; /* texto terciário */
+  --text-inverse: #ffffff; /* em fundos escuros (quando houver) */
+
+  /* Escala de rosa da marca (baseada na cor exata da logo #d6938a) */
+  --brand-rose-50: #f7f0ef; /* highlights suaves / seleção leve */
+  --brand-rose-100: #f0e6e4; /* chips / linhas ativas */
+  --brand-rose-200: #e6d4d1; /* bordas de destaque */
+  --brand-rose-500: #d6938a; /* primária (cor exata da logo) */
+  --brand-rose-600: #d6938a; /* primária (botões/links) */
+  --brand-rose-700: #c4847b; /* hover/ativo */
+
+  /* Aliases práticos */
+  --primary: var(--brand-rose-600);
+  --primary-hover: var(--brand-rose-700);
+  --accent: var(--brand-rose-500);
+  --focus-ring: rgba(214, 147, 138, 0.45); /* anel de foco acessível */
+
+  /* Cores de status (mantendo acessibilidade) */
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --info: var(--primary);
+  --info-light: var(--brand-rose-50);
+}
+
+/* ========================================
+   HEADER E FOOTER BRAND
+   ======================================== */
+
+.header-brand--light {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-bottom: 1px solid var(--brand-rose-700);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.brand:hover {
+  opacity: 0.8;
+}
+
+.brand img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-title {
+  color: var(--text-inverse);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.brand-subtitle {
+  display: block;
+  font-size: 12px;
+  color: var(--brand-rose-100);
+  font-weight: 400;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.footer-brand {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-top: 1px solid var(--brand-rose-700);
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.footer-brand h3 {
+  color: var(--text-inverse);
+  margin-bottom: var(--spacing-2);
+}
+
+.footer-brand p {
+  color: var(--brand-rose-100);
+  margin-bottom: var(--spacing-3);
+}
+
+.footer-brand .footer-links a {
+  color: var(--brand-rose-100);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-brand .footer-links a:hover {
+  color: var(--text-inverse);
+}
+
+/* ========================================
+   BOTÕES BRAND
+   ======================================== */
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(196, 131, 126, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(196, 131, 126, 0.3);
+}
+
+.btn-secondary {
+  background: var(--surface-base);
+  color: var(--primary);
+  border: 1px solid var(--brand-rose-200);
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--brand-rose-50);
+  border-color: var(--brand-rose-300);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: var(--primary);
+  color: var(--text-inverse);
+}
+
+/* ========================================
+   LINKS E NAVEGAÇÃO
+   ======================================== */
+
+.link-brand {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link-brand:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+.main-nav .nav-link {
+  color: var(--text-inverse);
+}
+
+.main-nav .nav-link.active {
+  color: var(--text-inverse);
+  border-bottom: 2px solid var(--text-inverse);
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.main-nav .nav-link:hover {
+  color: var(--text-inverse);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ========================================
+   FORMULÁRIOS
+   ======================================== */
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--brand-rose-50);
+}
+
+.form-checkbox:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.form-radio:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ========================================
+   CARDS E SUPERFÍCIES
+   ======================================== */
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.data-table {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.data-table th {
+  background: var(--surface-muted);
+  color: var(--text-900);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.data-table td {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* ========================================
+   BADGES E CHIPS
+   ======================================== */
+
+.badge {
+  background: var(--brand-rose-50);
+  color: var(--brand-rose-700);
+  border: 1px solid var(--brand-rose-200);
+  font-weight: 500;
+}
+
+.badge-primary {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border: none;
+}
+
+.badge-success {
+  background: var(--success-light);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.badge-warning {
+  background: var(--warning-light);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+}
+
+.badge-error {
+  background: var(--error-light);
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+
+/* ========================================
+   CALENDÁRIO
+   ======================================== */
+
+.cal-day.is-selected {
+  background: var(--brand-rose-100);
+  border: 2px solid var(--primary);
+  color: var(--text-900);
+}
+
+.cal-count {
+  background: var(--primary);
+  color: var(--text-inverse);
+}
+
+.cal-count.appointments {
+  background: var(--primary);
+}
+
+.cal-count.vaccines {
+  background: var(--accent);
+}
+
+/* ========================================
+   VACINAS E PRONTUÁRIOS
+   ======================================== */
+
+.vaccine-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--primary);
+}
+
+.vaccine-card:hover {
+  box-shadow: 0 4px 12px rgba(196, 131, 126, 0.15);
+}
+
+.prontuario-item {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--primary);
+}
+
+/* ========================================
+   DASHBOARD
+   ======================================== */
+
+.dashboard-stats .stat-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.dashboard-stats .stat-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(196, 131, 126, 0.1);
+}
+
+/* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .brand-title {
+    font-size: 14px;
+  }
+
+  .brand-subtitle {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .brand-text {
+    display: none;
+  }
+
+  .brand img {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand {
+    gap: 8px;
+  }
+
+  .brand img {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ========================================
+   UTILITÁRIOS
+   ======================================== */
+
+.text-brand {
+  color: var(--primary);
+}
+
+.bg-brand {
+  background: var(--primary);
+}
+
+.border-brand {
+  border-color: var(--primary);
+}
+
+.shadow-brand {
+  box-shadow: 0 4px 12px rgba(196, 131, 126, 0.15);
+}
+
+/* ========================================
+   ANIMAÇÕES
+   ======================================== */
+
+@keyframes fadeInBrand {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-brand {
+  animation: fadeInBrand 0.3s ease-out;
+}
+
+/* ========================================
+   ACESSIBILIDADE
+   ======================================== */
+
+/* Foco visível para todos os elementos interativos */
+*:focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Contraste adequado para texto */
+.text-contrast {
+  color: var(--text-900);
+}
+
+.text-contrast-muted {
+  color: var(--text-700);
+}
+
+/* Estados de loading */
+.loading-brand {
+  background: linear-gradient(
+    90deg,
+    var(--brand-rose-50) 25%,
+    var(--brand-rose-100) 50%,
+    var(--brand-rose-50) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

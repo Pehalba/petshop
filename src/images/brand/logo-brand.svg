@@ -1,0 +1,30 @@
+<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo de fundo rosa -->
+  <circle cx="18" cy="18" r="18" fill="#C4837E"/>
+  
+  <!-- Linha contínua formando cão e gato em formato de coração -->
+  <!-- Contorno do cão (lado esquerdo) -->
+  <path d="M6 12 C6 10, 7 9, 8.5 9 C10 9, 11 10, 11 11.5 C11 13, 10 14, 9 15 C8 16, 7 17, 6.5 18 C6 19, 6 20, 6.5 21 C7 22, 8 23, 9 24 C10 25, 11 26, 12 27 C13 28, 14 28.5, 15 29 C16 29.5, 17 30, 18 30.5 
+  
+  <!-- Contorno do gato (lado direito) -->
+  C19 30, 20 29.5, 21 29 C22 28.5, 23 28, 24 27 C25 26, 26 25, 27 24 C28 23, 29 22, 29.5 21 C30 20, 30 19, 29.5 18 C29 17, 28 16, 27 15 C26 14, 25 13, 25 11.5 C25 10, 26 9, 27.5 9 C29 9, 30 10, 30 12
+  
+  <!-- Orelhas do gato -->
+  M25 11.5 L24 8 M25 11.5 L26 8
+  
+  <!-- Rabo do gato -->
+  M30 12 C31 12, 32 13, 32 14 C32 15, 31 16, 30 17 C29 18, 28 19, 27 20
+  
+  <!-- Base do coração -->
+  M18 30.5 C18 31, 18 31.5, 18 32" 
+  
+  stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Detalhes mínimos -->
+  <!-- Olho do cão -->
+  <circle cx="8.5" cy="11" r="0.5" fill="white"/>
+  
+  <!-- Olhos do gato -->
+  <circle cx="26.5" cy="10.5" r="0.5" fill="white"/>
+  <circle cx="28" cy="10.5" r="0.5" fill="white"/>
+</svg>

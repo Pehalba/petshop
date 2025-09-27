@@ -1,11 +1,19 @@
 /* ===== HEADER ===== */
 #header {
-  background-color: var(--white);
-  border-bottom: 1px solid var(--gray-200);
+  background-color: var(--primary);
+  border-bottom: 1px solid var(--brand-rose-700);
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+/* Header brand styles */
+.header-brand--light {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-bottom: 1px solid var(--brand-rose-700);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .header-container {
@@ -23,7 +31,49 @@
   align-items: center;
   gap: var(--spacing-3);
   text-decoration: none;
-  color: var(--gray-900);
+  color: var(--text-900);
+}
+
+/* Brand logo styles */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.brand:hover {
+  opacity: 0.8;
+}
+
+.brand img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-title {
+  color: var(--brand-rose-700);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.brand-subtitle {
+  display: block;
+  font-size: 12px;
+  color: var(--text-700);
+  font-weight: 400;
+  margin: 0;
 }
 
 .header-logo-icon {
@@ -62,20 +112,35 @@
   padding: var(--spacing-2) var(--spacing-4);
   font-size: var(--font-size-sm);
   font-weight: 500;
-  color: var(--gray-600);
+  color: var(--text-inverse);
   text-decoration: none;
   border-radius: var(--border-radius);
   transition: all var(--transition-fast);
 }
 
 .nav-link:hover {
-  color: var(--gray-900);
-  background-color: var(--gray-100);
+  color: var(--text-inverse);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link.active {
-  color: var(--primary-color);
-  background-color: var(--primary-light);
+  color: var(--text-inverse);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid var(--text-inverse);
+  font-weight: 600;
+}
+
+/* Main nav styles */
+.main-nav .nav-link.active {
+  color: var(--text-inverse);
+  border-bottom: 2px solid var(--text-inverse);
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.main-nav .nav-link:hover {
+  color: var(--text-inverse);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link-icon {
