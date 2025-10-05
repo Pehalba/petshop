@@ -201,35 +201,24 @@ class PetShopApp {
                             <span class="nav-link-icon">⚙️</span>
                             Configurações
                         </a>
+                        <div class="mobile-menu-divider"></div>
+                        <a href="#" class="mobile-nav-link" data-action="backup">
+                            <span class="nav-link-icon">💾</span>
+                            Backup
+                        </a>
+                        <a href="#" class="mobile-nav-link" data-action="restore">
+                            <span class="nav-link-icon">📁</span>
+                            Restaurar
+                        </a>
+                        <a href="#" class="mobile-nav-link" data-action="logout">
+                            <span class="nav-link-icon">🚪</span>
+                            Sair
+                        </a>
                     </div>
                 </div>
                 
                 <div class="header-actions">
-                    <div class="header-profile">
-                        <button class="profile-button" id="profile-menu">
-                            <div class="profile-avatar">👤</div>
-                            <span class="profile-name">Admin</span>
-                        </button>
-                        <div class="profile-dropdown" id="profile-dropdown">
-                            <a href="#" class="dropdown-item" data-page="configuracoes">
-                                <span class="dropdown-item-icon">⚙️</span>
-                                Configurações
-                            </a>
-                            <a href="#" class="dropdown-item" data-action="backup">
-                                <span class="dropdown-item-icon">💾</span>
-                                Backup
-                            </a>
-                            <a href="#" class="dropdown-item" data-action="restore">
-                                <span class="dropdown-item-icon">📁</span>
-                                Restaurar
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="#" class="dropdown-item" data-action="logout">
-                                <span class="dropdown-item-icon">🚪</span>
-                                Sair
-                            </a>
-                        </div>
-                    </div>
+                    <!-- Removido o perfil Admin - agora está no menu mobile -->
                 </div>
             </div>
         `;

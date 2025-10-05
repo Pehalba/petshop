@@ -538,7 +538,7 @@
   }
 
   .cal-days {
-    grid-auto-rows: 45px;
+    grid-auto-rows: 40px;
   }
 
   .cal-day-number {
@@ -548,6 +548,30 @@
   .cal-count {
     font-size: 8px;
     padding: 1px 2px;
-    min-width: 12px;
+    min-width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .cal-count.appointments {
+    background: var(--primary) !important;
+    color: var(--text-inverse);
+  }
+  
+  .cal-count.vaccines {
+    background: var(--primary) !important;
+    color: var(--text-inverse);
+    font-size: 6px !important;
+    padding: 1px !important;
+    min-width: 10px !important;
+    height: 10px !important;
+  }
+  
+  .cal-count.vaccines::before {
+    content: "•";
+    font-size: 8px;
   }
 }

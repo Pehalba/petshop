@@ -162,11 +162,21 @@ class Calendar {
     const totalCount = appointmentsCount + vaccinesCount;
 
     let countsHtml = "";
+    const isMobile = window.innerWidth <= 480;
+    
     if (appointmentsCount > 0) {
-      countsHtml += `<span class="cal-count appointments">${appointmentsCount}</span>`;
+      if (isMobile) {
+        countsHtml += `<span class="cal-count appointments"></span>`;
+      } else {
+        countsHtml += `<span class="cal-count appointments">${appointmentsCount}</span>`;
+      }
     }
     if (vaccinesCount > 0) {
-      countsHtml += `<span class="cal-count vaccines">💉</span>`;
+      if (isMobile) {
+        countsHtml += `<span class="cal-count vaccines"></span>`;
+      } else {
+        countsHtml += `<span class="cal-count vaccines">💉</span>`;
+      }
     }
 
     dayEl.innerHTML = `
