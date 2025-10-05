@@ -4149,11 +4149,7 @@ class PetShopApp {
   }
 
   renderPetVaccines(pet) {
-    console.log("🔍 renderPetVaccines chamado para pet:", pet);
-    console.log("🔍 Vacinas do pet:", pet.vacinas);
-    
     if (!pet.vacinas || pet.vacinas.length === 0) {
-      console.log("🔍 Nenhuma vacina encontrada, renderizando empty state");
       return `
         <div class="empty-state">
           <div class="empty-icon">💉</div>
@@ -4168,9 +4164,8 @@ class PetShopApp {
     const vacinas = pet.vacinas.sort(
       (a, b) => new Date(b.dataAplicacao) - new Date(a.dataAplicacao)
     );
-    console.log("🔍 Vacinas ordenadas:", vacinas);
 
-    const html = `
+    return `
       <div class="vaccines-list">
         ${vacinas.map((vacina) => this.renderVaccineCard(vacina, pet)).join("")}
       </div>
@@ -4182,9 +4177,6 @@ class PetShopApp {
         </button>
       </div>
     `;
-    
-    console.log("🔍 HTML gerado para vacinas:", html);
-    return html;
   }
 
   renderVaccineCard(vacina, pet) {
@@ -7035,7 +7027,6 @@ Entre em contato conosco para agendar o reforço!`;
     const formData = new FormData(form);
 
     const vacinas = this.processVaccines(formData);
-    console.log("🔍 Vacinas processadas:", vacinas);
 
     if (vacinas.length === 0) {
       ui.error("Nenhuma vacina válida encontrada. Verifique os dados preenchidos.");
@@ -7044,23 +7035,23 @@ Entre em contato conosco para agendar o reforço!`;
 
     try {
       const pet = await store.getPet(petId);
-      console.log("🔍 Pet antes de salvar:", pet);
-      
       pet.vacinas = vacinas;
-      console.log("🔍 Pet após adicionar vacinas:", pet);
-
       await store.savePet(pet);
-      console.log("🔍 Pet salvo com sucesso");
 
       // Criar lembretes para as vacinas
       for (const vacina of vacinas) {
         if (vacina.habilitarLembrete && vacina.proximaDose) {
-          await store.upsertVaccineReminder(petId, vacina);
+          await store.upsertVaccineReminder({
+            petId: petId,
+            clienteId: pet.clienteId,
+            nomeVacina: vacina.nomeVacina,
+            proximaDose: vacina.proximaDose,
+            antecedenciaDias: vacina.antecedenciaDias,
+          });
         }
       }
 
       ui.success("Vacinas salvas com sucesso!");
-      console.log("🔍 Redirecionando para viewPet:", petId);
       this.viewPet(petId);
     } catch (error) {
       console.error("Erro ao salvar vacinas:", error);
