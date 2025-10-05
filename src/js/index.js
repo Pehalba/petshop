@@ -2089,6 +2089,13 @@ class PetShopApp {
         return;
       }
 
+      // Ordenar serviços por data de criação (mais novos primeiro)
+      const sortedServices = services.sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.updatedAt || 0);
+        const dateB = new Date(b.createdAt || b.updatedAt || 0);
+        return dateB - dateA; // Mais novos primeiro
+      });
+
       content.innerHTML = `
       <div class="page-header">
         <div class="page-title">
@@ -2144,7 +2151,7 @@ class PetShopApp {
         </button>
       </div>
 
-      ${this.renderServicesTable(services)}
+      ${this.renderServicesTable(sortedServices)}
     `;
 
       this.setupServiceEvents();
@@ -3167,10 +3174,17 @@ class PetShopApp {
       return matchesSearch && matchesCategory;
     });
 
+    // Ordenar serviços filtrados por data de criação (mais novos primeiro)
+    const sortedFiltered = filtered.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.updatedAt || 0);
+      const dateB = new Date(b.createdAt || b.updatedAt || 0);
+      return dateB - dateA; // Mais novos primeiro
+    });
+
     const tableContainer = document.querySelector(".data-table");
     if (tableContainer) {
       tableContainer.outerHTML = this.renderServicesTable(
-        filtered,
+        sortedFiltered,
         categoryFilter
       );
     }
