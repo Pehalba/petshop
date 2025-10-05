@@ -188,7 +188,7 @@ class Utils {
     return re.test(email);
   }
 
-  // Cálculo de idade
+  // Cálculo de idade simples (apenas anos)
   static calculateAge(birthDate) {
     if (!birthDate) return null;
 
@@ -205,6 +205,70 @@ class Utils {
     }
 
     return age;
+  }
+
+  // Cálculo de idade detalhada (anos, meses, dias)
+  static calculateDetailedAge(birthDate) {
+    if (!birthDate) return null;
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+    
+    let years = today.getFullYear() - birth.getFullYear();
+    let months = today.getMonth() - birth.getMonth();
+    let days = today.getDate() - birth.getDate();
+
+    if (days < 0) {
+      months--;
+      const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+      days += lastMonth.getDate();
+    }
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    return { years, months, days };
+  }
+
+  // Formatar idade detalhada para exibição
+  static formatDetailedAge(birthDate) {
+    const age = this.calculateDetailedAge(birthDate);
+    if (!age) return null;
+
+    const parts = [];
+    if (age.years > 0) parts.push(`${age.years} ${age.years === 1 ? 'ano' : 'anos'}`);
+    if (age.months > 0) parts.push(`${age.months} ${age.months === 1 ? 'mês' : 'meses'}`);
+    if (age.days > 0) parts.push(`${age.days} ${age.days === 1 ? 'dia' : 'dias'}`);
+
+    return parts.join(', ');
+  }
+
+  // Calcular data de nascimento baseada em idade aproximada
+  static calculateBirthDateFromAge(ageString) {
+    if (!ageString) return null;
+
+    // Extrair anos, meses e dias da string
+    const yearsMatch = ageString.match(/(\d+)\s*(ano|anos)/i);
+    const monthsMatch = ageString.match(/(\d+)\s*(mês|mes|meses)/i);
+    const daysMatch = ageString.match(/(\d+)\s*(dia|dias)/i);
+
+    const years = yearsMatch ? parseInt(yearsMatch[1]) : 0;
+    const months = monthsMatch ? parseInt(monthsMatch[1]) : 0;
+    const days = daysMatch ? parseInt(daysMatch[1]) : 0;
+
+    if (years === 0 && months === 0 && days === 0) return null;
+
+    // Calcular data de nascimento aproximada
+    const today = new Date();
+    const birthDate = new Date(today);
+    
+    birthDate.setFullYear(today.getFullYear() - years);
+    birthDate.setMonth(today.getMonth() - months);
+    birthDate.setDate(today.getDate() - days);
+
+    return birthDate.toISOString().split('T')[0];
   }
 
   // Cálculo de preço por porte

@@ -1959,9 +1959,9 @@ class PetShopApp {
                       <p><strong>Sexo:</strong> ${pet.sexo || "-"}</p>
                       ${
                         pet.dataNascimento
-                          ? `<p><strong>Idade:</strong> ${utils.calculateAge(
+                          ? `<p><strong>Idade:</strong> ${utils.formatDetailedAge(
                               pet.dataNascimento
-                            )} anos</p>`
+                            )}</p>`
                           : pet.idade
                           ? `<p><strong>Idade:</strong> ${pet.idade}</p>`
                           : ""
@@ -3706,7 +3706,7 @@ class PetShopApp {
         const client = await store.getClient(pet.clienteId);
         // Sempre calcular idade baseada na data de nascimento se disponível
         const idade = pet.dataNascimento
-          ? `${utils.calculateAge(pet.dataNascimento)} anos`
+          ? utils.formatDetailedAge(pet.dataNascimento)
           : pet.idade || "-";
 
         return `
@@ -4635,15 +4635,18 @@ Entre em contato conosco para agendar o reforço!`;
                 <div class="form-error" id="petDataNascimento-error"></div>
               </div>
               <div class="form-group">
-                <label for="petIdade">Idade (se não souber a data)</label>
+                <label for="petIdade">Idade (se não souber a data exata)</label>
                 <input 
                   type="text" 
                   id="petIdade" 
                   name="idade" 
                   class="form-input" 
                   value="${pet?.idade || ""}"
-                  placeholder="Ex: 2 anos, 6 meses"
+                  placeholder="Ex: 2 anos, 6 meses, 15 dias"
                 >
+                <div class="form-help">
+                  💡 Dica: Digite a idade aproximada (ex: "1 ano e 3 meses" ou "6 meses e 10 dias")
+                </div>
               </div>
             </div>
             <div class="form-row">
@@ -4759,15 +4762,15 @@ Entre em contato conosco para agendar o reforço!`;
 
     document.getElementById("content").innerHTML = content;
     this.setupPetFormEvents();
-    
+
     // Inicializar estado do campo de idade se pet já tem data de nascimento
     if (pet && pet.dataNascimento) {
       const dataNascimentoInput = document.getElementById("petDataNascimento");
       const idadeInput = document.getElementById("petIdade");
       
       if (dataNascimentoInput && idadeInput) {
-        const idade = utils.calculateAge(pet.dataNascimento);
-        idadeInput.value = `${idade} anos`;
+        const idade = utils.formatDetailedAge(pet.dataNascimento);
+        idadeInput.value = idade;
         idadeInput.placeholder = "Idade calculada automaticamente";
         idadeInput.readOnly = true;
         idadeInput.style.backgroundColor = "#f8f9fa";
@@ -4794,17 +4797,49 @@ Entre em contato conosco para agendar o reforço!`;
     if (dataNascimentoInput && idadeInput) {
       dataNascimentoInput.addEventListener("change", (e) => {
         if (e.target.value) {
-          const idade = utils.calculateAge(e.target.value);
-          idadeInput.value = `${idade} anos`;
+          const idade = utils.formatDetailedAge(e.target.value);
+          idadeInput.value = idade;
           idadeInput.placeholder = "Idade calculada automaticamente";
           idadeInput.readOnly = true;
           idadeInput.style.backgroundColor = "#f8f9fa";
         } else {
           // Se data de nascimento for removida, liberar campo de idade manual
           idadeInput.value = "";
-          idadeInput.placeholder = "Ex: 2 anos, 6 meses";
+          idadeInput.placeholder = "Ex: 2 anos, 6 meses, 15 dias";
           idadeInput.readOnly = false;
           idadeInput.style.backgroundColor = "";
+        }
+      });
+
+      // Evento para calcular data de nascimento quando idade manual for digitada
+      idadeInput.addEventListener("blur", (e) => {
+        if (e.target.value && !dataNascimentoInput.value) {
+          const dataCalculada = utils.calculateBirthDateFromAge(e.target.value);
+          if (dataCalculada) {
+            dataNascimentoInput.value = dataCalculada;
+            // Mostrar feedback visual
+            const feedback = document.createElement("div");
+            feedback.className = "form-help";
+            feedback.style.color = "#28a745";
+            feedback.innerHTML = "✅ Data de nascimento calculada automaticamente";
+            feedback.id = "birthdate-feedback";
+            
+            // Remover feedback anterior se existir
+            const existingFeedback = document.getElementById("birthdate-feedback");
+            if (existingFeedback) {
+              existingFeedback.remove();
+            }
+            
+            dataNascimentoInput.parentNode.appendChild(feedback);
+            
+            // Remover feedback após 3 segundos
+            setTimeout(() => {
+              const feedbackToRemove = document.getElementById("birthdate-feedback");
+              if (feedbackToRemove) {
+                feedbackToRemove.remove();
+              }
+            }, 3000);
+          }
         }
       });
     }
@@ -4814,8 +4849,14 @@ Entre em contato conosco para agendar o reforço!`;
     event.preventDefault();
 
     const formData = new FormData(event.target);
-    const dataNascimento = formData.get("dataNascimento");
+    let dataNascimento = formData.get("dataNascimento");
+    const idadeManual = formData.get("idade");
     
+    // Se não há data de nascimento mas há idade manual, calcular data de nascimento
+    if (!dataNascimento && idadeManual) {
+      dataNascimento = utils.calculateBirthDateFromAge(idadeManual);
+    }
+
     const petData = {
       nome: formData.get("nome"),
       especie: formData.get("especie") || "cão",
@@ -4823,8 +4864,10 @@ Entre em contato conosco para agendar o reforço!`;
       sexo: formData.get("sexo"),
       porte: formData.get("porte"),
       dataNascimento: dataNascimento,
-      // Calcular idade automaticamente se há data de nascimento, senão usar idade manual
-      idade: dataNascimento ? utils.calculateAge(dataNascimento) : formData.get("idade"),
+      // Se há data de nascimento, usar idade calculada, senão usar idade manual
+      idade: dataNascimento
+        ? utils.formatDetailedAge(dataNascimento)
+        : idadeManual,
       pesoAproximadoKg: parseFloat(formData.get("pesoAproximadoKg")) || null,
       clienteId: formData.get("clienteId"),
       observacoes: formData.get("observacoes"),
@@ -4922,7 +4965,7 @@ Entre em contato conosco para agendar o reforço!`;
     console.log("🔍 Cliente encontrado:", client);
     // Sempre calcular idade baseada na data de nascimento se disponível
     const idade = pet.dataNascimento
-      ? `${utils.calculateAge(pet.dataNascimento)} anos`
+      ? utils.formatDetailedAge(pet.dataNascimento)
       : pet.idade || "-";
     console.log("🔍 Idade calculada:", idade);
     console.log("🔍 Criando conteúdo HTML...");
