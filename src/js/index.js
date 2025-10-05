@@ -2508,7 +2508,6 @@ class PetShopApp {
                   id="tipoVariacao" 
                   name="tipoVariacao" 
                   class="form-select"
-                  required
                 >
                   <option value="">Selecione o tipo de variação</option>
                   <option value="porte" ${
@@ -2681,9 +2680,6 @@ class PetShopApp {
             <button type="button" class="btn btn-outline" onclick="app.renderServicos()">
               Cancelar
             </button>
-            <button type="button" class="btn btn-outline" onclick="app.saveServiceAndNew()">
-              Salvar e Novo
-            </button>
             <button type="submit" class="btn btn-primary">
               ${isEdit ? "Atualizar" : "Salvar"} Serviço
             </button>
@@ -2694,6 +2690,16 @@ class PetShopApp {
 
     document.getElementById("content").innerHTML = content;
     this.setupServiceFormEvents();
+    
+    // Inicializar estado do campo tipoVariacao
+    const temVariacoesCheckbox = document.getElementById("temVariacoes");
+    const tipoVariacaoSelect = document.getElementById("tipoVariacao");
+    
+    if (temVariacoesCheckbox && tipoVariacaoSelect) {
+      if (!temVariacoesCheckbox.checked) {
+        tipoVariacaoSelect.removeAttribute("required");
+      }
+    }
   }
 
   // Eventos do formulário de serviço
@@ -2730,10 +2736,19 @@ class PetShopApp {
     if (temVariacoesCheckbox) {
       temVariacoesCheckbox.addEventListener("change", (e) => {
         variacoesGroup.style.display = e.target.checked ? "block" : "none";
-        if (!e.target.checked) {
-          // Limpar variações se desmarcar
-          this.clearVariationInputs();
-        } else {
+        
+        // Controlar atributo required do tipoVariacao
+        if (tipoVariacaoSelect) {
+          if (e.target.checked) {
+            tipoVariacaoSelect.setAttribute("required", "required");
+          } else {
+            tipoVariacaoSelect.removeAttribute("required");
+            // Limpar variações se desmarcar
+            this.clearVariationInputs();
+          }
+        }
+        
+        if (e.target.checked) {
           // Preencher com preço base se marcar
           this.fillVariationInputs();
         }
@@ -2994,47 +3009,6 @@ class PetShopApp {
     }
   }
 
-  // Salvar e criar novo
-  async saveServiceAndNew() {
-    const form = document.getElementById("serviceForm");
-    const formData = new FormData(form);
-
-    const serviceData = {
-      nome: formData.get("nome").trim(),
-      categoria: formData.get("categoria"),
-      preco: MoneyUtils.parseBRL(formData.get("preco")),
-      temCusto: formData.get("temCusto") === "on",
-      custoAproximado:
-        formData.get("temCusto") === "on"
-          ? MoneyUtils.parseBRL(formData.get("custoAproximado"))
-          : null,
-      descricao: formData.get("descricao").trim(),
-      ativo: true, // Sempre ativo - se não quiser, pode excluir
-      temVariacoes: formData.get("temVariacoes") === "on",
-      tipoVariacao:
-        formData.get("temVariacoes") === "on"
-          ? formData.get("tipoVariacao")
-          : null,
-      variacoes:
-        formData.get("temVariacoes") === "on"
-          ? this.buildVariationsData(formData)
-          : null,
-    };
-
-    if (!(await this.validateService(serviceData))) {
-      return;
-    }
-
-    try {
-      const newServiceId = store.generateId("srv");
-      await store.saveService({ ...serviceData, id: newServiceId });
-
-      ui.success("Serviço cadastrado com sucesso!");
-      this.showServiceForm(); // Abrir formulário limpo
-    } catch (error) {
-      ui.error("Erro ao salvar serviço: " + error.message);
-    }
-  }
 
   // Validar serviço
   async validateService(serviceData, serviceId = null) {
