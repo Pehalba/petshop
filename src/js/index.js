@@ -4074,7 +4074,6 @@ class PetShopApp {
               value="${
                 vaccine?.proximaDose || new Date().toISOString().split("T")[0]
               }"
-              onchange="app.toggleVaccineReminder(${index})"
             >
           </div>
           
@@ -4094,17 +4093,14 @@ class PetShopApp {
         
         <div class="form-row">
           <div class="form-group">
-            <label class="checkbox-label">
-              <input 
-                type="checkbox" 
-                name="vacinaHabilitarLembrete[]" 
-                class="form-checkbox" 
-                ${vaccine?.habilitarLembrete ? "checked" : ""}
-                onchange="app.toggleVaccineReminder(${index})"
-              >
-              <span class="checkmark"></span>
-              Habilitar lembrete
-            </label>
+            <div class="form-help">
+              💡 Lembrete automático habilitado para esta vacina
+            </div>
+            <input 
+              type="hidden" 
+              name="vacinaHabilitarLembrete[]" 
+              value="on"
+            >
           </div>
         </div>
         
@@ -4124,25 +4120,6 @@ class PetShopApp {
     `;
   }
 
-  toggleVaccineReminder(index) {
-    const vaccineItem = document.querySelector(
-      `[data-vaccine-index="${index}"]`
-    );
-    const proximaDoseInput = vaccineItem.querySelector(
-      'input[name="vacinaProximaDose[]"]'
-    );
-    const habilitarLembreteCheckbox = vaccineItem.querySelector(
-      'input[name="vacinaHabilitarLembrete[]"]'
-    );
-
-    // Se habilitar lembrete está marcado mas não há próxima dose, exigir próxima dose
-    if (habilitarLembreteCheckbox.checked && !proximaDoseInput.value) {
-      proximaDoseInput.required = true;
-      proximaDoseInput.focus();
-    } else {
-      proximaDoseInput.required = false;
-    }
-  }
 
   processVaccines(formData) {
     const vacinas = [];
@@ -4162,7 +4139,7 @@ class PetShopApp {
           dataAplicacao: datasAplicacao[i],
           proximaDose: proximasDoses[i] || null,
           antecedenciaDias: parseInt(antecedencias[i]) || 7,
-          habilitarLembrete: habilitarLembretes[i] === "on",
+          habilitarLembrete: true, // Sempre habilitado
           observacoes: observacoes[i] || "",
         };
         vacinas.push(vacina);
@@ -4192,6 +4169,11 @@ class PetShopApp {
     return `
       <div class="vaccines-list">
         ${vacinas.map((vacina) => this.renderVaccineCard(vacina, pet)).join("")}
+      </div>
+      <div class="vaccine-actions-section">
+        <button class="btn btn-outline btn-sm" onclick="app.showVaccineFormForPet('${pet.id}')">
+          <i class="icon-plus"></i> Adicionar Nova Vacina
+        </button>
       </div>
     `;
   }

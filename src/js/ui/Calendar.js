@@ -29,8 +29,10 @@ class Calendar {
     this.callbacks = { ...this.callbacks, ...options };
     
     if (this.config.minMonth === 'auto') {
+      // Permitir navegação para pelo menos 12 meses atrás
       const now = new Date();
-      this.config.minMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const minDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+      this.config.minMonth = `${minDate.getFullYear()}-${String(minDate.getMonth() + 1).padStart(2, '0')}`;
     }
 
     this.render();
@@ -44,11 +46,11 @@ class Calendar {
       <div class="calendar">
         <div class="calendar-header">
           <button class="cal-nav cal-prev" type="button" aria-label="Mês anterior">
-            <i class="icon-chevron-left"></i>
+            ←
           </button>
           <h3 class="cal-title"></h3>
           <button class="cal-nav cal-next" type="button" aria-label="Próximo mês">
-            <i class="icon-chevron-right"></i>
+            →
           </button>
         </div>
         <div class="calendar-grid">
