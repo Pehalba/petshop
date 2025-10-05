@@ -4120,7 +4120,6 @@ class PetShopApp {
     `;
   }
 
-
   processVaccines(formData) {
     const vacinas = [];
     const nomes = formData.getAll("vacinaNome[]");
@@ -4150,7 +4149,11 @@ class PetShopApp {
   }
 
   renderPetVaccines(pet) {
+    console.log("🔍 renderPetVaccines chamado para pet:", pet);
+    console.log("🔍 Vacinas do pet:", pet.vacinas);
+    
     if (!pet.vacinas || pet.vacinas.length === 0) {
+      console.log("🔍 Nenhuma vacina encontrada, renderizando empty state");
       return `
         <div class="empty-state">
           <div class="empty-icon">💉</div>
@@ -4165,17 +4168,23 @@ class PetShopApp {
     const vacinas = pet.vacinas.sort(
       (a, b) => new Date(b.dataAplicacao) - new Date(a.dataAplicacao)
     );
+    console.log("🔍 Vacinas ordenadas:", vacinas);
 
-    return `
+    const html = `
       <div class="vaccines-list">
         ${vacinas.map((vacina) => this.renderVaccineCard(vacina, pet)).join("")}
       </div>
       <div class="vaccine-actions-section">
-        <button class="btn btn-outline btn-sm" onclick="app.showVaccineFormForPet('${pet.id}')">
+        <button class="btn btn-outline btn-sm" onclick="app.showVaccineFormForPet('${
+          pet.id
+        }')">
           <i class="icon-plus"></i> Adicionar Nova Vacina
         </button>
       </div>
     `;
+    
+    console.log("🔍 HTML gerado para vacinas:", html);
+    return html;
   }
 
   renderVaccineCard(vacina, pet) {
@@ -4767,7 +4776,7 @@ Entre em contato conosco para agendar o reforço!`;
     if (pet && pet.dataNascimento) {
       const dataNascimentoInput = document.getElementById("petDataNascimento");
       const idadeInput = document.getElementById("petIdade");
-      
+
       if (dataNascimentoInput && idadeInput) {
         const idade = utils.formatDetailedAge(pet.dataNascimento);
         idadeInput.value = idade;
@@ -4821,20 +4830,23 @@ Entre em contato conosco para agendar o reforço!`;
             const feedback = document.createElement("div");
             feedback.className = "form-help";
             feedback.style.color = "#28a745";
-            feedback.innerHTML = "✅ Data de nascimento calculada automaticamente";
+            feedback.innerHTML =
+              "✅ Data de nascimento calculada automaticamente";
             feedback.id = "birthdate-feedback";
-            
+
             // Remover feedback anterior se existir
-            const existingFeedback = document.getElementById("birthdate-feedback");
+            const existingFeedback =
+              document.getElementById("birthdate-feedback");
             if (existingFeedback) {
               existingFeedback.remove();
             }
-            
+
             dataNascimentoInput.parentNode.appendChild(feedback);
-            
+
             // Remover feedback após 3 segundos
             setTimeout(() => {
-              const feedbackToRemove = document.getElementById("birthdate-feedback");
+              const feedbackToRemove =
+                document.getElementById("birthdate-feedback");
               if (feedbackToRemove) {
                 feedbackToRemove.remove();
               }
@@ -4851,7 +4863,7 @@ Entre em contato conosco para agendar o reforço!`;
     const formData = new FormData(event.target);
     let dataNascimento = formData.get("dataNascimento");
     const idadeManual = formData.get("idade");
-    
+
     // Se não há data de nascimento mas há idade manual, calcular data de nascimento
     if (!dataNascimento && idadeManual) {
       dataNascimento = utils.calculateBirthDateFromAge(idadeManual);
@@ -7023,12 +7035,22 @@ Entre em contato conosco para agendar o reforço!`;
     const formData = new FormData(form);
 
     const vacinas = this.processVaccines(formData);
+    console.log("🔍 Vacinas processadas:", vacinas);
+
+    if (vacinas.length === 0) {
+      ui.error("Nenhuma vacina válida encontrada. Verifique os dados preenchidos.");
+      return;
+    }
 
     try {
       const pet = await store.getPet(petId);
+      console.log("🔍 Pet antes de salvar:", pet);
+      
       pet.vacinas = vacinas;
+      console.log("🔍 Pet após adicionar vacinas:", pet);
 
       await store.savePet(pet);
+      console.log("🔍 Pet salvo com sucesso");
 
       // Criar lembretes para as vacinas
       for (const vacina of vacinas) {
@@ -7037,11 +7059,12 @@ Entre em contato conosco para agendar o reforço!`;
         }
       }
 
-      ui.showSuccess("Vacinas salvas com sucesso!");
+      ui.success("Vacinas salvas com sucesso!");
+      console.log("🔍 Redirecionando para viewPet:", petId);
       this.viewPet(petId);
     } catch (error) {
       console.error("Erro ao salvar vacinas:", error);
-      ui.showError("Erro ao salvar vacinas. Tente novamente.");
+      ui.error("Erro ao salvar vacinas. Tente novamente.");
     }
   }
 

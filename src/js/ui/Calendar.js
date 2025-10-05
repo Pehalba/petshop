@@ -11,15 +11,15 @@ class Calendar {
     this.selectedDay = null;
     this.counts = {};
     this.config = {
-      locale: 'pt-BR',
+      locale: "pt-BR",
       weekStartsOn: 0, // 0 = domingo
-      minMonth: 'auto',
-      maxMonth: '2026-12'
+      minMonth: "auto",
+      maxMonth: "2026-12",
     };
     this.callbacks = {
       onMonthChange: null,
       onDayClick: null,
-      getDayCount: null
+      getDayCount: null,
     };
   }
 
@@ -27,12 +27,14 @@ class Calendar {
     this.container = options.container;
     this.config = { ...this.config, ...options };
     this.callbacks = { ...this.callbacks, ...options };
-    
-    if (this.config.minMonth === 'auto') {
+
+    if (this.config.minMonth === "auto") {
       // Permitir navegação para pelo menos 12 meses atrás
       const now = new Date();
       const minDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
-      this.config.minMonth = `${minDate.getFullYear()}-${String(minDate.getMonth() + 1).padStart(2, '0')}`;
+      this.config.minMonth = `${minDate.getFullYear()}-${String(
+        minDate.getMonth() + 1
+      ).padStart(2, "0")}`;
     }
 
     this.render();
@@ -76,10 +78,10 @@ class Calendar {
     this.currentMonth = month;
 
     // Atualizar título
-    const titleEl = this.container.querySelector('.cal-title');
+    const titleEl = this.container.querySelector(".cal-title");
     const monthName = new Intl.DateTimeFormat(this.config.locale, {
-      month: 'long',
-      year: 'numeric'
+      month: "long",
+      year: "numeric",
     }).format(new Date(year, month - 1));
     titleEl.textContent = monthName;
 
@@ -87,17 +89,18 @@ class Calendar {
     const daysInMonth = new Date(year, month, 0).getDate();
     const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
     const today = new Date();
-    const isCurrentMonth = year === today.getFullYear() && month === today.getMonth() + 1;
+    const isCurrentMonth =
+      year === today.getFullYear() && month === today.getMonth() + 1;
 
     // Renderizar dias
-    const daysEl = this.container.querySelector('.cal-days');
-    daysEl.innerHTML = '';
+    const daysEl = this.container.querySelector(".cal-days");
+    daysEl.innerHTML = "";
 
     // Dias do mês anterior (cinza)
     const prevMonth = month === 1 ? 12 : month - 1;
     const prevYear = month === 1 ? year - 1 : year;
     const daysInPrevMonth = new Date(prevYear, prevMonth, 0).getDate();
-    
+
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
       const day = daysInPrevMonth - i;
       const dayEl = this.createDayElement(day, prevYear, prevMonth, true);
@@ -114,10 +117,10 @@ class Calendar {
     // Dias do próximo mês (cinza)
     const totalCells = 42; // 6 semanas × 7 dias
     const remainingCells = totalCells - (firstDayOfWeek + daysInMonth);
-    
+
     const nextMonth = month === 12 ? 1 : month + 1;
     const nextYear = month === 12 ? year + 1 : year;
-    
+
     for (let day = 1; day <= remainingCells; day++) {
       const dayEl = this.createDayElement(day, nextYear, nextMonth, true);
       daysEl.appendChild(dayEl);
@@ -136,25 +139,29 @@ class Calendar {
   }
 
   createDayElement(day, year, month, isOtherMonth = false, isToday = false) {
-    const dayEl = document.createElement('div');
-    dayEl.className = 'cal-day';
-    
+    const dayEl = document.createElement("div");
+    dayEl.className = "cal-day";
+
     if (isOtherMonth) {
-      dayEl.classList.add('is-other-month');
+      dayEl.classList.add("is-other-month");
     }
     if (isToday) {
-      dayEl.classList.add('is-today');
+      dayEl.classList.add("is-today");
     }
 
-    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(
+      day
+    ).padStart(2, "0")}`;
     const dayData = this.counts[dateStr] || { appointments: 0, vaccines: 0 };
-    
+
     // Compatibilidade com formato antigo (número simples)
-    const appointmentsCount = typeof dayData === 'number' ? dayData : (dayData.appointments || 0);
-    const vaccinesCount = typeof dayData === 'number' ? 0 : (dayData.vaccines || 0);
+    const appointmentsCount =
+      typeof dayData === "number" ? dayData : dayData.appointments || 0;
+    const vaccinesCount =
+      typeof dayData === "number" ? 0 : dayData.vaccines || 0;
     const totalCount = appointmentsCount + vaccinesCount;
 
-    let countsHtml = '';
+    let countsHtml = "";
     if (appointmentsCount > 0) {
       countsHtml += `<span class="cal-count appointments">${appointmentsCount}</span>`;
     }
@@ -168,17 +175,25 @@ class Calendar {
     `;
 
     if (!isOtherMonth) {
-      dayEl.addEventListener('click', () => this.selectDay(dateStr));
-      
+      dayEl.addEventListener("click", () => this.selectDay(dateStr));
+
       // Criar texto para aria-label
       let ariaText = `${day} de ${this.getMonthName(month)} de ${year}`;
       if (totalCount > 0) {
         let items = [];
-        if (appointmentsCount > 0) items.push(`${appointmentsCount} ${appointmentsCount === 1 ? 'serviço' : 'serviços'}`);
-        if (vaccinesCount > 0) items.push(`${vaccinesCount} ${vaccinesCount === 1 ? 'vacina' : 'vacinas'}`);
-        ariaText += ` — ${items.join(' e ')}`;
+        if (appointmentsCount > 0)
+          items.push(
+            `${appointmentsCount} ${
+              appointmentsCount === 1 ? "serviço" : "serviços"
+            }`
+          );
+        if (vaccinesCount > 0)
+          items.push(
+            `${vaccinesCount} ${vaccinesCount === 1 ? "vacina" : "vacinas"}`
+          );
+        ariaText += ` — ${items.join(" e ")}`;
       }
-      dayEl.setAttribute('aria-label', ariaText);
+      dayEl.setAttribute("aria-label", ariaText);
     }
 
     // Não precisamos mais de classes de contagem - cores fixas
@@ -188,15 +203,15 @@ class Calendar {
 
   selectDay(dateStr) {
     // Remover seleção anterior
-    const prevSelected = this.container.querySelector('.cal-day.is-selected');
+    const prevSelected = this.container.querySelector(".cal-day.is-selected");
     if (prevSelected) {
-      prevSelected.classList.remove('is-selected');
+      prevSelected.classList.remove("is-selected");
     }
 
     // Selecionar novo dia
     const dayEl = this.container.querySelector(`[aria-label*="${dateStr}"]`);
     if (dayEl) {
-      dayEl.classList.add('is-selected');
+      dayEl.classList.add("is-selected");
       this.selectedDay = dateStr;
     }
 
@@ -212,37 +227,43 @@ class Calendar {
   }
 
   updateDayCounts() {
-    const dayElements = this.container.querySelectorAll('.cal-day:not(.is-other-month)');
-    dayElements.forEach(dayEl => {
-      const dayNumber = dayEl.querySelector('.cal-day-number').textContent;
+    const dayElements = this.container.querySelectorAll(
+      ".cal-day:not(.is-other-month)"
+    );
+    dayElements.forEach((dayEl) => {
+      const dayNumber = dayEl.querySelector(".cal-day-number").textContent;
       const month = this.currentMonth;
       const year = this.currentYear;
-      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+      const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(
+        dayNumber
+      ).padStart(2, "0")}`;
       const dayData = this.counts[dateStr] || { appointments: 0, vaccines: 0 };
-      
+
       // Compatibilidade com formato antigo
-      const appointmentsCount = typeof dayData === 'number' ? dayData : (dayData.appointments || 0);
-      const vaccinesCount = typeof dayData === 'number' ? 0 : (dayData.vaccines || 0);
+      const appointmentsCount =
+        typeof dayData === "number" ? dayData : dayData.appointments || 0;
+      const vaccinesCount =
+        typeof dayData === "number" ? 0 : dayData.vaccines || 0;
       const totalCount = appointmentsCount + vaccinesCount;
 
       // Não precisamos mais remover classes de contagem
 
       // Remover contadores antigos
-      const oldCounts = dayEl.querySelectorAll('.cal-count');
-      oldCounts.forEach(el => el.remove());
+      const oldCounts = dayEl.querySelectorAll(".cal-count");
+      oldCounts.forEach((el) => el.remove());
 
       // Adicionar novos contadores
       if (appointmentsCount > 0) {
-        const appointmentEl = document.createElement('span');
-        appointmentEl.className = 'cal-count appointments';
+        const appointmentEl = document.createElement("span");
+        appointmentEl.className = "cal-count appointments";
         appointmentEl.textContent = appointmentsCount;
         dayEl.appendChild(appointmentEl);
       }
 
       if (vaccinesCount > 0) {
-        const vaccineEl = document.createElement('span');
-        vaccineEl.className = 'cal-count vaccines';
-        vaccineEl.textContent = '💉';
+        const vaccineEl = document.createElement("span");
+        vaccineEl.className = "cal-count vaccines";
+        vaccineEl.textContent = "💉";
         dayEl.appendChild(vaccineEl);
       }
 
@@ -251,11 +272,13 @@ class Calendar {
   }
 
   updateNavigation() {
-    const prevBtn = this.container.querySelector('.cal-prev');
-    const nextBtn = this.container.querySelector('.cal-next');
+    const prevBtn = this.container.querySelector(".cal-prev");
+    const nextBtn = this.container.querySelector(".cal-next");
 
     // Verificar limites
-    const currentMonthStr = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
+    const currentMonthStr = `${this.currentYear}-${String(
+      this.currentMonth
+    ).padStart(2, "0")}`;
     const isMinMonth = currentMonthStr <= this.config.minMonth;
     const isMaxMonth = currentMonthStr >= this.config.maxMonth;
 
@@ -263,40 +286,43 @@ class Calendar {
     nextBtn.disabled = isMaxMonth;
 
     if (isMinMonth) {
-      prevBtn.classList.add('disabled');
+      prevBtn.classList.add("disabled");
     } else {
-      prevBtn.classList.remove('disabled');
+      prevBtn.classList.remove("disabled");
     }
 
     if (isMaxMonth) {
-      nextBtn.classList.add('disabled');
+      nextBtn.classList.add("disabled");
     } else {
-      nextBtn.classList.remove('disabled');
+      nextBtn.classList.remove("disabled");
     }
   }
 
   async loadMonthCounts() {
     if (this.callbacks.getDayCount) {
       try {
-        const countMap = await this.callbacks.getDayCount(this.currentYear, this.currentMonth);
+        const countMap = await this.callbacks.getDayCount(
+          this.currentYear,
+          this.currentMonth
+        );
         this.setCounts(countMap);
       } catch (error) {
-        console.error('Erro ao carregar contagens do mês:', error);
+        console.error("Erro ao carregar contagens do mês:", error);
       }
     }
   }
 
   setupEventListeners() {
-    const prevBtn = this.container.querySelector('.cal-prev');
-    const nextBtn = this.container.querySelector('.cal-next');
+    const prevBtn = this.container.querySelector(".cal-prev");
+    const nextBtn = this.container.querySelector(".cal-next");
 
-    prevBtn.addEventListener('click', () => {
+    prevBtn.addEventListener("click", () => {
       if (!prevBtn.disabled) {
         this.navigateMonth(-1);
       }
     });
 
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener("click", () => {
       if (!nextBtn.disabled) {
         this.navigateMonth(1);
       }
@@ -320,8 +346,18 @@ class Calendar {
 
   getMonthName(month) {
     const months = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+      "janeiro",
+      "fevereiro",
+      "março",
+      "abril",
+      "maio",
+      "junho",
+      "julho",
+      "agosto",
+      "setembro",
+      "outubro",
+      "novembro",
+      "dezembro",
     ];
     return months[month - 1];
   }
@@ -329,15 +365,15 @@ class Calendar {
   // Métodos públicos já implementados acima
 
   disableNavPrev() {
-    const prevBtn = this.container.querySelector('.cal-prev');
+    const prevBtn = this.container.querySelector(".cal-prev");
     prevBtn.disabled = true;
-    prevBtn.classList.add('disabled');
+    prevBtn.classList.add("disabled");
   }
 
   disableNavNext() {
-    const nextBtn = this.container.querySelector('.cal-next');
+    const nextBtn = this.container.querySelector(".cal-next");
     nextBtn.disabled = true;
-    nextBtn.classList.add('disabled');
+    nextBtn.classList.add("disabled");
   }
 }
 

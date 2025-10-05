@@ -3069,6 +3069,13 @@
   border-color: var(--error-600);
 }
 
+.vaccine-actions-section {
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--border-light);
+  text-align: center;
+}
+
 /* Status badges para vacinas */
 .badge-warning {
   background-color: var(--warning-100);
