@@ -378,13 +378,13 @@ class CalendarController {
             <button class="btn btn-sm btn-outline" onclick="app.viewAppointment('${
               appointment.id
             }')" title="Ver detalhes">
-              <i class="icon-eye"></i>
+              👁️
             </button>
             ${
               client && client.telefoneWhatsApp
                 ? `
               <button class="btn btn-sm btn-info" onclick="app.sendConfirmationWhatsApp('${appointment.id}')" title="Enviar WhatsApp">
-                <i class="icon-message-circle"></i>
+                📱
               </button>
             `
                 : ""
@@ -442,13 +442,13 @@ class CalendarController {
             <button class="btn btn-sm btn-outline" onclick="app.viewPet('${
               vaccine.petId
             }')" title="Ver pet">
-              <i class="icon-eye"></i>
+              👁️
             </button>
             ${
               client && client.telefoneWhatsApp
                 ? `
               <button class="btn btn-sm btn-info" onclick="app.sendVaccineWhatsApp('${vaccine.clienteId}', '${vaccine.nomeVacina}', '${vaccine.proximaDose}')" title="Enviar WhatsApp">
-                <i class="icon-message-circle"></i>
+                📱
               </button>
             `
                 : ""
@@ -456,7 +456,7 @@ class CalendarController {
             <button class="btn btn-sm btn-success" onclick="app.createVaccineAppointment('${
               vaccine.petId
             }', '${vaccine.nomeVacina}')" title="Agendar aplicação">
-              <i class="icon-calendar"></i>
+              📅
             </button>
           </div>
         </div>

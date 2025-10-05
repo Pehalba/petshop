@@ -4437,17 +4437,17 @@ class PetShopApp {
                 }', '${vaccine.nomeVacina}', '${
                 vaccine.proximaDose
               }')" title="Enviar WhatsApp">
-                  <i class="icon-whatsapp"></i> WhatsApp
+                  📱 WhatsApp
                 </button>
                 <button class="btn btn-sm btn-primary" onclick="app.createVaccineAppointment('${
                   pet.id
                 }', '${vaccine.nomeVacina}')" title="Agendar aplicação">
-                  <i class="icon-calendar"></i> Agendar
+                  📅 Agendar
                 </button>
                 <button class="btn btn-sm btn-outline" onclick="app.viewPet('${
                   pet.id
                 }')" title="Ver pet">
-                  <i class="icon-eye"></i> Ver Pet
+                  👁️ Ver Pet
                 </button>
               </div>
             </div>
