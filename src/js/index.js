@@ -4635,7 +4635,7 @@ Entre em contato conosco para agendar o reforço!`;
                 <div class="form-error" id="petDataNascimento-error"></div>
               </div>
               <div class="form-group">
-                <label for="petIdade">Idade (se não souber a data exata)</label>
+                <label for="petIdade">Idade</label>
                 <input 
                   type="text" 
                   id="petIdade" 
@@ -4644,9 +4644,6 @@ Entre em contato conosco para agendar o reforço!`;
                   value="${pet?.idade || ""}"
                   placeholder="Ex: 2 anos, 6 meses, 15 dias"
                 >
-                <div class="form-help">
-                  💡 Dica: Digite a idade aproximada (ex: "1 ano e 3 meses" ou "6 meses e 10 dias")
-                </div>
               </div>
             </div>
             <div class="form-row">
