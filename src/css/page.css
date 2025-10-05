@@ -596,8 +596,8 @@
 
 /* Vacinas do Mês */
 .vaccines-month-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-4);
   margin-top: var(--spacing-4);
 }
@@ -608,11 +608,14 @@
   border-radius: var(--radius-md);
   padding: var(--spacing-4);
   transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: var(--spacing-2);
 }
 
 .pet-vaccine-card:hover {
   border-color: var(--primary-300);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
 
 .pet-vaccine-header {
@@ -705,10 +708,6 @@
 
 /* Responsividade para vacinas do mês */
 @media (max-width: 768px) {
-  .vaccines-month-list {
-    grid-template-columns: 1fr;
-  }
-  
   .pet-vaccine-header {
     flex-direction: column;
     align-items: flex-start;
