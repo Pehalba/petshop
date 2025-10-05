@@ -1010,9 +1010,13 @@ class PetShopApp {
   }
 
   // ===== MÉTODOS DE CLIENTES =====
-  showClientForm(clientId = null) {
+  async showClientForm(clientId = null) {
     const isEdit = clientId !== null;
-    const client = isEdit ? store.getClient(clientId) : null;
+    const client = isEdit ? await store.getClient(clientId) : null;
+    
+    if (isEdit) {
+      console.log("🔍 Carregando cliente para edição:", clientId, client);
+    }
 
     const content = `
       <div class="form-container">
@@ -1993,8 +1997,8 @@ class PetShopApp {
     document.getElementById("content").innerHTML = content;
   }
 
-  editClient(clientId) {
-    this.showClientForm(clientId);
+  async editClient(clientId) {
+    await this.showClientForm(clientId);
   }
 
   async deleteClient(clientId) {
@@ -2690,11 +2694,11 @@ class PetShopApp {
 
     document.getElementById("content").innerHTML = content;
     this.setupServiceFormEvents();
-    
+
     // Inicializar estado do campo tipoVariacao
     const temVariacoesCheckbox = document.getElementById("temVariacoes");
     const tipoVariacaoSelect = document.getElementById("tipoVariacao");
-    
+
     if (temVariacoesCheckbox && tipoVariacaoSelect) {
       if (!temVariacoesCheckbox.checked) {
         tipoVariacaoSelect.removeAttribute("required");
@@ -2736,7 +2740,7 @@ class PetShopApp {
     if (temVariacoesCheckbox) {
       temVariacoesCheckbox.addEventListener("change", (e) => {
         variacoesGroup.style.display = e.target.checked ? "block" : "none";
-        
+
         // Controlar atributo required do tipoVariacao
         if (tipoVariacaoSelect) {
           if (e.target.checked) {
@@ -2747,7 +2751,7 @@ class PetShopApp {
             this.clearVariationInputs();
           }
         }
-        
+
         if (e.target.checked) {
           // Preencher com preço base se marcar
           this.fillVariationInputs();
@@ -3008,7 +3012,6 @@ class PetShopApp {
       ui.error("Erro ao salvar serviço: " + error.message);
     }
   }
-
 
   // Validar serviço
   async validateService(serviceData, serviceId = null) {
