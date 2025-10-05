@@ -54,23 +54,39 @@ class CalendarController {
         from,
         to
       );
+      
+      console.log(`📅 Buscando agendamentos para ${year}-${month}:`, {
+        from,
+        to,
+        appointmentsFound: appointments.length,
+        appointments: appointments.map(apt => ({
+          id: apt.id,
+          dataHoraInicio: apt.dataHoraInicio,
+          status: apt.status,
+          cliente: apt.clienteId
+        }))
+      });
 
       // Buscar vacinas vencendo no mês
       const vaccines = await this.getVaccinesDueInMonth(year, month);
 
       // Agrupar agendamentos por dia (filtrar cancelados)
       const countMap = {};
-      appointments
-        .filter((appointment) => appointment.status !== "cancelado")
-        .forEach((appointment) => {
-          const appointmentDate = new Date(appointment.dataHoraInicio);
-          const dateStr = appointmentDate.toISOString().split("T")[0]; // YYYY-MM-DD
+      const validAppointments = appointments.filter((appointment) => appointment.status !== "cancelado");
+      
+      console.log(`📊 Agendamentos válidos para contar:`, validAppointments.length);
+      
+      validAppointments.forEach((appointment) => {
+        const appointmentDate = new Date(appointment.dataHoraInicio);
+        const dateStr = appointmentDate.toISOString().split("T")[0]; // YYYY-MM-DD
 
-          if (!countMap[dateStr]) {
-            countMap[dateStr] = { appointments: 0, vaccines: 0 };
-          }
-          countMap[dateStr].appointments++;
-        });
+        if (!countMap[dateStr]) {
+          countMap[dateStr] = { appointments: 0, vaccines: 0 };
+        }
+        countMap[dateStr].appointments++;
+        
+        console.log(`📅 Agendamento ${appointment.id} adicionado ao dia ${dateStr}`);
+      });
 
       // Agrupar vacinas por dia - evitar problemas de fuso horário
       vaccines.forEach((vaccine) => {
@@ -96,6 +112,8 @@ class CalendarController {
 
       // Cachear resultado
       this.cache.set(cacheKey, countMap);
+      
+      console.log(`📋 Resultado final do countMap para ${year}-${month}:`, countMap);
 
       return countMap;
     } catch (error) {

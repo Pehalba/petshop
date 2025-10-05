@@ -165,6 +165,45 @@ class PetShopApp {
                     </a>
                 </nav>
                 
+                <!-- Menu Mobile -->
+                <div class="mobile-menu">
+                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                    <div class="mobile-menu-dropdown" id="mobile-menu-dropdown">
+                        <a href="#" class="mobile-nav-link" data-page="dashboard">
+                            <span class="nav-link-icon">📊</span>
+                            Dashboard
+                        </a>
+                        <a href="#" class="mobile-nav-link" data-page="clientes">
+                            <span class="nav-link-icon">👥</span>
+                            Clientes
+                        </a>
+                        <a href="#" class="mobile-nav-link" data-page="pets">
+                            <span class="nav-link-icon">🐕</span>
+                            Pets
+                        </a>
+                        <a href="#" class="mobile-nav-link" data-page="servicos">
+                            <span class="nav-link-icon">✂️</span>
+                            Serviços
+                        </a>
+                        <a href="#" class="mobile-nav-link" data-page="agendamentos">
+                            <span class="nav-link-icon">📅</span>
+                            Agendamentos
+                        </a>
+                        <a href="#" class="mobile-nav-link" data-page="relatorios">
+                            <span class="nav-link-icon">📈</span>
+                            Relatórios
+                        </a>
+                        <a href="#" class="mobile-nav-link" data-page="configuracoes">
+                            <span class="nav-link-icon">⚙️</span>
+                            Configurações
+                        </a>
+                    </div>
+                </div>
+                
                 <div class="header-actions">
                     <div class="header-profile">
                         <button class="profile-button" id="profile-menu">
@@ -268,6 +307,25 @@ class PetShopApp {
       document.addEventListener("click", (e) => {
         if (!profileButton.contains(e.target)) {
           profileDropdown.classList.remove("show");
+        }
+      });
+    }
+
+    // Menu mobile
+    const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+    const mobileMenuDropdown = document.getElementById("mobile-menu-dropdown");
+
+    if (mobileMenuToggle && mobileMenuDropdown) {
+      mobileMenuToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        mobileMenuDropdown.classList.toggle("show");
+        mobileMenuToggle.classList.toggle("active");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!mobileMenuToggle.contains(e.target) && !mobileMenuDropdown.contains(e.target)) {
+          mobileMenuDropdown.classList.remove("show");
+          mobileMenuToggle.classList.remove("active");
         }
       });
     }
