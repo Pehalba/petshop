@@ -3381,6 +3381,13 @@ class PetShopApp {
         (appointment) => appointment.status !== "cancelado"
       );
 
+      // Ordenar agendamentos por data de criação (mais novos primeiro)
+      const sortedAppointments = appointments.sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.updatedAt || 0);
+        const dateB = new Date(b.createdAt || b.updatedAt || 0);
+        return dateB - dateA; // Mais novos primeiro
+      });
+
       content.innerHTML = `
       <div class="page-header">
         <div class="page-title">
@@ -3430,7 +3437,7 @@ class PetShopApp {
       </div>
 
       <div class="data-container">
-        ${await this.renderAppointmentsTable(appointments)}
+        ${await this.renderAppointmentsTable(sortedAppointments)}
       </div>
     `;
 
@@ -6209,8 +6216,15 @@ Entre em contato conosco para agendar o reforço!`;
       return matchesSearch && matchesStatus && matchesPayment && matchesDate;
     });
 
+    // Ordenar agendamentos filtrados por data de criação (mais novos primeiro)
+    const sortedFiltered = filtered.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.updatedAt || 0);
+      const dateB = new Date(b.createdAt || b.updatedAt || 0);
+      return dateB - dateA; // Mais novos primeiro
+    });
+
     const container = document.querySelector(".data-container");
-    container.innerHTML = this.renderAppointmentsTable(filtered);
+    container.innerHTML = this.renderAppointmentsTable(sortedFiltered);
   }
 
   // ===== PRONTUÁRIOS VETERINÁRIOS =====
