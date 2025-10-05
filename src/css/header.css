@@ -278,7 +278,7 @@
 /* ===== MOBILE HEADER ===== */
 @media (max-width: 768px) {
   .header-container {
-    padding: 0 var(--spacing-4);
+    padding: 0 var(--spacing-3);
   }
 
   .header-nav {
@@ -286,11 +286,21 @@
   }
 
   .search-input {
-    width: 200px;
+    width: 150px;
+    font-size: 0.8rem;
   }
 
   .header-logo-text {
     display: none;
+  }
+  
+  .header-actions {
+    gap: var(--spacing-2);
+  }
+  
+  .header-actions .btn {
+    font-size: 0.8rem;
+    padding: var(--spacing-1) var(--spacing-2);
   }
 }
 

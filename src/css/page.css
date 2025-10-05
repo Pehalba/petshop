@@ -410,6 +410,22 @@
   .form-row-2,
   .form-row-3 {
     grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+  
+  .form-group {
+    margin-bottom: var(--spacing-3);
+  }
+  
+  .form-group label {
+    font-size: 0.9rem;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 0.9rem;
+    padding: var(--spacing-2);
   }
 
   .data-table-header {
@@ -481,7 +497,7 @@
 /* Estatísticas do sistema */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--spacing-4);
   margin-top: var(--spacing-4);
 }
@@ -821,6 +837,76 @@
 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-3);
+  }
+  
+  .stat-card {
+    padding: var(--spacing-3);
+  }
+  
+  .stat-title {
+    font-size: 0.9rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .stat-action {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
+  }
+  
+  .stat-card {
+    padding: var(--spacing-2);
+  }
+  
+  .stat-header {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-1);
+  }
+  
+  .stat-title {
+    font-size: 0.8rem;
+    text-align: center;
+  }
+  
+  .stat-value {
+    font-size: 1.25rem;
+  }
+  
+  .stat-action {
+    font-size: 0.7rem;
+    text-align: center;
+  }
+  
+  /* Formulários em telas muito pequenas */
+  .form-container {
+    margin: var(--spacing-2);
+    padding: var(--spacing-3);
+  }
+  
+  .form-group label {
+    font-size: 0.8rem;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 0.8rem;
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+  
+  .btn {
+    font-size: 0.8rem;
+    padding: var(--spacing-2) var(--spacing-3);
   }
 }
 
@@ -1771,6 +1857,10 @@
 }
 
 @media (max-width: 768px) {
+  .data-table {
+    min-width: 800px;
+  }
+  
   .data-table th:nth-child(3), /* Serviços */
   .data-table td:nth-child(3) {
     display: none;
@@ -1779,6 +1869,41 @@
   .data-table th:nth-child(4), /* Total */
   .data-table td:nth-child(4) {
     display: none;
+  }
+  
+  .data-table-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--spacing-1);
+  }
+  
+  .data-table-actions .btn {
+    flex: 1;
+    min-width: 60px;
+    font-size: 0.7rem;
+    padding: var(--spacing-1);
+  }
+}
+
+@media (max-width: 480px) {
+  .data-table {
+    min-width: 600px;
+  }
+  
+  .data-table th:nth-child(5), /* Pagamento */
+  .data-table td:nth-child(5) {
+    display: none;
+  }
+  
+  .data-table-actions {
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+  
+  .data-table-actions .btn {
+    width: 100%;
+    min-width: auto;
+    font-size: 0.65rem;
   }
 }
 

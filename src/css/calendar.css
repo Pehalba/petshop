@@ -503,6 +503,32 @@
     padding: 3px 6px;
     font-size: 11px;
   }
+  
+  .vaccine-card {
+    padding: 8px 12px;
+  }
+  
+  .vaccine-icon {
+    font-size: 20px !important;
+    width: 30px;
+    height: 30px;
+  }
+  
+  .vaccine-details {
+    font-size: 0.8rem;
+  }
+  
+  .vaccine-actions {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .vaccine-actions .btn {
+    font-size: 10px;
+    padding: 2px 4px;
+    min-width: 24px;
+    height: 20px;
+  }
 }
 
 @media (max-width: 480px) {
