@@ -6990,7 +6990,7 @@ Entre em contato conosco para agendar o reforço!`;
             </div>
             
             <div class="form-actions">
-              <button type="button" class="btn btn-outline" onclick="app.addVaccine()">
+              <button type="button" class="btn btn-outline" onclick="app.addVaccineToForm()">
                 <i class="icon-plus"></i> Adicionar Vacina
               </button>
             </div>
@@ -7021,6 +7021,21 @@ Entre em contato conosco para agendar o reforço!`;
     }
   }
 
+  addVaccineToForm() {
+    const container = document.getElementById("vaccinesContainer");
+    
+    // Contar vacinas existentes ANTES de adicionar
+    const currentVaccineCount = container.querySelectorAll(".vaccine-item").length;
+    const vaccineIndex = currentVaccineCount;
+
+    // Criar elemento de vacina usando o método render
+    const vaccineItemHTML = this.renderVaccineItem(null, vaccineIndex);
+    container.insertAdjacentHTML("beforeend", vaccineItemHTML);
+
+    // Re-numerar todas as vacinas para garantir sequência correta
+    this.renumberVaccines();
+  }
+
   async saveVaccinesForPet() {
     const form = document.getElementById("vaccineForm");
     const petId = form.dataset.petId;
@@ -7029,7 +7044,9 @@ Entre em contato conosco para agendar o reforço!`;
     const vacinas = this.processVaccines(formData);
 
     if (vacinas.length === 0) {
-      ui.error("Nenhuma vacina válida encontrada. Verifique os dados preenchidos.");
+      ui.error(
+        "Nenhuma vacina válida encontrada. Verifique os dados preenchidos."
+      );
       return;
     }
 
