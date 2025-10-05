@@ -6978,15 +6978,7 @@ Entre em contato conosco para agendar o reforço!`;
           <div class="form-section">
             <h3>Vacinas do Pet</h3>
             <div id="vaccinesContainer">
-              ${
-                pet?.vacinas && pet.vacinas.length > 0
-                  ? pet.vacinas
-                      .map((vacina, index) =>
-                        this.renderVaccineItem(vacina, index)
-                      )
-                      .join("")
-                  : ""
-              }
+              <!-- Formulário sempre abre limpo para adicionar novas vacinas -->
             </div>
             
             <div class="form-actions">
@@ -7052,7 +7044,11 @@ Entre em contato conosco para agendar o reforço!`;
 
     try {
       const pet = await store.getPet(petId);
-      pet.vacinas = vacinas;
+      // Adicionar novas vacinas às existentes
+      if (!pet.vacinas) {
+        pet.vacinas = [];
+      }
+      pet.vacinas = [...pet.vacinas, ...vacinas];
       await store.savePet(pet);
 
       // Criar lembretes para as vacinas
