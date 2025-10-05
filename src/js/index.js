@@ -2017,22 +2017,22 @@ class PetShopApp {
     const appointmentsCount = appointments.length;
 
     let confirmMessage = `Tem certeza que deseja excluir o cliente "${client.nomeCompleto}"?`;
-    
+
     if (appointmentsCount > 0 || petsCount > 0) {
       confirmMessage += `\n\n⚠️ Este cliente tem:`;
-      
+
       if (appointmentsCount > 0) {
         confirmMessage += `\n• ${appointmentsCount} agendamento(s) que serão cancelados`;
       }
-      
+
       if (petsCount > 0) {
         confirmMessage += `\n• ${petsCount} pet(s) que serão excluídos`;
         if (petsCount > 0) {
-          const petNames = pets.map(pet => pet.nome || "Sem nome").join(", ");
+          const petNames = pets.map((pet) => pet.nome || "Sem nome").join(", ");
           confirmMessage += `\n  (${petNames})`;
         }
       }
-      
+
       confirmMessage += `\n\nTodas essas ações serão executadas automaticamente.`;
     }
 
@@ -2044,17 +2044,17 @@ class PetShopApp {
       try {
         // Usar a função do store que já cuida de tudo
         await store.deleteClient(clientId);
-        
+
         let successMessage = "Cliente excluído com sucesso!";
-        
+
         if (appointmentsCount > 0) {
           successMessage += ` ${appointmentsCount} agendamento(s) cancelados.`;
         }
-        
+
         if (petsCount > 0) {
           successMessage += ` ${petsCount} pet(s) excluído(s).`;
         }
-        
+
         ui.success(successMessage);
         this.renderClientes();
       } catch (error) {
@@ -3001,6 +3001,7 @@ class PetShopApp {
 
     const serviceData = {
       nome: formData.get("nome").trim(),
+      categoria: formData.get("categoria"),
       preco: MoneyUtils.parseBRL(formData.get("preco")),
       temCusto: formData.get("temCusto") === "on",
       custoAproximado:
@@ -3010,13 +3011,13 @@ class PetShopApp {
       descricao: formData.get("descricao").trim(),
       ativo: true, // Sempre ativo - se não quiser, pode excluir
       temVariacoes: formData.get("temVariacoes") === "on",
+      tipoVariacao:
+        formData.get("temVariacoes") === "on"
+          ? formData.get("tipoVariacao")
+          : null,
       variacoes:
         formData.get("temVariacoes") === "on"
-          ? {
-              pequeno: MoneyUtils.parseBRL(formData.get("precoPequeno")),
-              medio: MoneyUtils.parseBRL(formData.get("precoMedio")),
-              grande: MoneyUtils.parseBRL(formData.get("precoGrande")),
-            }
+          ? this.buildVariationsData(formData)
           : null,
     };
 
@@ -3071,17 +3072,25 @@ class PetShopApp {
       isValid = false;
     }
 
-    // Validação das variações (se tem variações)
-    if (serviceData.temVariacoes && serviceData.variacoes) {
-      const variacoes = serviceData.variacoes;
-      const variacoesValidas = Object.values(variacoes).some((v) => v > 0);
-
-      if (!variacoesValidas) {
+    // Validação das variações (apenas se tem variações E tipo de variação é válido)
+    if (serviceData.temVariacoes && serviceData.tipoVariacao) {
+      if (!serviceData.variacoes) {
         this.showFieldError(
-          "precoPequeno",
-          "Pelo menos uma variação de preço deve ser preenchida"
+          "tipoVariacao",
+          "Selecione um tipo de variação válido"
         );
         isValid = false;
+      } else {
+        const variacoes = serviceData.variacoes;
+        const variacoesValidas = Object.values(variacoes).some((v) => v > 0);
+
+        if (!variacoesValidas) {
+          this.showFieldError(
+            "precoPequeno",
+            "Pelo menos uma variação de preço deve ser preenchida"
+          );
+          isValid = false;
+        }
       }
     }
 
