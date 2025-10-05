@@ -1013,7 +1013,7 @@ class PetShopApp {
   async showClientForm(clientId = null) {
     const isEdit = clientId !== null;
     const client = isEdit ? await store.getClient(clientId) : null;
-    
+
     if (isEdit) {
       console.log("🔍 Carregando cliente para edição:", clientId, client);
     }
@@ -1961,7 +1961,9 @@ class PetShopApp {
                         pet.dataNascimento
                           ? `<p><strong>Idade:</strong> ${utils.calculateAge(
                               pet.dataNascimento
-                            )}</p>`
+                            )} anos</p>`
+                          : pet.idade
+                          ? `<p><strong>Idade:</strong> ${pet.idade}</p>`
                           : ""
                       }
                       ${
@@ -3702,8 +3704,9 @@ class PetShopApp {
     const tableRows = await Promise.all(
       pets.map(async (pet) => {
         const client = await store.getClient(pet.clienteId);
+        // Sempre calcular idade baseada na data de nascimento se disponível
         const idade = pet.dataNascimento
-          ? utils.calculateAge(pet.dataNascimento)
+          ? `${utils.calculateAge(pet.dataNascimento)} anos`
           : pet.idade || "-";
 
         return `
@@ -4756,6 +4759,20 @@ Entre em contato conosco para agendar o reforço!`;
 
     document.getElementById("content").innerHTML = content;
     this.setupPetFormEvents();
+    
+    // Inicializar estado do campo de idade se pet já tem data de nascimento
+    if (pet && pet.dataNascimento) {
+      const dataNascimentoInput = document.getElementById("petDataNascimento");
+      const idadeInput = document.getElementById("petIdade");
+      
+      if (dataNascimentoInput && idadeInput) {
+        const idade = utils.calculateAge(pet.dataNascimento);
+        idadeInput.value = `${idade} anos`;
+        idadeInput.placeholder = "Idade calculada automaticamente";
+        idadeInput.readOnly = true;
+        idadeInput.style.backgroundColor = "#f8f9fa";
+      }
+    }
   }
 
   setupPetFormEvents() {
@@ -4778,7 +4795,16 @@ Entre em contato conosco para agendar o reforço!`;
       dataNascimentoInput.addEventListener("change", (e) => {
         if (e.target.value) {
           const idade = utils.calculateAge(e.target.value);
-          idadeInput.value = idade;
+          idadeInput.value = `${idade} anos`;
+          idadeInput.placeholder = "Idade calculada automaticamente";
+          idadeInput.readOnly = true;
+          idadeInput.style.backgroundColor = "#f8f9fa";
+        } else {
+          // Se data de nascimento for removida, liberar campo de idade manual
+          idadeInput.value = "";
+          idadeInput.placeholder = "Ex: 2 anos, 6 meses";
+          idadeInput.readOnly = false;
+          idadeInput.style.backgroundColor = "";
         }
       });
     }
@@ -4788,14 +4814,17 @@ Entre em contato conosco para agendar o reforço!`;
     event.preventDefault();
 
     const formData = new FormData(event.target);
+    const dataNascimento = formData.get("dataNascimento");
+    
     const petData = {
       nome: formData.get("nome"),
       especie: formData.get("especie") || "cão",
       raca: formData.get("raca"),
       sexo: formData.get("sexo"),
       porte: formData.get("porte"),
-      dataNascimento: formData.get("dataNascimento"),
-      idade: formData.get("idade"),
+      dataNascimento: dataNascimento,
+      // Calcular idade automaticamente se há data de nascimento, senão usar idade manual
+      idade: dataNascimento ? utils.calculateAge(dataNascimento) : formData.get("idade"),
       pesoAproximadoKg: parseFloat(formData.get("pesoAproximadoKg")) || null,
       clienteId: formData.get("clienteId"),
       observacoes: formData.get("observacoes"),
@@ -4891,8 +4920,9 @@ Entre em contato conosco para agendar o reforço!`;
 
     const client = await store.getClient(pet.clienteId);
     console.log("🔍 Cliente encontrado:", client);
+    // Sempre calcular idade baseada na data de nascimento se disponível
     const idade = pet.dataNascimento
-      ? utils.calculateAge(pet.dataNascimento)
+      ? `${utils.calculateAge(pet.dataNascimento)} anos`
       : pet.idade || "-";
     console.log("🔍 Idade calculada:", idade);
     console.log("🔍 Criando conteúdo HTML...");
