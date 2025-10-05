@@ -560,9 +560,16 @@ class PetShopApp {
         (apt) => apt.dataHoraInicio && apt.dataHoraInicio.startsWith(today)
       );
 
-      // Calcular pets com vacina a vencer neste mês
+      // Calcular agendamentos do mês atual
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
+      const monthAppointments = appointments.filter((apt) => {
+        if (!apt.dataHoraInicio) return false;
+        const aptDate = new Date(apt.dataHoraInicio);
+        return aptDate.getMonth() === currentMonth && aptDate.getFullYear() === currentYear;
+      });
+
+      // Calcular pets com vacina a vencer neste mês
       const petsWithVaccinesDue = this.getPetsWithVaccinesDueThisMonth(
         pets,
         currentMonth,
@@ -611,10 +618,10 @@ class PetShopApp {
 
                 <div class="stat-card clickable-card" onclick="app.navigateToPage('agendamentos')">
                     <div class="stat-header">
-                        <div class="stat-title">Agendamentos</div>
+                        <div class="stat-title">Agendamentos do Mês</div>
                         <div class="stat-icon stat-icon-info">📅</div>
                     </div>
-                    <div class="stat-value">${todayAppointments.length}</div>
+                    <div class="stat-value">${monthAppointments.length}</div>
                     <div class="stat-action">
                         <span>Ver agendamentos →</span>
                     </div>
@@ -7015,9 +7022,10 @@ Entre em contato conosco para agendar o reforço!`;
 
   addVaccineToForm() {
     const container = document.getElementById("vaccinesContainer");
-    
+
     // Contar vacinas existentes ANTES de adicionar
-    const currentVaccineCount = container.querySelectorAll(".vaccine-item").length;
+    const currentVaccineCount =
+      container.querySelectorAll(".vaccine-item").length;
     const vaccineIndex = currentVaccineCount;
 
     // Criar elemento de vacina usando o método render
