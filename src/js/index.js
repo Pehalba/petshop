@@ -210,6 +210,10 @@ class PetShopApp {
                             <span class="nav-link-icon">📁</span>
                             Restaurar
                         </a>
+                        <a href="#" class="mobile-nav-link" data-action="clear-all-data">
+                            <span class="nav-link-icon">🗑️</span>
+                            Limpar Todos os Dados
+                        </a>
                         <a href="#" class="mobile-nav-link" data-action="logout">
                             <span class="nav-link-icon">🚪</span>
                             Sair
@@ -392,9 +396,52 @@ class PetShopApp {
       case "restore":
         this.importData();
         break;
+      case "clear-all-data":
+        this.clearAllData();
+        break;
       case "logout":
         this.logout();
         break;
+    }
+  }
+
+  // ===== LIMPEZA DE DADOS =====
+  async clearAllData() {
+    const confirmed = await ui.confirm(
+      "⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema!\n\n" +
+      "• Todos os clientes\n" +
+      "• Todos os pets\n" +
+      "• Todos os serviços\n" +
+      "• Todos os agendamentos\n" +
+      "• Todas as vacinas\n\n" +
+      "Esta ação NÃO pode ser desfeita!\n\n" +
+      "Tem certeza que deseja continuar?",
+      "Confirmar Limpeza Total",
+      { type: "danger" }
+    );
+
+    if (confirmed) {
+      try {
+        // Limpar todos os dados
+        await store.clearAllData();
+        
+        // Limpar cache do calendário
+        if (window.calendarController) {
+          window.calendarController.clearCache();
+        }
+        
+        // Mostrar mensagem de sucesso
+        ui.success("✅ Todos os dados foram apagados com sucesso!\n\nO sistema foi resetado e está pronto para uso.");
+        
+        // Recarregar a página para limpar a interface
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+        
+      } catch (error) {
+        console.error("❌ Erro ao limpar dados:", error);
+        ui.error("Erro ao limpar dados: " + error.message);
+      }
     }
   }
 
