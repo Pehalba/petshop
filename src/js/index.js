@@ -316,7 +316,10 @@ class PetShopApp {
       });
 
       document.addEventListener("click", (e) => {
-        if (!mobileMenuToggle.contains(e.target) && !mobileMenuDropdown.contains(e.target)) {
+        if (
+          !mobileMenuToggle.contains(e.target) &&
+          !mobileMenuDropdown.contains(e.target)
+        ) {
           mobileMenuDropdown.classList.remove("show");
           mobileMenuToggle.classList.remove("active");
         }
@@ -409,13 +412,13 @@ class PetShopApp {
   async clearAllData() {
     const confirmed = await ui.confirm(
       "⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema!\n\n" +
-      "• Todos os clientes\n" +
-      "• Todos os pets\n" +
-      "• Todos os serviços\n" +
-      "• Todos os agendamentos\n" +
-      "• Todas as vacinas\n\n" +
-      "Esta ação NÃO pode ser desfeita!\n\n" +
-      "Tem certeza que deseja continuar?",
+        "• Todos os clientes\n" +
+        "• Todos os pets\n" +
+        "• Todos os serviços\n" +
+        "• Todos os agendamentos\n" +
+        "• Todas as vacinas\n\n" +
+        "Esta ação NÃO pode ser desfeita!\n\n" +
+        "Tem certeza que deseja continuar?",
       "Confirmar Limpeza Total",
       { type: "danger" }
     );
@@ -424,20 +427,21 @@ class PetShopApp {
       try {
         // Limpar todos os dados
         await store.clearAllData();
-        
+
         // Limpar cache do calendário
         if (window.calendarController) {
           window.calendarController.clearCache();
         }
-        
+
         // Mostrar mensagem de sucesso
-        ui.success("✅ Todos os dados foram apagados com sucesso!\n\nO sistema foi resetado e está pronto para uso.");
-        
+        ui.success(
+          "✅ Todos os dados foram apagados com sucesso!\n\nO sistema foi resetado e está pronto para uso."
+        );
+
         // Recarregar a página para limpar a interface
         setTimeout(() => {
           window.location.reload();
         }, 2000);
-        
       } catch (error) {
         console.error("❌ Erro ao limpar dados:", error);
         ui.error("Erro ao limpar dados: " + error.message);
@@ -660,7 +664,10 @@ class PetShopApp {
       const monthAppointments = appointments.filter((apt) => {
         if (!apt.dataHoraInicio) return false;
         const aptDate = new Date(apt.dataHoraInicio);
-        return aptDate.getMonth() === currentMonth && aptDate.getFullYear() === currentYear;
+        return (
+          aptDate.getMonth() === currentMonth &&
+          aptDate.getFullYear() === currentYear
+        );
       });
 
       // Calcular pets com vacina a vencer neste mês
@@ -5165,6 +5172,13 @@ Entre em contato conosco para agendar o reforço!`;
                 ${await this.renderPetProntuarios(pet.id)}
               </div>
             </div>
+
+            <div class="detail-card">
+              <h3>Prescrições</h3>
+              <div class="prescriptions-section">
+                ${await this.renderPetPrescriptions(pet.id)}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -7403,6 +7417,919 @@ Entre em contato conosco para agendar o reforço!`;
           .join("")}
       </div>
     `;
+  }
+
+  // ===== PRESCRIÇÕES =====
+  
+  async renderPetPrescriptions(petId) {
+    const prescriptions = await store.getPrescriptionsByPet(petId);
+
+    if (prescriptions.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-icon">💊</div>
+          <p>Nenhuma prescrição encontrada</p>
+          <button class="btn btn-primary btn-sm" onclick="app.showPrescriptionForm('${petId}')">
+            <i class="icon-plus"></i> Nova Prescrição
+          </button>
+        </div>
+      `;
+    }
+
+    // Ordenar por data de criação (mais recentes primeiro)
+    const sortedPrescriptions = prescriptions.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    return `
+      <div class="prescriptions-list">
+        ${sortedPrescriptions
+          .map(
+            (prescription) => `
+          <div class="prescription-item">
+            <div class="prescription-header">
+              <div class="prescription-number">
+                ${prescription.numero || 'N/A'}
+              </div>
+              <div class="prescription-date">
+                ${new Date(prescription.dataEmissao).toLocaleDateString("pt-BR")}
+              </div>
+              <div class="prescription-status">
+                ${this.getPrescriptionStatusBadge(prescription.status)}
+              </div>
+            </div>
+            <div class="prescription-content">
+              ${
+                prescription.diagnostico
+                  ? `
+                <div class="prescription-field">
+                  <strong>Diagnóstico:</strong> ${prescription.diagnostico}
+                </div>
+              `
+                  : ""
+              }
+              ${
+                prescription.medicamentos && prescription.medicamentos.length > 0
+                  ? `
+                <div class="prescription-field">
+                  <strong>Medicamentos:</strong> ${prescription.medicamentos.length} item(s)
+                </div>
+              `
+                  : ""
+              }
+              ${
+                prescription.observacoesClinicas
+                  ? `
+                <div class="prescription-field">
+                  <strong>Observações:</strong> ${prescription.observacoesClinicas}
+                </div>
+              `
+                  : ""
+              }
+            </div>
+            <div class="prescription-actions">
+              <button class="btn btn-sm btn-outline" onclick="app.viewPrescription('${
+                prescription.id
+              }')" title="Ver prescrição">
+                <i class="icon-eye"></i> Ver
+              </button>
+              ${prescription.status === 'rascunho' ? `
+                <button class="btn btn-sm btn-primary" onclick="app.editPrescription('${
+                  prescription.id
+                }')" title="Editar prescrição">
+                  <i class="icon-edit"></i> Editar
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="app.deletePrescription('${
+                  prescription.id
+                }', '${petId}')" title="Deletar prescrição">
+                  ✕ Deletar
+                </button>
+              ` : `
+                <button class="btn btn-sm btn-outline" onclick="app.duplicatePrescription('${
+                  prescription.id
+                }')" title="Duplicar prescrição">
+                  <i class="icon-copy"></i> Duplicar
+                </button>
+                <button class="btn btn-sm btn-success" onclick="app.generatePrescriptionPDF('${
+                  prescription.id
+                }')" title="Gerar PDF">
+                  <i class="icon-download"></i> PDF
+                </button>
+                <button class="btn btn-sm btn-whatsapp" onclick="app.sendPrescriptionWhatsApp('${
+                  prescription.id
+                }')" title="Enviar WhatsApp">
+                  <i class="icon-whatsapp"></i> WhatsApp
+                </button>
+              `}
+            </div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    `;
+  }
+
+  getPrescriptionStatusBadge(status) {
+    const badges = {
+      rascunho: '<span class="badge badge-warning">Rascunho</span>',
+      assinada: '<span class="badge badge-success">Assinada</span>'
+    };
+    return badges[status] || '<span class="badge badge-secondary">Desconhecido</span>';
+  }
+
+  async showPrescriptionForm(petId, prescriptionId = null) {
+    const pet = await store.getPet(petId);
+    const client = await store.getClient(pet.clienteId);
+    
+    if (!pet) {
+      ui.error("Pet não encontrado");
+      return;
+    }
+
+    const isEdit = prescriptionId !== null;
+    let prescription = null;
+    
+    if (isEdit) {
+      prescription = await store.getPrescription(prescriptionId);
+      if (!prescription) {
+        ui.error("Prescrição não encontrada");
+        return;
+      }
+    }
+
+    // Calcular idade do pet
+    const idade = pet.dataNascimento
+      ? utils.formatDetailedAge(pet.dataNascimento)
+      : pet.idade || "-";
+
+    const content = `
+      <div class="modal-overlay" id="prescription-modal">
+        <div class="modal" style="max-width: 800px; max-height: 90vh;">
+          <div class="modal-header">
+            <h3>${isEdit ? 'Editar' : 'Nova'} Prescrição - ${pet.nome}</h3>
+            <button onclick="app.closeModal()" class="btn btn-outline btn-sm">✕</button>
+          </div>
+          
+          <form id="prescription-form" class="prescription-form">
+            <div class="modal-body">
+              <!-- Dados do Pet (somente leitura) -->
+              <div class="form-section">
+                <h4>Dados do Pet</h4>
+                <div class="pet-info-readonly">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Nome</label>
+                      <input type="text" value="${pet.nome}" readonly class="form-input readonly">
+                    </div>
+                    <div class="form-group">
+                      <label>Espécie</label>
+                      <input type="text" value="${pet.especie || '-'}" readonly class="form-input readonly">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Raça</label>
+                      <input type="text" value="${pet.raca || '-'}" readonly class="form-input readonly">
+                    </div>
+                    <div class="form-group">
+                      <label>Sexo</label>
+                      <input type="text" value="${pet.sexo || '-'}" readonly class="form-input readonly">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Idade</label>
+                      <input type="text" value="${idade}" readonly class="form-input readonly">
+                    </div>
+                    <div class="form-group">
+                      <label>Peso (kg)</label>
+                      <input type="number" id="pet-peso" value="${pet.pesoAproximadoKg || ''}" 
+                             step="0.1" min="0" class="form-input" 
+                             placeholder="Peso atual do pet">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Tutor</label>
+                      <input type="text" value="${client?.nomeCompleto || '-'}" readonly class="form-input readonly">
+                    </div>
+                    <div class="form-group">
+                      <label>WhatsApp</label>
+                      <input type="text" value="${client?.telefoneWhatsApp || '-'}" readonly class="form-input readonly">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Alergias/Condições</label>
+                    <textarea readonly class="form-textarea readonly" rows="2">${pet.alergiasAtenções || pet.restricoesSaude || 'Nenhuma informação registrada'}</textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dados Clínicos -->
+              <div class="form-section">
+                <h4>Dados Clínicos</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Data de Emissão *</label>
+                    <input type="date" id="data-emissao" name="dataEmissao" 
+                           value="${prescription?.dataEmissao || new Date().toISOString().split('T')[0]}" 
+                           required class="form-input">
+                  </div>
+                  <div class="form-group">
+                    <label>Validade (dias) *</label>
+                    <input type="number" id="validade-dias" name="validadeDias" 
+                           value="${prescription?.validadeDias || 30}" 
+                           min="1" max="365" required class="form-input">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Diagnóstico/Motivo *</label>
+                  <input type="text" id="diagnostico" name="diagnostico" 
+                         value="${prescription?.diagnostico || ''}" 
+                         placeholder="Ex: Dermatite atópica, Infecção urinária..." 
+                         required class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>Observações Clínicas</label>
+                  <textarea id="observacoes-clinicas" name="observacoesClinicas" 
+                            class="form-textarea" rows="3" 
+                            placeholder="Observações adicionais sobre o caso...">${prescription?.observacoesClinicas || ''}</textarea>
+                </div>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="medicamento-controlado" name="medicamentoControlado" 
+                           ${prescription?.medicamentoControlado ? 'checked' : ''}>
+                    <span class="checkmark"></span>
+                    Medicamento controlado
+                  </label>
+                </div>
+                <div id="justificativa-controlado" class="form-group" style="display: ${prescription?.medicamentoControlado ? 'block' : 'none'};">
+                  <label>Justificativa *</label>
+                  <textarea id="justificativa" name="justificativaControlado" 
+                            class="form-textarea" rows="2" 
+                            placeholder="Justifique o uso de medicamento controlado...">${prescription?.justificativaControlado || ''}</textarea>
+                </div>
+              </div>
+
+              <!-- Medicamentos -->
+              <div class="form-section">
+                <h4>Medicamentos</h4>
+                <div id="medicamentos-container">
+                  ${prescription?.medicamentos?.length > 0 
+                    ? prescription.medicamentos.map((med, index) => this.renderMedicationForm(med, index)).join('')
+                    : this.renderMedicationForm(null, 0)
+                  }
+                </div>
+                <button type="button" class="btn btn-outline btn-sm" onclick="app.addMedication()">
+                  <i class="icon-plus"></i> Adicionar Medicamento
+                </button>
+              </div>
+
+              <!-- Responsável Técnico -->
+              <div class="form-section">
+                <h4>Responsável Técnico</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Nome do Veterinário *</label>
+                    <input type="text" id="vet-nome" name="vetNome" 
+                           value="${prescription?.responsavelTecnico?.nome || ''}" 
+                           placeholder="Dr. João Silva" required class="form-input">
+                  </div>
+                  <div class="form-group">
+                    <label>CRMV *</label>
+                    <input type="text" id="vet-crmv" name="vetCrmv" 
+                           value="${prescription?.responsavelTecnico?.crmv || ''}" 
+                           placeholder="12345" required class="form-input">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>UF *</label>
+                    <select id="vet-uf" name="vetUf" required class="form-select">
+                      <option value="">Selecione</option>
+                      <option value="AC" ${prescription?.responsavelTecnico?.uf === 'AC' ? 'selected' : ''}>AC</option>
+                      <option value="AL" ${prescription?.responsavelTecnico?.uf === 'AL' ? 'selected' : ''}>AL</option>
+                      <option value="AP" ${prescription?.responsavelTecnico?.uf === 'AP' ? 'selected' : ''}>AP</option>
+                      <option value="AM" ${prescription?.responsavelTecnico?.uf === 'AM' ? 'selected' : ''}>AM</option>
+                      <option value="BA" ${prescription?.responsavelTecnico?.uf === 'BA' ? 'selected' : ''}>BA</option>
+                      <option value="CE" ${prescription?.responsavelTecnico?.uf === 'CE' ? 'selected' : ''}>CE</option>
+                      <option value="DF" ${prescription?.responsavelTecnico?.uf === 'DF' ? 'selected' : ''}>DF</option>
+                      <option value="ES" ${prescription?.responsavelTecnico?.uf === 'ES' ? 'selected' : ''}>ES</option>
+                      <option value="GO" ${prescription?.responsavelTecnico?.uf === 'GO' ? 'selected' : ''}>GO</option>
+                      <option value="MA" ${prescription?.responsavelTecnico?.uf === 'MA' ? 'selected' : ''}>MA</option>
+                      <option value="MT" ${prescription?.responsavelTecnico?.uf === 'MT' ? 'selected' : ''}>MT</option>
+                      <option value="MS" ${prescription?.responsavelTecnico?.uf === 'MS' ? 'selected' : ''}>MS</option>
+                      <option value="MG" ${prescription?.responsavelTecnico?.uf === 'MG' ? 'selected' : ''}>MG</option>
+                      <option value="PA" ${prescription?.responsavelTecnico?.uf === 'PA' ? 'selected' : ''}>PA</option>
+                      <option value="PB" ${prescription?.responsavelTecnico?.uf === 'PB' ? 'selected' : ''}>PB</option>
+                      <option value="PR" ${prescription?.responsavelTecnico?.uf === 'PR' ? 'selected' : ''}>PR</option>
+                      <option value="PE" ${prescription?.responsavelTecnico?.uf === 'PE' ? 'selected' : ''}>PE</option>
+                      <option value="PI" ${prescription?.responsavelTecnico?.uf === 'PI' ? 'selected' : ''}>PI</option>
+                      <option value="RJ" ${prescription?.responsavelTecnico?.uf === 'RJ' ? 'selected' : ''}>RJ</option>
+                      <option value="RN" ${prescription?.responsavelTecnico?.uf === 'RN' ? 'selected' : ''}>RN</option>
+                      <option value="RS" ${prescription?.responsavelTecnico?.uf === 'RS' ? 'selected' : ''}>RS</option>
+                      <option value="RO" ${prescription?.responsavelTecnico?.uf === 'RO' ? 'selected' : ''}>RO</option>
+                      <option value="RR" ${prescription?.responsavelTecnico?.uf === 'RR' ? 'selected' : ''}>RR</option>
+                      <option value="SC" ${prescription?.responsavelTecnico?.uf === 'SC' ? 'selected' : ''}>SC</option>
+                      <option value="SP" ${prescription?.responsavelTecnico?.uf === 'SP' ? 'selected' : ''}>SP</option>
+                      <option value="SE" ${prescription?.responsavelTecnico?.uf === 'SE' ? 'selected' : ''}>SE</option>
+                      <option value="TO" ${prescription?.responsavelTecnico?.uf === 'TO' ? 'selected' : ''}>TO</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Especialidade</label>
+                    <input type="text" id="vet-especialidade" name="vetEspecialidade" 
+                           value="${prescription?.responsavelTecnico?.especialidade || ''}" 
+                           placeholder="Ex: Dermatologia" class="form-input">
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" onclick="app.closeModal()">
+                Cancelar
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="app.savePrescriptionDraft('${petId}')">
+                Salvar Rascunho
+              </button>
+              <button type="button" class="btn btn-primary" onclick="app.savePrescription('${petId}', '${prescriptionId || ''}')">
+                ${isEdit ? 'Atualizar' : 'Assinar e Finalizar'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', content);
+    this.setupPrescriptionFormEvents();
+  }
+
+  renderMedicationForm(medication = null, index = 0) {
+    return `
+      <div class="medication-form" data-index="${index}">
+        <div class="medication-header">
+          <h5>Medicamento ${index + 1}</h5>
+          ${index > 0 ? `<button type="button" class="btn btn-sm btn-danger" onclick="app.removeMedication(${index})">✕</button>` : ''}
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome do Medicamento *</label>
+            <input type="text" name="medicamento-nome-${index}" 
+                   value="${medication?.nome || ''}" 
+                   placeholder="Ex: Prednisolona" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Apresentação *</label>
+            <input type="text" name="medicamento-apresentacao-${index}" 
+                   value="${medication?.apresentacao || ''}" 
+                   placeholder="Ex: comprimido 5mg" required class="form-input">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Dose *</label>
+            <input type="number" name="medicamento-dose-${index}" 
+                   value="${medication?.dose || ''}" 
+                   step="0.1" min="0" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Unidade *</label>
+            <select name="medicamento-unidade-${index}" required class="form-select">
+              <option value="">Selecione</option>
+              <option value="mg/kg" ${medication?.unidade === 'mg/kg' ? 'selected' : ''}>mg/kg</option>
+              <option value="mg" ${medication?.unidade === 'mg' ? 'selected' : ''}>mg</option>
+              <option value="mL/kg" ${medication?.unidade === 'mL/kg' ? 'selected' : ''}>mL/kg</option>
+              <option value="mL" ${medication?.unidade === 'mL' ? 'selected' : ''}>mL</option>
+              <option value="gotas" ${medication?.unidade === 'gotas' ? 'selected' : ''}>gotas</option>
+              <option value="UI" ${medication?.unidade === 'UI' ? 'selected' : ''}>UI</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Frequência *</label>
+            <input type="text" name="medicamento-frequencia-${index}" 
+                   value="${medication?.frequencia || ''}" 
+                   placeholder="Ex: a cada 12h" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Duração (dias) *</label>
+            <input type="number" name="medicamento-duracao-${index}" 
+                   value="${medication?.duracaoDias || ''}" 
+                   min="1" required class="form-input">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Via de Administração *</label>
+            <select name="medicamento-via-${index}" required class="form-select">
+              <option value="">Selecione</option>
+              <option value="VO" ${medication?.via === 'VO' ? 'selected' : ''}>VO (Oral)</option>
+              <option value="SC" ${medication?.via === 'SC' ? 'selected' : ''}>SC (Subcutânea)</option>
+              <option value="IM" ${medication?.via === 'IM' ? 'selected' : ''}>IM (Intramuscular)</option>
+              <option value="IV" ${medication?.via === 'IV' ? 'selected' : ''}>IV (Intravenosa)</option>
+              <option value="ótica" ${medication?.via === 'ótica' ? 'selected' : ''}>Ótica</option>
+              <option value="auricular" ${medication?.via === 'auricular' ? 'selected' : ''}>Auricular</option>
+              <option value="tópica" ${medication?.via === 'tópica' ? 'selected' : ''}>Tópica</option>
+              <option value="retal" ${medication?.via === 'retal' ? 'selected' : ''}>Retal</option>
+              <option value="nasal" ${medication?.via === 'nasal' ? 'selected' : ''}>Nasal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="medicamento-uso-clinica-${index}" 
+                     ${medication?.usoClinica ? 'checked' : ''}>
+              <span class="checkmark"></span>
+              Uso apenas na clínica
+            </label>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Instruções ao Tutor</label>
+          <textarea name="medicamento-instrucoes-${index}" 
+                    class="form-textarea" rows="2" 
+                    placeholder="Ex: Administrar com alimento, evitar sol...">${medication?.instrucoesTutor || ''}</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Contraindicações/Alertas</label>
+          <textarea name="medicamento-contraindicacoes-${index}" 
+                    class="form-textarea" rows="2" 
+                    placeholder="Ex: Evitar em gestantes, pode causar sonolência...">${medication?.contraindicacoes || ''}</textarea>
+        </div>
+      </div>
+    `;
+  }
+
+  // Funções auxiliares para prescrições
+  setupPrescriptionFormEvents() {
+    // Event listener para medicamento controlado
+    const controladoCheckbox = document.getElementById('medicamento-controlado');
+    const justificativaDiv = document.getElementById('justificativa-controlado');
+    
+    if (controladoCheckbox && justificativaDiv) {
+      controladoCheckbox.addEventListener('change', (e) => {
+        justificativaDiv.style.display = e.target.checked ? 'block' : 'none';
+        const justificativaInput = document.getElementById('justificativa');
+        if (e.target.checked) {
+          justificativaInput.required = true;
+        } else {
+          justificativaInput.required = false;
+          justificativaInput.value = '';
+        }
+      });
+    }
+
+    // Event listener para cálculo de dose por peso
+    const pesoInput = document.getElementById('pet-peso');
+    if (pesoInput) {
+      pesoInput.addEventListener('input', () => {
+        this.calculateMedicationDoses();
+      });
+    }
+  }
+
+  addMedication() {
+    const container = document.getElementById('medicamentos-container');
+    if (!container) return;
+
+    const currentCount = container.children.length;
+    const newMedication = this.renderMedicationForm(null, currentCount);
+    container.insertAdjacentHTML('beforeend', newMedication);
+  }
+
+  removeMedication(index) {
+    const medicationForm = document.querySelector(`[data-index="${index}"]`);
+    if (medicationForm) {
+      medicationForm.remove();
+    }
+  }
+
+  calculateMedicationDoses() {
+    const peso = parseFloat(document.getElementById('pet-peso')?.value || 0);
+    if (!peso || peso <= 0) return;
+
+    const medicationForms = document.querySelectorAll('.medication-form');
+    medicationForms.forEach(form => {
+      const doseInput = form.querySelector('input[name*="medicamento-dose"]');
+      const unidadeSelect = form.querySelector('select[name*="medicamento-unidade"]');
+      
+      if (doseInput && unidadeSelect) {
+        const dose = parseFloat(doseInput.value || 0);
+        const unidade = unidadeSelect.value;
+        
+        if (dose > 0 && (unidade === 'mg/kg' || unidade === 'mL/kg')) {
+          const doseCalculada = (dose * peso).toFixed(2);
+          // Aqui você pode adicionar um campo para mostrar a dose calculada
+          console.log(`Dose calculada: ${doseCalculada} ${unidade.replace('/kg', '')}`);
+        }
+      }
+    });
+  }
+
+  async savePrescriptionDraft(petId) {
+    const formData = this.collectPrescriptionFormData();
+    if (!formData) return;
+
+    try {
+      const prescriptionData = {
+        ...formData,
+        petId: petId,
+        status: 'rascunho',
+        numero: formData.numero || store.generatePrescriptionNumber(),
+        auditoria: {
+          criadoPor: 'admin', // TODO: Pegar do usuário logado
+          criadoEm: new Date().toISOString(),
+          origem: 'sistema'
+        }
+      };
+
+      await store.savePrescription(prescriptionData);
+      ui.success("Prescrição salva como rascunho!");
+      this.closeModal();
+      this.viewPet(petId); // Recarregar a página do pet
+    } catch (error) {
+      console.error("Erro ao salvar prescrição:", error);
+      ui.error("Erro ao salvar prescrição: " + error.message);
+    }
+  }
+
+  async savePrescription(petId, prescriptionId = null) {
+    const formData = this.collectPrescriptionFormData();
+    if (!formData) return;
+
+    // Validações para assinatura
+    if (!this.validatePrescriptionForSignature(formData)) {
+      return;
+    }
+
+    try {
+      const prescriptionData = {
+        ...formData,
+        petId: petId,
+        status: 'assinada',
+        numero: formData.numero || store.generatePrescriptionNumber(),
+        auditoria: {
+          criadoPor: 'admin', // TODO: Pegar do usuário logado
+          criadoEm: new Date().toISOString(),
+          assinadoPor: 'admin',
+          assinadoEm: new Date().toISOString(),
+          origem: 'sistema'
+        }
+      };
+
+      if (prescriptionId) {
+        prescriptionData.id = prescriptionId;
+      }
+
+      await store.savePrescription(prescriptionData);
+      ui.success("Prescrição assinada e finalizada!");
+      this.closeModal();
+      this.viewPet(petId); // Recarregar a página do pet
+    } catch (error) {
+      console.error("Erro ao salvar prescrição:", error);
+      ui.error("Erro ao salvar prescrição: " + error.message);
+    }
+  }
+
+  collectPrescriptionFormData() {
+    const form = document.getElementById('prescription-form');
+    if (!form) return null;
+
+    const formData = new FormData(form);
+    
+    // Dados básicos
+    const data = {
+      dataEmissao: formData.get('dataEmissao'),
+      validadeDias: parseInt(formData.get('validadeDias')),
+      diagnostico: formData.get('diagnostico'),
+      observacoesClinicas: formData.get('observacoesClinicas'),
+      medicamentoControlado: formData.get('medicamentoControlado') === 'on',
+      justificativaControlado: formData.get('justificativaControlado'),
+      responsavelTecnico: {
+        nome: formData.get('vetNome'),
+        crmv: formData.get('vetCrmv'),
+        uf: formData.get('vetUf'),
+        especialidade: formData.get('vetEspecialidade')
+      }
+    };
+
+    // Coletar medicamentos
+    const medicamentos = [];
+    const medicationForms = document.querySelectorAll('.medication-form');
+    
+    medicationForms.forEach((form, index) => {
+      const medData = {
+        id: `med_${Date.now()}_${index}`,
+        nome: formData.get(`medicamento-nome-${index}`),
+        apresentacao: formData.get(`medicamento-apresentacao-${index}`),
+        dose: parseFloat(formData.get(`medicamento-dose-${index}`)),
+        unidade: formData.get(`medicamento-unidade-${index}`),
+        frequencia: formData.get(`medicamento-frequencia-${index}`),
+        duracaoDias: parseInt(formData.get(`medicamento-duracao-${index}`)),
+        via: formData.get(`medicamento-via-${index}`),
+        instrucoesTutor: formData.get(`medicamento-instrucoes-${index}`),
+        contraindicacoes: formData.get(`medicamento-contraindicacoes-${index}`),
+        usoClinica: formData.get(`medicamento-uso-clinica-${index}`) === 'on',
+        ordem: index + 1
+      };
+
+      // Calcular dose por tomada se necessário
+      const peso = parseFloat(document.getElementById('pet-peso')?.value || 0);
+      if (peso > 0 && (medData.unidade === 'mg/kg' || medData.unidade === 'mL/kg')) {
+        medData.dosePorTomada = (medData.dose * peso).toFixed(2);
+      }
+
+      medicamentos.push(medData);
+    });
+
+    data.medicamentos = medicamentos;
+
+    return data;
+  }
+
+  validatePrescriptionForSignature(data) {
+    // Validar medicamentos
+    if (!data.medicamentos || data.medicamentos.length === 0) {
+      ui.error("Adicione pelo menos um medicamento");
+      return false;
+    }
+
+    // Validar peso para doses por kg
+    const peso = parseFloat(document.getElementById('pet-peso')?.value || 0);
+    const hasDosePerKg = data.medicamentos.some(med => 
+      med.unidade === 'mg/kg' || med.unidade === 'mL/kg'
+    );
+    
+    if (hasDosePerKg && (!peso || peso <= 0)) {
+      ui.error("Peso do pet é obrigatório para medicamentos com dose por kg");
+      return false;
+    }
+
+    // Validar medicamentos
+    for (let i = 0; i < data.medicamentos.length; i++) {
+      const med = data.medicamentos[i];
+      if (!med.nome || !med.apresentacao || !med.dose || !med.unidade || 
+          !med.frequencia || !med.duracaoDias || !med.via) {
+        ui.error(`Preencha todos os campos obrigatórios do medicamento ${i + 1}`);
+        return false;
+      }
+    }
+
+    // Validar responsável técnico
+    if (!data.responsavelTecnico.nome || !data.responsavelTecnico.crmv || !data.responsavelTecnico.uf) {
+      ui.error("Preencha todos os dados do responsável técnico");
+      return false;
+    }
+
+    // Validar justificativa para medicamento controlado
+    if (data.medicamentoControlado && !data.justificativaControlado) {
+      ui.error("Justificativa é obrigatória para medicamentos controlados");
+      return false;
+    }
+
+    return true;
+  }
+
+  closeModal() {
+    const modal = document.getElementById('prescription-modal');
+    if (modal) {
+      modal.remove();
+    }
+  }
+
+  async viewPrescription(prescriptionId) {
+    const prescription = await store.getPrescription(prescriptionId);
+    if (!prescription) {
+      ui.error("Prescrição não encontrada");
+      return;
+    }
+
+    const pet = await store.getPet(prescription.petId);
+    const client = await store.getClient(pet.clienteId);
+
+    const content = `
+      <div class="modal-overlay" id="prescription-view-modal">
+        <div class="modal" style="max-width: 800px; max-height: 90vh;">
+          <div class="modal-header">
+            <h3>Prescrição ${prescription.numero} - ${pet.nome}</h3>
+            <button onclick="app.closeModal()" class="btn btn-outline btn-sm">✕</button>
+          </div>
+          
+          <div class="modal-body">
+            <div class="prescription-view">
+              <!-- Dados do Pet -->
+              <div class="form-section">
+                <h4>Dados do Pet</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Nome</label>
+                    <p>${pet.nome}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>Espécie</label>
+                    <p>${pet.especie || '-'}</p>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Raça</label>
+                    <p>${pet.raca || '-'}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>Peso</label>
+                    <p>${pet.pesoAproximadoKg ? pet.pesoAproximadoKg + ' kg' : '-'}</p>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Tutor</label>
+                  <p>${client?.nomeCompleto || '-'} - ${client?.telefoneWhatsApp || '-'}</p>
+                </div>
+              </div>
+
+              <!-- Dados Clínicos -->
+              <div class="form-section">
+                <h4>Dados Clínicos</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Data de Emissão</label>
+                    <p>${new Date(prescription.dataEmissao).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>Validade</label>
+                    <p>${prescription.validadeDias} dias</p>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Diagnóstico</label>
+                  <p>${prescription.diagnostico}</p>
+                </div>
+                ${prescription.observacoesClinicas ? `
+                  <div class="form-group">
+                    <label>Observações Clínicas</label>
+                    <p>${prescription.observacoesClinicas}</p>
+                  </div>
+                ` : ''}
+                ${prescription.medicamentoControlado ? `
+                  <div class="form-group">
+                    <label>Medicamento Controlado</label>
+                    <p>Sim - ${prescription.justificativaControlado}</p>
+                  </div>
+                ` : ''}
+              </div>
+
+              <!-- Medicamentos -->
+              <div class="form-section">
+                <h4>Medicamentos</h4>
+                ${prescription.medicamentos.map((med, index) => `
+                  <div class="medication-view">
+                    <h5>Medicamento ${index + 1}: ${med.nome}</h5>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label>Apresentação</label>
+                        <p>${med.apresentacao}</p>
+                      </div>
+                      <div class="form-group">
+                        <label>Dose</label>
+                        <p>${med.dose} ${med.unidade}${med.dosePorTomada ? ` (${med.dosePorTomada} ${med.unidade.replace('/kg', '')} por tomada)` : ''}</p>
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label>Frequência</label>
+                        <p>${med.frequencia}</p>
+                      </div>
+                      <div class="form-group">
+                        <label>Duração</label>
+                        <p>${med.duracaoDias} dias</p>
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label>Via</label>
+                        <p>${med.via}</p>
+                      </div>
+                      <div class="form-group">
+                        <label>Uso na Clínica</label>
+                        <p>${med.usoClinica ? 'Sim' : 'Não'}</p>
+                      </div>
+                    </div>
+                    ${med.instrucoesTutor ? `
+                      <div class="form-group">
+                        <label>Instruções ao Tutor</label>
+                        <p>${med.instrucoesTutor}</p>
+                      </div>
+                    ` : ''}
+                    ${med.contraindicacoes ? `
+                      <div class="form-group">
+                        <label>Contraindicações</label>
+                        <p>${med.contraindicacoes}</p>
+                      </div>
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
+
+              <!-- Responsável Técnico -->
+              <div class="form-section">
+                <h4>Responsável Técnico</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Veterinário</label>
+                    <p>${prescription.responsavelTecnico.nome}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>CRMV</label>
+                    <p>${prescription.responsavelTecnico.crmv}/${prescription.responsavelTecnico.uf}</p>
+                  </div>
+                </div>
+                ${prescription.responsavelTecnico.especialidade ? `
+                  <div class="form-group">
+                    <label>Especialidade</label>
+                    <p>${prescription.responsavelTecnico.especialidade}</p>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="app.closeModal()">
+              Fechar
+            </button>
+            ${prescription.status === 'assinada' ? `
+              <button type="button" class="btn btn-success" onclick="app.generatePrescriptionPDF('${prescriptionId}')">
+                <i class="icon-download"></i> Gerar PDF
+              </button>
+              <button type="button" class="btn btn-whatsapp" onclick="app.sendPrescriptionWhatsApp('${prescriptionId}')">
+                <i class="icon-whatsapp"></i> Enviar WhatsApp
+              </button>
+            ` : `
+              <button type="button" class="btn btn-primary" onclick="app.editPrescription('${prescriptionId}')">
+                <i class="icon-edit"></i> Editar
+              </button>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', content);
+  }
+
+  async editPrescription(prescriptionId) {
+    const prescription = await store.getPrescription(prescriptionId);
+    if (!prescription) {
+      ui.error("Prescrição não encontrada");
+      return;
+    }
+
+    if (prescription.status === 'assinada') {
+      ui.error("Prescrições assinadas não podem ser editadas");
+      return;
+    }
+
+    this.closeModal();
+    await this.showPrescriptionForm(prescription.petId, prescriptionId);
+  }
+
+  async deletePrescription(prescriptionId, petId) {
+    const confirmed = await ui.confirm(
+      "Tem certeza que deseja excluir esta prescrição?",
+      "Confirmar Exclusão"
+    );
+
+    if (confirmed) {
+      try {
+        await store.deletePrescription(prescriptionId);
+        ui.success("Prescrição excluída com sucesso!");
+        this.viewPet(petId); // Recarregar a página do pet
+      } catch (error) {
+        console.error("Erro ao excluir prescrição:", error);
+        ui.error("Erro ao excluir prescrição: " + error.message);
+      }
+    }
+  }
+
+  // Placeholder functions para funcionalidades futuras
+  async duplicatePrescription(prescriptionId) {
+    ui.info("Funcionalidade de duplicar prescrição será implementada na Fase 5");
+  }
+
+  async generatePrescriptionPDF(prescriptionId) {
+    ui.info("Geração de PDF será implementada na Fase 3");
+  }
+
+  async sendPrescriptionWhatsApp(prescriptionId) {
+    ui.info("Envio por WhatsApp será implementado na Fase 4");
   }
 
   // Formulário de cliente a partir de agendamento

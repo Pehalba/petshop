@@ -2609,6 +2609,237 @@
   border: 1px solid var(--warning-200);
 }
 
+/* ===== PRESCRIÇÕES ===== */
+.prescriptions-section {
+  margin-top: var(--spacing-4);
+}
+
+.prescriptions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.prescription-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.prescription-item:hover {
+  border-color: var(--primary-300);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.prescription-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3);
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.prescription-number {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+.prescription-date {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.prescription-status {
+  display: flex;
+  align-items: center;
+}
+
+.prescription-content {
+  margin-bottom: var(--spacing-3);
+}
+
+.prescription-field {
+  margin-bottom: var(--spacing-2);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.prescription-field:last-child {
+  margin-bottom: 0;
+}
+
+.prescription-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--border-light);
+}
+
+.btn-whatsapp {
+  background-color: #25D366;
+  color: white;
+  border: 1px solid #25D366;
+}
+
+.btn-whatsapp:hover {
+  background-color: #128C7E;
+  border-color: #128C7E;
+  color: white;
+}
+
+/* Badges para status de prescrição */
+.badge-warning {
+  background-color: var(--warning-100);
+  color: var(--warning-700);
+  border: 1px solid var(--warning-200);
+}
+
+.badge-success {
+  background-color: var(--success-100);
+  color: var(--success-700);
+  border: 1px solid var(--success-200);
+}
+
+.badge-secondary {
+  background-color: var(--gray-100);
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
+}
+
+/* Formulário de Prescrição */
+.prescription-form {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.pet-info-readonly .form-input.readonly,
+.pet-info-readonly .form-textarea.readonly {
+  background-color: var(--gray-50);
+  color: var(--gray-600);
+  cursor: not-allowed;
+}
+
+.medication-form {
+  background: var(--gray-50);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  position: relative;
+}
+
+.medication-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.medication-header h5 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.medication-form:first-child .medication-header button {
+  display: none;
+}
+
+/* Checkbox personalizado para medicamento controlado */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--gray-300);
+  border-radius: 3px;
+  margin-right: var(--spacing-2);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+  content: "✓";
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Visualização de Prescrição */
+.prescription-view .form-section {
+  margin-bottom: var(--spacing-6);
+}
+
+.prescription-view .form-section h4 {
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary-200);
+  padding-bottom: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+}
+
+.prescription-view .form-group {
+  margin-bottom: var(--spacing-3);
+}
+
+.prescription-view .form-group label {
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-1);
+  display: block;
+}
+
+.prescription-view .form-group p {
+  margin: 0;
+  padding: var(--spacing-2);
+  background-color: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--primary);
+}
+
+.medication-view {
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.medication-view h5 {
+  color: var(--primary);
+  margin: 0 0 var(--spacing-3) 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: var(--spacing-2);
+}
+
 /* ===== ONBOARDING ===== */
 .onboarding-container {
   display: flex;

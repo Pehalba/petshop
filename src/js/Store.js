@@ -1016,6 +1016,49 @@ class Store {
       this.saveSettings(settings);
     }
   }
+
+  // Limpar todos os dados do sistema
+  async clearAllData() {
+    try {
+      console.log("🗑️ Iniciando limpeza de todos os dados...");
+
+      // Limpar localStorage
+      Object.values(this.stores).forEach((storeName) => {
+        localStorage.setItem(storeName, JSON.stringify([]));
+        console.log(`✅ Limpo: ${storeName}`);
+      });
+
+      // Limpar Firebase se conectado
+      if (window.firebaseService && window.firebaseService.isConnected()) {
+        console.log("🔥 Limpando dados do Firebase...");
+
+        // Limpar cada coleção no Firebase
+        for (const [storeKey, storeName] of Object.entries(this.stores)) {
+          try {
+            // Buscar todos os documentos da coleção
+            const documents = await window.firebaseService.getCollection(
+              storeKey
+            );
+
+            // Deletar cada documento
+            for (const doc of documents) {
+              await window.firebaseService.deleteDocument(storeKey, doc.id);
+            }
+
+            console.log(`✅ Firebase limpo: ${storeKey}`);
+          } catch (error) {
+            console.warn(`⚠️ Erro ao limpar ${storeKey} no Firebase:`, error);
+          }
+        }
+      }
+
+      console.log("✅ Limpeza completa finalizada!");
+      return true;
+    } catch (error) {
+      console.error("❌ Erro durante limpeza:", error);
+      throw error;
+    }
+  }
 }
 
 // Instância global do store
