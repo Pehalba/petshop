@@ -9023,7 +9023,25 @@ Entre em contato conosco para agendar o reforço!`;
         }\n` +
         `\nUso veterinário. Siga estritamente as orientações do médico-veterinário.`;
 
-      const message = `${header}${corpo}${medsBlock}${footer}`.trim();
+      let linkBloco = "";
+
+      // Tentar gerar página (HTML) e subir no Firebase Storage para link público
+      try {
+        const settings = store.getSettings ? store.getSettings() : null;
+        const html = await this.buildPrescriptionHTML(prescription, pet, client, settings);
+        const publicUrl = await this.uploadPrescriptionHTML(
+          prescription,
+          pet,
+          html
+        );
+        if (publicUrl) {
+          linkBloco = `\n\nAbrir prescrição (PDF): ${publicUrl}`;
+        }
+      } catch (e) {
+        console.warn("Falha ao publicar HTML no Storage:", e);
+      }
+
+      const message = `${header}${corpo}${medsBlock}${footer}${linkBloco}`.trim();
 
       // Obter telefone do cliente e formatar para E.164 (Brasil)
       const raw = client?.telefoneWhatsApp || "";
@@ -9087,6 +9105,122 @@ Entre em contato conosco para agendar o reforço!`;
     } catch (error) {
       console.error("Erro ao preparar WhatsApp:", error);
       ui.error("Erro ao preparar mensagem do WhatsApp");
+    }
+  }
+
+  // ===== Helpers de Prescrição (HTML + Upload) =====
+  async buildPrescriptionHTML(prescription, pet, client, settings) {
+    const clinicName = settings?.businessName || "Clínica Veterinária";
+    const clinicPhone = settings?.businessPhone || "";
+    const clinicEmail = settings?.businessEmail || "";
+    const medsRows = (prescription.medicamentos || [])
+      .map(
+        (m, idx) => `
+          <tr>
+            <td>${idx + 1}. ${m.nome || ""}</td>
+            <td>${m.apresentacao || ""}</td>
+            <td>${
+              m.dosePorTomada
+                ? `${m.dosePorTomada} ${(m.unidade || "").replace("/kg", "")}`
+                : `${m.dose || ""} ${m.unidade || ""}`
+            }</td>
+            <td>${m.via || ""}</td>
+            <td>${m.frequencia || ""}</td>
+            <td>${m.duracaoDias || ""} dias</td>
+            <td>${m.instrucoesTutor || ""}</td>
+          </tr>`
+      )
+      .join("");
+
+    return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Prescrição ${prescription.numero || ""}</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; color:#111; margin: 24px; }
+    .header { display:flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .clinic { font-size: 14px; }
+    h1 { font-size: 20px; margin: 8px 0 16px; text-align:center; }
+    .block { border:1px solid #ddd; padding:12px; border-radius:6px; margin-bottom:12px; }
+    .label { font-weight: bold; }
+    table { width:100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border:1px solid #ddd; padding:6px; vertical-align: top; }
+    th { background: #f7f7f7; }
+    .footer { margin-top: 18px; font-size: 11px; color:#444; }
+    .sign { margin-top: 36px; text-align:right; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="clinic">
+      <div class="label">${clinicName}</div>
+      ${clinicPhone ? `<div>Fone: ${clinicPhone}</div>` : ""}
+      ${clinicEmail ? `<div>Email: ${clinicEmail}</div>` : ""}
+    </div>
+    <div class="clinic">
+      <div class="label">Prescrição Nº</div>
+      <div>${prescription.numero || "-"}</div>
+      <div>Emissão: ${new Date(prescription.dataEmissao).toLocaleDateString("pt-BR")}</div>
+    </div>
+  </div>
+  <h1>Prescrição Médica Veterinária</h1>
+  <div class="block">
+    <div><span class="label">Paciente:</span> ${pet?.nome || "-"} (${pet?.especie || "-"}, ${pet?.raca || "-"})</div>
+    <div><span class="label">Tutor:</span> ${client?.nomeCompleto || "-"} ${client?.telefoneWhatsApp ? `- ${client.telefoneWhatsApp}` : ""}</div>
+    <div><span class="label">Peso:</span> ${pet?.pesoAproximadoKg ? pet.pesoAproximadoKg + " kg" : "-"}</div>
+  </div>
+  <div class="block">
+    <div><span class="label">Diagnóstico/Motivo:</span> ${prescription.diagnostico || "-"}</div>
+    ${prescription.observacoesClinicas ? `<div><span class="label">Observações:</span> ${prescription.observacoesClinicas}</div>` : ""}
+    <div><span class="label">Validade:</span> ${prescription.validadeDias || "-"} dias</div>
+    ${prescription.medicamentoControlado ? `<div><span class="label">Medicamento controlado:</span> Sim — ${prescription.justificativaControlado || ""}</div>` : ""}
+  </div>
+  <div class="block">
+    <table>
+      <thead>
+        <tr>
+          <th>Medicamento</th>
+          <th>Apresentação</th>
+          <th>Dose por tomada</th>
+          <th>Via</th>
+          <th>Frequência</th>
+          <th>Duração</th>
+          <th>Instruções</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${medsRows}
+      </tbody>
+    </table>
+  </div>
+  <div class="sign">
+    <div>${prescription.responsavelTecnico?.nome || ""}</div>
+    <div>CRMV ${prescription.responsavelTecnico?.crmv || ""}/${prescription.responsavelTecnico?.uf || ""}</div>
+  </div>
+  <div class="footer">Uso veterinário. Siga estritamente as orientações do médico-veterinário.</div>
+</body>
+</html>`;
+  }
+
+  async uploadPrescriptionHTML(prescription, pet, html) {
+    try {
+      // Verificar Storage compat
+      if (!window.firebase || !window.firebase.storage) return null;
+      const storage = window.firebase.storage();
+      const path = `prescricoes/${pet?.id || prescription.petId}/${
+        prescription.numero || prescription.id || Date.now()
+      }.html`;
+      const ref = storage.ref().child(path);
+      const metadata = { contentType: "text/html; charset=utf-8" };
+      // putString com formato RAW
+      await ref.putString(html, "raw", metadata);
+      const url = await ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      console.warn("Storage indisponível ou erro ao enviar HTML:", e);
+      return null;
     }
   }
 
