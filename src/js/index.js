@@ -8802,27 +8802,29 @@ Entre em contato conosco para agendar o reforço!`;
       const client = pet ? await store.getClient(pet.clienteId) : null;
       const settings = store.getSettings ? store.getSettings() : null;
 
-      const clinicName = settings?.businessName || "Clínica Veterinária";
+      const clinicName = settings?.businessName || "Dra. Karianny Tolentino Sabatini";
+      const clinicTagline = "Dermatologia Veterinária";
       const clinicPhone = settings?.businessPhone || "";
       const clinicEmail = settings?.businessEmail || "";
+      const clinicAddress = settings?.businessAddress || "";
+      const emissionDate = new Date(prescription.dataEmissao).toLocaleDateString("pt-BR");
 
-      const medsRows = (prescription.medicamentos || [])
-        .map(
-          (m, idx) => `
-          <tr>
-            <td>${idx + 1}. ${m.nome || ""}</td>
-            <td>${m.apresentacao || ""}</td>
-            <td>${
-              m.dosePorTomada
-                ? `${m.dosePorTomada} ${(m.unidade || "").replace("/kg", "")}`
-                : `${m.dose || ""} ${m.unidade || ""}`
-            }</td>
-            <td>${m.via || ""}</td>
-            <td>${m.frequencia || ""}</td>
-            <td>${m.duracaoDias || ""} dias</td>
-            <td>${m.instrucoesTutor || ""}</td>
-          </tr>`
-        )
+      // Formatar medicamentos em lista numerada
+      const itemsHtml = (prescription.medicamentos || [])
+        .map((m) => {
+          const doseTxt = m.dosePorTomada
+            ? `${m.dosePorTomada} ${(m.unidade || "").replace("/kg", "")}`
+            : `${m.dose || ""} ${m.unidade || ""}`;
+          return `
+            <li>
+              <div class="med-item-title">${m.nome || ""}${m.apresentacao ? ` — ${m.apresentacao}` : ""}</div>
+              <div class="med-item-body">
+                <div><strong>Dose:</strong> ${doseTxt}</div>
+                <div><strong>Frequência:</strong> ${m.frequencia || ""} • <strong>Duração:</strong> ${m.duracaoDias || ""} dias</div>
+                ${m.instrucoesTutor ? `<div><strong>Observações:</strong> ${m.instrucoesTutor}</div>` : ""}
+              </div>
+            </li>`;
+        })
         .join("");
 
       const html = `
@@ -8831,105 +8833,205 @@ Entre em contato conosco para agendar o reforço!`;
 <head>
   <meta charset="utf-8" />
   <title>Prescrição ${prescription.numero || ""}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Open+Sans:wght@400;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; color:#111; margin: 24px; }
-    .header { display:flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .clinic { font-size: 14px; }
-    h1 { font-size: 20px; margin: 8px 0 16px; text-align:center; }
-    .block { border:1px solid #ddd; padding:12px; border-radius:6px; margin-bottom:12px; }
-    .label { font-weight: bold; }
-    table { width:100%; border-collapse: collapse; font-size: 12px; }
-    th, td { border:1px solid #ddd; padding:6px; vertical-align: top; }
-    th { background: #f7f7f7; }
-    .footer { margin-top: 18px; font-size: 11px; color:#444; }
-    .sign { margin-top: 36px; text-align:right; }
+    :root {
+      --rose: #D79B91;
+      --rose-light: #E2AFA1;
+      --rose-line: #CFA79E;
+      --bg: #FDF9F8;
+      --brown: #4D3D38;
+      --white: #FFFFFF;
+    }
+    html, body {
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      margin: 22mm;
+      color: var(--brown);
+      font-family: 'Lato', 'Open Sans', Arial, Helvetica, sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      font-size: 11pt;
+      line-height: 1.6;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo {
+      height: 64px;
+      object-fit: contain;
+      margin: 0 auto 12px;
+      display: block;
+    }
+    .title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 20pt;
+      font-weight: 700;
+      color: var(--brown);
+      margin: 0;
+    }
+    .subtitle {
+      font-size: 12pt;
+      color: var(--rose);
+      margin-top: 4px;
+      font-style: italic;
+    }
+    .line {
+      height: 2px;
+      background: var(--rose-line);
+      border-radius: 2px;
+      margin: 12px auto;
+      width: 100%;
+      max-width: 600px;
+    }
+    .contact {
+      font-size: 10pt;
+      color: #6b5c58;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--rose-line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 12px 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .card h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 13pt;
+      margin: 0 0 10px;
+      color: var(--brown);
+      font-weight: 600;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+      font-size: 11pt;
+    }
+    .row .item {
+      display: flex;
+      gap: 8px;
+    }
+    .label {
+      color: #6b5c58;
+      min-width: 90px;
+      font-weight: 600;
+    }
+    .presc {
+      border: 1px dashed var(--rose-line);
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      padding: 14px 16px;
+    }
+    .presc-list {
+      margin: 10px 0 0 22px;
+      font-size: 11pt;
+      padding-left: 0;
+    }
+    .presc-list li {
+      margin-bottom: 12px;
+      list-style-position: outside;
+    }
+    .med-item-title {
+      font-weight: 700;
+      color: var(--brown);
+      margin-bottom: 4px;
+    }
+    .med-item-body {
+      margin-top: 4px;
+      color: #4f4745;
+      font-size: 10pt;
+    }
+    .med-item-body div {
+      margin: 2px 0;
+    }
+    .hint {
+      background: #FFF6F4;
+      border-left: 4px solid var(--rose-line);
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+    .hint strong {
+      color: var(--brown);
+    }
+    .sign {
+      margin-top: 28px;
+      text-align: right;
+      padding-right: 20px;
+    }
+    .sign .name {
+      font-weight: 700;
+      color: var(--brown);
+      margin-bottom: 4px;
+    }
+    .footer-note {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 10pt;
+      color: #6b5c58;
+      font-style: italic;
+    }
+    @media print {
+      @page {
+        size: A4;
+        margin: 18mm;
+      }
+      body {
+        margin: 0;
+      }
+      .no-print {
+        display: none;
+      }
+    }
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-store" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <script>window.onload = () => { setTimeout(() => window.print(), 200); };</script>
+  <script>window.onload = () => { setTimeout(() => window.print(), 250); };</script>
 </head>
 <body>
   <div class="header">
-    <div class="clinic">
-      <div class="label">${clinicName}</div>
-      ${clinicPhone ? `<div>Fone: ${clinicPhone}</div>` : ""}
-      ${clinicEmail ? `<div>Email: ${clinicEmail}</div>` : ""}
+    <img class="logo" src="${location.origin + '/logo.jpg'}" alt="Logo" onerror="this.style.display='none'" />
+    <div class="title">${clinicName}</div>
+    <div class="subtitle">${clinicTagline}</div>
+    <div class="line"></div>
+    <div class="contact">${clinicAddress ? `Endereço: ${clinicAddress} • ` : ''}Contato: ${clinicPhone || ''} • E-mail: ${clinicEmail || ''} • Data: ${emissionDate}</div>
+  </div>
+
+  <div class="card">
+    <h2>Identificação do Paciente</h2>
+    <div class="row">
+      <div class="item"><span class="label">Pet:</span> <span>${pet?.nome || '-'}</span></div>
+      <div class="item"><span class="label">Tutor:</span> <span>${client?.nomeCompleto || '-'}</span></div>
+      <div class="item"><span class="label">Espécie:</span> <span>${pet?.especie || '-'}</span></div>
+      <div class="item"><span class="label">Raça:</span> <span>${pet?.raca || '-'}</span></div>
+      <div class="item"><span class="label">Sexo:</span> <span>${pet?.sexo || '-'}</span></div>
+      <div class="item"><span class="label">Idade:</span> <span>${pet?.idadeDescricao || '-'}</span></div>
     </div>
-    <div class="clinic">
-      <div class="label">Prescrição Nº</div>
-      <div>${prescription.numero || "-"}</div>
-      <div>Emissão: ${new Date(prescription.dataEmissao).toLocaleDateString(
-        "pt-BR"
-      )}</div>
-    </div>
   </div>
 
-  <h1>Prescrição Médica Veterinária</h1>
-
-  <div class="block">
-    <div><span class="label">Paciente:</span> ${pet?.nome || "-"} (${
-        pet?.especie || "-"
-      }, ${pet?.raca || "-"})</div>
-    <div><span class="label">Tutor:</span> ${client?.nomeCompleto || "-"} ${
-        client?.telefoneWhatsApp ? `- ${client.telefoneWhatsApp}` : ""
-      }</div>
-    <div><span class="label">Peso:</span> ${
-      pet?.pesoAproximadoKg ? pet.pesoAproximadoKg + " kg" : "-"
-    }</div>
+  <div class="card presc">
+    <h2>Prescrição Médica</h2>
+    <ol class="presc-list">${itemsHtml}</ol>
   </div>
 
-  <div class="block">
-    <div><span class="label">Diagnóstico/Motivo:</span> ${
-      prescription.diagnostico || "-"
-    }</div>
-    ${
-      prescription.observacoesClinicas
-        ? `<div><span class="label">Observações:</span> ${prescription.observacoesClinicas}</div>`
-        : ""
-    }
-    <div><span class="label">Validade:</span> ${
-      prescription.validadeDias || "-"
-    } dias</div>
-    ${
-      prescription.medicamentoControlado
-        ? `<div><span class="label">Medicamento controlado:</span> Sim — ${
-            prescription.justificativaControlado || ""
-          }</div>`
-        : ""
-    }
-  </div>
-
-  <div class="block">
-    <table>
-      <thead>
-        <tr>
-          <th>Medicamento</th>
-          <th>Apresentação</th>
-          <th>Dose por tomada</th>
-          <th>Via</th>
-          <th>Frequência</th>
-          <th>Duração</th>
-          <th>Instruções</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${medsRows}
-      </tbody>
-    </table>
-  </div>
+  ${prescription?.observacoesClinicas ? `<div class="hint"><strong>Orientações:</strong> ${prescription.observacoesClinicas}</div>` : ''}
 
   <div class="sign">
-    <div>${prescription.responsavelTecnico?.nome || ""}</div>
-    <div>CRMV ${prescription.responsavelTecnico?.crmv || ""}/${
-        prescription.responsavelTecnico?.uf || ""
-      }</div>
+    <div class="name">${prescription?.responsavelTecnico?.nome || ''}</div>
+    <div>CRMV ${prescription?.responsavelTecnico?.crmv || ''}/${prescription?.responsavelTecnico?.uf || ''}</div>
   </div>
 
-  <div class="footer">
-    Uso veterinário. Siga estritamente as orientações do médico-veterinário.
-  </div>
+  <div class="footer-note">Atendimento especializado em dermatologia veterinária com amor e cuidado.</div>
 </body>
 </html>`;
 
@@ -9087,7 +9189,6 @@ Entre em contato conosco para agendar o reforço!`;
       ui.error("Erro ao preparar mensagem do WhatsApp");
     }
   }
-
 
   // Formulário de cliente a partir de agendamento
   showClientFormFromAppointment() {
