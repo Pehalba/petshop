@@ -3986,6 +3986,20 @@ class PetShopApp {
           this.viewClient(clientId);
         }
       });
+
+      // Fallback: binding direto (reforço caso delegação seja bloqueada)
+      const bindDirect = (selector, handler) => {
+        container.querySelectorAll(selector).forEach((el) => {
+          el.addEventListener("click", (e) => {
+            e.preventDefault();
+            handler(el);
+          });
+        });
+      };
+      bindDirect('[data-action="view-pet"]', (el) => this.viewPet(el.dataset.petId));
+      bindDirect('[data-action="edit-pet"]', (el) => this.editPet(el.dataset.petId));
+      bindDirect('[data-action="delete-pet"]', (el) => this.deletePet(el.dataset.petId));
+      bindDirect('[data-action="view-client"]', (el) => this.viewClient(el.dataset.clientId));
     }
   }
 
