@@ -8802,12 +8802,15 @@ Entre em contato conosco para agendar o reforço!`;
       const client = pet ? await store.getClient(pet.clienteId) : null;
       const settings = store.getSettings ? store.getSettings() : null;
 
-      const clinicName = settings?.businessName || "Dra. Karianny Tolentino Sabatini";
+      const clinicName =
+        settings?.businessName || "Dra. Karianny Tolentino Sabatini";
       const clinicTagline = "Dermatologia Veterinária";
       const clinicPhone = settings?.businessPhone || "";
       const clinicEmail = settings?.businessEmail || "";
       const clinicAddress = settings?.businessAddress || "";
-      const emissionDate = new Date(prescription.dataEmissao).toLocaleDateString("pt-BR");
+      const emissionDate = new Date(
+        prescription.dataEmissao
+      ).toLocaleDateString("pt-BR");
 
       // Formatar medicamentos em lista numerada
       const itemsHtml = (prescription.medicamentos || [])
@@ -8817,11 +8820,19 @@ Entre em contato conosco para agendar o reforço!`;
             : `${m.dose || ""} ${m.unidade || ""}`;
           return `
             <li>
-              <div class="med-item-title">${m.nome || ""}${m.apresentacao ? ` — ${m.apresentacao}` : ""}</div>
+              <div class="med-item-title">${m.nome || ""}${
+            m.apresentacao ? ` — ${m.apresentacao}` : ""
+          }</div>
               <div class="med-item-body">
                 <div><strong>Dose:</strong> ${doseTxt}</div>
-                <div><strong>Frequência:</strong> ${m.frequencia || ""} • <strong>Duração:</strong> ${m.duracaoDias || ""} dias</div>
-                ${m.instrucoesTutor ? `<div><strong>Observações:</strong> ${m.instrucoesTutor}</div>` : ""}
+                <div><strong>Frequência:</strong> ${
+                  m.frequencia || ""
+                } • <strong>Duração:</strong> ${m.duracaoDias || ""} dias</div>
+                ${
+                  m.instrucoesTutor
+                    ? `<div><strong>Observações:</strong> ${m.instrucoesTutor}</div>`
+                    : ""
+                }
               </div>
             </li>`;
         })
@@ -8839,7 +8850,7 @@ Entre em contato conosco para agendar o reforço!`;
       --rose: #D79B91;
       --rose-light: #E2AFA1;
       --rose-line: #CFA79E;
-      --bg: #FDF9F8;
+      --bg: #F5E8E6;
       --brown: #4D3D38;
       --white: #FFFFFF;
     }
@@ -8847,6 +8858,7 @@ Entre em contato conosco para agendar o reforço!`;
       background: var(--bg);
       margin: 0;
       padding: 0;
+      position: relative;
     }
     body {
       margin: 22mm;
@@ -8857,15 +8869,48 @@ Entre em contato conosco para agendar o reforço!`;
       font-size: 11pt;
       line-height: 1.6;
     }
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
+    .watermark {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-5deg);
+      opacity: 0.1;
+      z-index: 0;
+      pointer-events: none;
+      width: 500px;
+      height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .logo {
+    .watermark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: grayscale(100%);
+    }
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      background: transparent;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .header-logo {
       height: 64px;
       object-fit: contain;
-      margin: 0 auto 12px;
       display: block;
+    }
+    .header-text {
+      text-align: center;
+      flex: 1;
+      min-width: 300px;
     }
     .title {
       font-family: 'Playfair Display', Georgia, serif;
@@ -8987,6 +9032,20 @@ Entre em contato conosco para agendar o reforço!`;
       body {
         margin: 0;
       }
+      .watermark {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-5deg);
+        opacity: 0.1;
+        z-index: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .content-wrapper {
+        position: relative;
+        z-index: 1;
+      }
       .no-print {
         display: none;
       }
@@ -8999,23 +9058,48 @@ Entre em contato conosco para agendar o reforço!`;
   <script>window.onload = () => { setTimeout(() => window.print(), 250); };</script>
 </head>
 <body>
-  <div class="header">
-    <img class="logo" src="${location.origin + '/logo.jpg'}" alt="Logo" onerror="this.style.display='none'" />
-    <div class="title">${clinicName}</div>
-    <div class="subtitle">${clinicTagline}</div>
-    <div class="line"></div>
-    <div class="contact">${clinicAddress ? `Endereço: ${clinicAddress} • ` : ''}Contato: ${clinicPhone || ''} • E-mail: ${clinicEmail || ''} • Data: ${emissionDate}</div>
+  <div class="watermark">
+    <img src="${location.origin + "/logo.jpg"}" alt="Watermark" onerror="this.style.display='none'" />
   </div>
+  
+  <div class="content-wrapper">
+    <div class="header">
+      <img class="header-logo" src="${
+        location.origin + "/logo.jpg"
+      }" alt="Logo" onerror="this.style.display='none'" />
+      <div class="header-text">
+        <div class="title">${clinicName}</div>
+        <div class="subtitle">${clinicTagline}</div>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div class="contact">${
+      clinicAddress ? `Endereço: ${clinicAddress} • ` : ""
+    }Contato: ${clinicPhone || ""} • E-mail: ${
+        clinicEmail || ""
+      } • Data: ${emissionDate}</div>
 
   <div class="card">
     <h2>Identificação do Paciente</h2>
     <div class="row">
-      <div class="item"><span class="label">Pet:</span> <span>${pet?.nome || '-'}</span></div>
-      <div class="item"><span class="label">Tutor:</span> <span>${client?.nomeCompleto || '-'}</span></div>
-      <div class="item"><span class="label">Espécie:</span> <span>${pet?.especie || '-'}</span></div>
-      <div class="item"><span class="label">Raça:</span> <span>${pet?.raca || '-'}</span></div>
-      <div class="item"><span class="label">Sexo:</span> <span>${pet?.sexo || '-'}</span></div>
-      <div class="item"><span class="label">Idade:</span> <span>${pet?.idadeDescricao || '-'}</span></div>
+      <div class="item"><span class="label">Pet:</span> <span>${
+        pet?.nome || "-"
+      }</span></div>
+      <div class="item"><span class="label">Tutor:</span> <span>${
+        client?.nomeCompleto || "-"
+      }</span></div>
+      <div class="item"><span class="label">Espécie:</span> <span>${
+        pet?.especie || "-"
+      }</span></div>
+      <div class="item"><span class="label">Raça:</span> <span>${
+        pet?.raca || "-"
+      }</span></div>
+      <div class="item"><span class="label">Sexo:</span> <span>${
+        pet?.sexo || "-"
+      }</span></div>
+      <div class="item"><span class="label">Idade:</span> <span>${
+        pet?.idadeDescricao || "-"
+      }</span></div>
     </div>
   </div>
 
@@ -9024,14 +9108,21 @@ Entre em contato conosco para agendar o reforço!`;
     <ol class="presc-list">${itemsHtml}</ol>
   </div>
 
-  ${prescription?.observacoesClinicas ? `<div class="hint"><strong>Orientações:</strong> ${prescription.observacoesClinicas}</div>` : ''}
+  ${
+    prescription?.observacoesClinicas
+      ? `<div class="hint"><strong>Orientações:</strong> ${prescription.observacoesClinicas}</div>`
+      : ""
+  }
 
   <div class="sign">
-    <div class="name">${prescription?.responsavelTecnico?.nome || ''}</div>
-    <div>CRMV ${prescription?.responsavelTecnico?.crmv || ''}/${prescription?.responsavelTecnico?.uf || ''}</div>
+    <div class="name">${prescription?.responsavelTecnico?.nome || ""}</div>
+    <div>CRMV ${prescription?.responsavelTecnico?.crmv || ""}/${
+        prescription?.responsavelTecnico?.uf || ""
+      }</div>
   </div>
 
-  <div class="footer-note">Atendimento especializado em dermatologia veterinária com amor e cuidado.</div>
+    <div class="footer-note">Atendimento especializado em dermatologia veterinária com amor e cuidado.</div>
+  </div>
 </body>
 </html>`;
 
