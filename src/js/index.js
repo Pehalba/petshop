@@ -8258,11 +8258,15 @@ Entre em contato conosco para agendar o reforço!`;
     if (!formData) return;
 
     try {
+      const numeroPrescricao =
+        typeof store.generatePrescriptionNumber === "function"
+          ? store.generatePrescriptionNumber()
+          : `PR-${new Date().getFullYear()}-${String(Date.now() % 1000).padStart(3, "0")}`;
       const prescriptionData = {
         ...formData,
         petId: petId,
         status: "rascunho",
-        numero: formData.numero || store.generatePrescriptionNumber(),
+        numero: formData.numero || numeroPrescricao,
         auditoria: {
           criadoPor: "admin", // TODO: Pegar do usuário logado
           criadoEm: new Date().toISOString(),
@@ -8290,11 +8294,15 @@ Entre em contato conosco para agendar o reforço!`;
     }
 
     try {
+      const numeroPrescricao =
+        typeof store.generatePrescriptionNumber === "function"
+          ? store.generatePrescriptionNumber()
+          : `PR-${new Date().getFullYear()}-${String(Date.now() % 1000).padStart(3, "0")}`;
       const prescriptionData = {
         ...formData,
         petId: petId,
         status: "assinada",
-        numero: formData.numero || store.generatePrescriptionNumber(),
+        numero: formData.numero || numeroPrescricao,
         auditoria: {
           criadoPor: "admin", // TODO: Pegar do usuário logado
           criadoEm: new Date().toISOString(),
@@ -8726,9 +8734,7 @@ Entre em contato conosco para agendar o reforço!`;
             <td>${m.apresentacao || ""}</td>
             <td>${
               m.dosePorTomada
-                ? `${m.dosePorTomada} ${
-                    (m.unidade || "").replace("/kg", "")
-                  }`
+                ? `${m.dosePorTomada} ${(m.unidade || "").replace("/kg", "")}`
                 : `${m.dose || ""} ${m.unidade || ""}`
             }</td>
             <td>${m.via || ""}</td>
@@ -8774,23 +8780,45 @@ Entre em contato conosco para agendar o reforço!`;
     <div class="clinic">
       <div class="label">Prescrição Nº</div>
       <div>${prescription.numero || "-"}</div>
-      <div>Emissão: ${new Date(prescription.dataEmissao).toLocaleDateString("pt-BR")}</div>
+      <div>Emissão: ${new Date(prescription.dataEmissao).toLocaleDateString(
+        "pt-BR"
+      )}</div>
     </div>
   </div>
 
   <h1>Prescrição Médica Veterinária</h1>
 
   <div class="block">
-    <div><span class="label">Paciente:</span> ${pet?.nome || "-"} (${pet?.especie || "-"}, ${pet?.raca || "-"})</div>
-    <div><span class="label">Tutor:</span> ${client?.nomeCompleto || "-"} ${client?.telefoneWhatsApp ? `- ${client.telefoneWhatsApp}` : ""}</div>
-    <div><span class="label">Peso:</span> ${pet?.pesoAproximadoKg ? pet.pesoAproximadoKg + " kg" : "-"}</div>
+    <div><span class="label">Paciente:</span> ${pet?.nome || "-"} (${
+        pet?.especie || "-"
+      }, ${pet?.raca || "-"})</div>
+    <div><span class="label">Tutor:</span> ${client?.nomeCompleto || "-"} ${
+        client?.telefoneWhatsApp ? `- ${client.telefoneWhatsApp}` : ""
+      }</div>
+    <div><span class="label">Peso:</span> ${
+      pet?.pesoAproximadoKg ? pet.pesoAproximadoKg + " kg" : "-"
+    }</div>
   </div>
 
   <div class="block">
-    <div><span class="label">Diagnóstico/Motivo:</span> ${prescription.diagnostico || "-"}</div>
-    ${prescription.observacoesClinicas ? `<div><span class="label">Observações:</span> ${prescription.observacoesClinicas}</div>` : ""}
-    <div><span class="label">Validade:</span> ${prescription.validadeDias || "-"} dias</div>
-    ${prescription.medicamentoControlado ? `<div><span class="label">Medicamento controlado:</span> Sim — ${prescription.justificativaControlado || ""}</div>` : ""}
+    <div><span class="label">Diagnóstico/Motivo:</span> ${
+      prescription.diagnostico || "-"
+    }</div>
+    ${
+      prescription.observacoesClinicas
+        ? `<div><span class="label">Observações:</span> ${prescription.observacoesClinicas}</div>`
+        : ""
+    }
+    <div><span class="label">Validade:</span> ${
+      prescription.validadeDias || "-"
+    } dias</div>
+    ${
+      prescription.medicamentoControlado
+        ? `<div><span class="label">Medicamento controlado:</span> Sim — ${
+            prescription.justificativaControlado || ""
+          }</div>`
+        : ""
+    }
   </div>
 
   <div class="block">
@@ -8814,7 +8842,9 @@ Entre em contato conosco para agendar o reforço!`;
 
   <div class="sign">
     <div>${prescription.responsavelTecnico?.nome || ""}</div>
-    <div>CRMV ${prescription.responsavelTecnico?.crmv || ""}/${prescription.responsavelTecnico?.uf || ""}</div>
+    <div>CRMV ${prescription.responsavelTecnico?.crmv || ""}/${
+        prescription.responsavelTecnico?.uf || ""
+      }</div>
   </div>
 
   <div class="footer">
