@@ -331,6 +331,26 @@ class PetShopApp {
       const action = e.target.closest("[data-action]");
       if (action) {
         e.preventDefault();
+        const act = action.dataset.action;
+        // Handlers globais para ações comuns na UI
+        if (act === "view-pet" && action.dataset.petId) {
+          this.viewPet(action.dataset.petId);
+          return;
+        }
+        if (act === "edit-pet" && action.dataset.petId) {
+          this.editPet(action.dataset.petId);
+          return;
+        }
+        if (act === "delete-pet" && action.dataset.petId) {
+          this.deletePet(action.dataset.petId);
+          return;
+        }
+        if (act === "view-client" && action.dataset.clientId) {
+          this.viewClient(action.dataset.clientId);
+          return;
+        }
+
+        // Ações de sistema (backup/restore/logout/etc.)
         this.handleAction(action.dataset.action);
       }
     });
