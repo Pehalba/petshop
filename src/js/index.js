@@ -3842,9 +3842,9 @@ class PetShopApp {
         <tr>
           <td>
             <div class="pet-info">
-              <strong class="clickable-name" onclick="app.viewPet('${
+              <strong class="clickable-name" data-action="view-pet" data-pet-id="${
                 pet.id
-              }')" title="Clique para ver detalhes">${
+              }" title="Clique para ver detalhes">${
           pet.nome || "Sem nome"
         }</strong>
               <span class="pet-species">${pet.especie || "-"}</span>
@@ -3866,26 +3866,26 @@ class PetShopApp {
           }</td>
           <td>${
             client
-              ? `<span class="clickable-name" onclick="app.viewClient('${pet.clienteId}')" title="Clique para ver detalhes do tutor">${client.nomeCompleto}</span>`
+              ? `<span class="clickable-name" data-action="view-client" data-client-id="${pet.clienteId}" title="Clique para ver detalhes do tutor">${client.nomeCompleto}</span>`
               : "Cliente não encontrado"
           }</td>
           <td>${idade}</td>
           <td>${pet.pesoAproximadoKg ? pet.pesoAproximadoKg + "kg" : "-"}</td>
           <td>
             <div class="data-table-actions">
-              <button class="btn btn-sm btn-outline" onclick="app.viewPet('${
+              <button class="btn btn-sm btn-outline" data-action="view-pet" data-pet-id="${
                 pet.id
-              }')" title="Ver detalhes">
+              }" title="Ver detalhes">
                 <i class="icon-eye"></i>
               </button>
-              <button class="btn btn-sm btn-outline" onclick="app.editPet('${
+              <button class="btn btn-sm btn-outline" data-action="edit-pet" data-pet-id="${
                 pet.id
-              }')" title="Editar">
+              }" title="Editar">
                 <i class="icon-edit"></i>
               </button>
-              <button class="btn btn-sm btn-danger" onclick="app.deletePet('${
+              <button class="btn btn-sm btn-danger" data-action="delete-pet" data-pet-id="${
                 pet.id
-              }')" title="Excluir">
+              }" title="Excluir">
                 ✕
               </button>
             </div>
@@ -3939,6 +3939,32 @@ class PetShopApp {
     if (sortSelect) {
       sortSelect.addEventListener("change", (e) => {
         this.sortPets(e.target.value);
+      });
+    }
+
+    // Delegação de cliques para evitar bloqueio por CSP (inline handlers)
+    const container = document.querySelector(".data-container");
+    if (container) {
+      container.addEventListener("click", (e) => {
+        const el = e.target.closest("[data-action]");
+        if (!el) return;
+        const action = el.getAttribute("data-action");
+        const petId = el.getAttribute("data-pet-id");
+        const clientId = el.getAttribute("data-client-id");
+
+        if (action === "view-pet" && petId) {
+          e.preventDefault();
+          this.viewPet(petId);
+        } else if (action === "edit-pet" && petId) {
+          e.preventDefault();
+          this.editPet(petId);
+        } else if (action === "delete-pet" && petId) {
+          e.preventDefault();
+          this.deletePet(petId);
+        } else if (action === "view-client" && clientId) {
+          e.preventDefault();
+          this.viewClient(clientId);
+        }
       });
     }
   }
@@ -7420,7 +7446,7 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   // ===== PRESCRIÇÕES =====
-  
+
   async renderPetPrescriptions(petId) {
     const prescriptions = await store.getPrescriptionsByPet(petId);
 
@@ -7449,10 +7475,12 @@ Entre em contato conosco para agendar o reforço!`;
           <div class="prescription-item">
             <div class="prescription-header">
               <div class="prescription-number">
-                ${prescription.numero || 'N/A'}
+                ${prescription.numero || "N/A"}
               </div>
               <div class="prescription-date">
-                ${new Date(prescription.dataEmissao).toLocaleDateString("pt-BR")}
+                ${new Date(prescription.dataEmissao).toLocaleDateString(
+                  "pt-BR"
+                )}
               </div>
               <div class="prescription-status">
                 ${this.getPrescriptionStatusBadge(prescription.status)}
@@ -7469,7 +7497,8 @@ Entre em contato conosco para agendar o reforço!`;
                   : ""
               }
               ${
-                prescription.medicamentos && prescription.medicamentos.length > 0
+                prescription.medicamentos &&
+                prescription.medicamentos.length > 0
                   ? `
                 <div class="prescription-field">
                   <strong>Medicamentos:</strong> ${prescription.medicamentos.length} item(s)
@@ -7493,34 +7522,28 @@ Entre em contato conosco para agendar o reforço!`;
               }')" title="Ver prescrição">
                 <i class="icon-eye"></i> Ver
               </button>
-              ${prescription.status === 'rascunho' ? `
-                <button class="btn btn-sm btn-primary" onclick="app.editPrescription('${
-                  prescription.id
-                }')" title="Editar prescrição">
+              ${
+                prescription.status === "rascunho"
+                  ? `
+                <button class="btn btn-sm btn-primary" onclick="app.editPrescription('${prescription.id}')" title="Editar prescrição">
                   <i class="icon-edit"></i> Editar
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="app.deletePrescription('${
-                  prescription.id
-                }', '${petId}')" title="Deletar prescrição">
+                <button class="btn btn-sm btn-danger" onclick="app.deletePrescription('${prescription.id}', '${petId}')" title="Deletar prescrição">
                   ✕ Deletar
                 </button>
-              ` : `
-                <button class="btn btn-sm btn-outline" onclick="app.duplicatePrescription('${
-                  prescription.id
-                }')" title="Duplicar prescrição">
+              `
+                  : `
+                <button class="btn btn-sm btn-outline" onclick="app.duplicatePrescription('${prescription.id}')" title="Duplicar prescrição">
                   <i class="icon-copy"></i> Duplicar
                 </button>
-                <button class="btn btn-sm btn-success" onclick="app.generatePrescriptionPDF('${
-                  prescription.id
-                }')" title="Gerar PDF">
+                <button class="btn btn-sm btn-success" onclick="app.generatePrescriptionPDF('${prescription.id}')" title="Gerar PDF">
                   <i class="icon-download"></i> PDF
                 </button>
-                <button class="btn btn-sm btn-whatsapp" onclick="app.sendPrescriptionWhatsApp('${
-                  prescription.id
-                }')" title="Enviar WhatsApp">
+                <button class="btn btn-sm btn-whatsapp" onclick="app.sendPrescriptionWhatsApp('${prescription.id}')" title="Enviar WhatsApp">
                   <i class="icon-whatsapp"></i> WhatsApp
                 </button>
-              `}
+              `
+              }
             </div>
           </div>
         `
@@ -7533,15 +7556,18 @@ Entre em contato conosco para agendar o reforço!`;
   getPrescriptionStatusBadge(status) {
     const badges = {
       rascunho: '<span class="badge badge-warning">Rascunho</span>',
-      assinada: '<span class="badge badge-success">Assinada</span>'
+      assinada: '<span class="badge badge-success">Assinada</span>',
     };
-    return badges[status] || '<span class="badge badge-secondary">Desconhecido</span>';
+    return (
+      badges[status] ||
+      '<span class="badge badge-secondary">Desconhecido</span>'
+    );
   }
 
   async showPrescriptionForm(petId, prescriptionId = null) {
     const pet = await store.getPet(petId);
     const client = await store.getClient(pet.clienteId);
-    
+
     if (!pet) {
       ui.error("Pet não encontrado");
       return;
@@ -7549,7 +7575,7 @@ Entre em contato conosco para agendar o reforço!`;
 
     const isEdit = prescriptionId !== null;
     let prescription = null;
-    
+
     if (isEdit) {
       prescription = await store.getPrescription(prescriptionId);
       if (!prescription) {
@@ -7567,7 +7593,7 @@ Entre em contato conosco para agendar o reforço!`;
       <div class="modal-overlay" id="prescription-modal">
         <div class="modal" style="max-width: 800px; max-height: 90vh;">
           <div class="modal-header">
-            <h3>${isEdit ? 'Editar' : 'Nova'} Prescrição - ${pet.nome}</h3>
+            <h3>${isEdit ? "Editar" : "Nova"} Prescrição - ${pet.nome}</h3>
             <button onclick="app.closeModal()" class="btn btn-outline btn-sm">✕</button>
           </div>
           
@@ -7580,21 +7606,29 @@ Entre em contato conosco para agendar o reforço!`;
                   <div class="form-row">
                     <div class="form-group">
                       <label>Nome</label>
-                      <input type="text" value="${pet.nome}" readonly class="form-input readonly">
+                      <input type="text" value="${
+                        pet.nome
+                      }" readonly class="form-input readonly">
                     </div>
                     <div class="form-group">
                       <label>Espécie</label>
-                      <input type="text" value="${pet.especie || '-'}" readonly class="form-input readonly">
+                      <input type="text" value="${
+                        pet.especie || "-"
+                      }" readonly class="form-input readonly">
                     </div>
                   </div>
                   <div class="form-row">
                     <div class="form-group">
                       <label>Raça</label>
-                      <input type="text" value="${pet.raca || '-'}" readonly class="form-input readonly">
+                      <input type="text" value="${
+                        pet.raca || "-"
+                      }" readonly class="form-input readonly">
                     </div>
                     <div class="form-group">
                       <label>Sexo</label>
-                      <input type="text" value="${pet.sexo || '-'}" readonly class="form-input readonly">
+                      <input type="text" value="${
+                        pet.sexo || "-"
+                      }" readonly class="form-input readonly">
                     </div>
                   </div>
                   <div class="form-row">
@@ -7604,7 +7638,9 @@ Entre em contato conosco para agendar o reforço!`;
                     </div>
                     <div class="form-group">
                       <label>Peso (kg)</label>
-                      <input type="number" id="pet-peso" value="${pet.pesoAproximadoKg || ''}" 
+                      <input type="number" id="pet-peso" value="${
+                        pet.pesoAproximadoKg || ""
+                      }" 
                              step="0.1" min="0" class="form-input" 
                              placeholder="Peso atual do pet">
                     </div>
@@ -7612,16 +7648,24 @@ Entre em contato conosco para agendar o reforço!`;
                   <div class="form-row">
                     <div class="form-group">
                       <label>Tutor</label>
-                      <input type="text" value="${client?.nomeCompleto || '-'}" readonly class="form-input readonly">
+                      <input type="text" value="${
+                        client?.nomeCompleto || "-"
+                      }" readonly class="form-input readonly">
                     </div>
                     <div class="form-group">
                       <label>WhatsApp</label>
-                      <input type="text" value="${client?.telefoneWhatsApp || '-'}" readonly class="form-input readonly">
+                      <input type="text" value="${
+                        client?.telefoneWhatsApp || "-"
+                      }" readonly class="form-input readonly">
                     </div>
                   </div>
                   <div class="form-group">
                     <label>Alergias/Condições</label>
-                    <textarea readonly class="form-textarea readonly" rows="2">${pet.alergiasAtenções || pet.restricoesSaude || 'Nenhuma informação registrada'}</textarea>
+                    <textarea readonly class="form-textarea readonly" rows="2">${
+                      pet.alergiasAtenções ||
+                      pet.restricoesSaude ||
+                      "Nenhuma informação registrada"
+                    }</textarea>
                   </div>
                 </div>
               </div>
@@ -7633,7 +7677,10 @@ Entre em contato conosco para agendar o reforço!`;
                   <div class="form-group">
                     <label>Data de Emissão *</label>
                     <input type="date" id="data-emissao" name="dataEmissao" 
-                           value="${prescription?.dataEmissao || new Date().toISOString().split('T')[0]}" 
+                           value="${
+                             prescription?.dataEmissao ||
+                             new Date().toISOString().split("T")[0]
+                           }" 
                            required class="form-input">
                   </div>
                   <div class="form-group">
@@ -7646,7 +7693,7 @@ Entre em contato conosco para agendar o reforço!`;
                 <div class="form-group">
                   <label>Diagnóstico/Motivo *</label>
                   <input type="text" id="diagnostico" name="diagnostico" 
-                         value="${prescription?.diagnostico || ''}" 
+                         value="${prescription?.diagnostico || ""}" 
                          placeholder="Ex: Dermatite atópica, Infecção urinária..." 
                          required class="form-input">
                 </div>
@@ -7654,21 +7701,31 @@ Entre em contato conosco para agendar o reforço!`;
                   <label>Observações Clínicas</label>
                   <textarea id="observacoes-clinicas" name="observacoesClinicas" 
                             class="form-textarea" rows="3" 
-                            placeholder="Observações adicionais sobre o caso...">${prescription?.observacoesClinicas || ''}</textarea>
+                            placeholder="Observações adicionais sobre o caso...">${
+                              prescription?.observacoesClinicas || ""
+                            }</textarea>
                 </div>
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="medicamento-controlado" name="medicamentoControlado" 
-                           ${prescription?.medicamentoControlado ? 'checked' : ''}>
+                           ${
+                             prescription?.medicamentoControlado
+                               ? "checked"
+                               : ""
+                           }>
                     <span class="checkmark"></span>
                     Medicamento controlado
                   </label>
                 </div>
-                <div id="justificativa-controlado" class="form-group" style="display: ${prescription?.medicamentoControlado ? 'block' : 'none'};">
+                <div id="justificativa-controlado" class="form-group" style="display: ${
+                  prescription?.medicamentoControlado ? "block" : "none"
+                };">
                   <label>Justificativa *</label>
                   <textarea id="justificativa" name="justificativaControlado" 
                             class="form-textarea" rows="2" 
-                            placeholder="Justifique o uso de medicamento controlado...">${prescription?.justificativaControlado || ''}</textarea>
+                            placeholder="Justifique o uso de medicamento controlado...">${
+                              prescription?.justificativaControlado || ""
+                            }</textarea>
                 </div>
               </div>
 
@@ -7676,9 +7733,14 @@ Entre em contato conosco para agendar o reforço!`;
               <div class="form-section">
                 <h4>Medicamentos</h4>
                 <div id="medicamentos-container">
-                  ${prescription?.medicamentos?.length > 0 
-                    ? prescription.medicamentos.map((med, index) => this.renderMedicationForm(med, index)).join('')
-                    : this.renderMedicationForm(null, 0)
+                  ${
+                    prescription?.medicamentos?.length > 0
+                      ? prescription.medicamentos
+                          .map((med, index) =>
+                            this.renderMedicationForm(med, index)
+                          )
+                          .join("")
+                      : this.renderMedicationForm(null, 0)
                   }
                 </div>
                 <button type="button" class="btn btn-outline btn-sm" onclick="app.addMedication()">
@@ -7693,13 +7755,17 @@ Entre em contato conosco para agendar o reforço!`;
                   <div class="form-group">
                     <label>Nome do Veterinário *</label>
                     <input type="text" id="vet-nome" name="vetNome" 
-                           value="${prescription?.responsavelTecnico?.nome || ''}" 
+                           value="${
+                             prescription?.responsavelTecnico?.nome || ""
+                           }" 
                            placeholder="Dr. João Silva" required class="form-input">
                   </div>
                   <div class="form-group">
                     <label>CRMV *</label>
                     <input type="text" id="vet-crmv" name="vetCrmv" 
-                           value="${prescription?.responsavelTecnico?.crmv || ''}" 
+                           value="${
+                             prescription?.responsavelTecnico?.crmv || ""
+                           }" 
                            placeholder="12345" required class="form-input">
                   </div>
                 </div>
@@ -7708,39 +7774,150 @@ Entre em contato conosco para agendar o reforço!`;
                     <label>UF *</label>
                     <select id="vet-uf" name="vetUf" required class="form-select">
                       <option value="">Selecione</option>
-                      <option value="AC" ${prescription?.responsavelTecnico?.uf === 'AC' ? 'selected' : ''}>AC</option>
-                      <option value="AL" ${prescription?.responsavelTecnico?.uf === 'AL' ? 'selected' : ''}>AL</option>
-                      <option value="AP" ${prescription?.responsavelTecnico?.uf === 'AP' ? 'selected' : ''}>AP</option>
-                      <option value="AM" ${prescription?.responsavelTecnico?.uf === 'AM' ? 'selected' : ''}>AM</option>
-                      <option value="BA" ${prescription?.responsavelTecnico?.uf === 'BA' ? 'selected' : ''}>BA</option>
-                      <option value="CE" ${prescription?.responsavelTecnico?.uf === 'CE' ? 'selected' : ''}>CE</option>
-                      <option value="DF" ${prescription?.responsavelTecnico?.uf === 'DF' ? 'selected' : ''}>DF</option>
-                      <option value="ES" ${prescription?.responsavelTecnico?.uf === 'ES' ? 'selected' : ''}>ES</option>
-                      <option value="GO" ${prescription?.responsavelTecnico?.uf === 'GO' ? 'selected' : ''}>GO</option>
-                      <option value="MA" ${prescription?.responsavelTecnico?.uf === 'MA' ? 'selected' : ''}>MA</option>
-                      <option value="MT" ${prescription?.responsavelTecnico?.uf === 'MT' ? 'selected' : ''}>MT</option>
-                      <option value="MS" ${prescription?.responsavelTecnico?.uf === 'MS' ? 'selected' : ''}>MS</option>
-                      <option value="MG" ${prescription?.responsavelTecnico?.uf === 'MG' ? 'selected' : ''}>MG</option>
-                      <option value="PA" ${prescription?.responsavelTecnico?.uf === 'PA' ? 'selected' : ''}>PA</option>
-                      <option value="PB" ${prescription?.responsavelTecnico?.uf === 'PB' ? 'selected' : ''}>PB</option>
-                      <option value="PR" ${prescription?.responsavelTecnico?.uf === 'PR' ? 'selected' : ''}>PR</option>
-                      <option value="PE" ${prescription?.responsavelTecnico?.uf === 'PE' ? 'selected' : ''}>PE</option>
-                      <option value="PI" ${prescription?.responsavelTecnico?.uf === 'PI' ? 'selected' : ''}>PI</option>
-                      <option value="RJ" ${prescription?.responsavelTecnico?.uf === 'RJ' ? 'selected' : ''}>RJ</option>
-                      <option value="RN" ${prescription?.responsavelTecnico?.uf === 'RN' ? 'selected' : ''}>RN</option>
-                      <option value="RS" ${prescription?.responsavelTecnico?.uf === 'RS' ? 'selected' : ''}>RS</option>
-                      <option value="RO" ${prescription?.responsavelTecnico?.uf === 'RO' ? 'selected' : ''}>RO</option>
-                      <option value="RR" ${prescription?.responsavelTecnico?.uf === 'RR' ? 'selected' : ''}>RR</option>
-                      <option value="SC" ${prescription?.responsavelTecnico?.uf === 'SC' ? 'selected' : ''}>SC</option>
-                      <option value="SP" ${prescription?.responsavelTecnico?.uf === 'SP' ? 'selected' : ''}>SP</option>
-                      <option value="SE" ${prescription?.responsavelTecnico?.uf === 'SE' ? 'selected' : ''}>SE</option>
-                      <option value="TO" ${prescription?.responsavelTecnico?.uf === 'TO' ? 'selected' : ''}>TO</option>
+                      <option value="AC" ${
+                        prescription?.responsavelTecnico?.uf === "AC"
+                          ? "selected"
+                          : ""
+                      }>AC</option>
+                      <option value="AL" ${
+                        prescription?.responsavelTecnico?.uf === "AL"
+                          ? "selected"
+                          : ""
+                      }>AL</option>
+                      <option value="AP" ${
+                        prescription?.responsavelTecnico?.uf === "AP"
+                          ? "selected"
+                          : ""
+                      }>AP</option>
+                      <option value="AM" ${
+                        prescription?.responsavelTecnico?.uf === "AM"
+                          ? "selected"
+                          : ""
+                      }>AM</option>
+                      <option value="BA" ${
+                        prescription?.responsavelTecnico?.uf === "BA"
+                          ? "selected"
+                          : ""
+                      }>BA</option>
+                      <option value="CE" ${
+                        prescription?.responsavelTecnico?.uf === "CE"
+                          ? "selected"
+                          : ""
+                      }>CE</option>
+                      <option value="DF" ${
+                        prescription?.responsavelTecnico?.uf === "DF"
+                          ? "selected"
+                          : ""
+                      }>DF</option>
+                      <option value="ES" ${
+                        prescription?.responsavelTecnico?.uf === "ES"
+                          ? "selected"
+                          : ""
+                      }>ES</option>
+                      <option value="GO" ${
+                        prescription?.responsavelTecnico?.uf === "GO"
+                          ? "selected"
+                          : ""
+                      }>GO</option>
+                      <option value="MA" ${
+                        prescription?.responsavelTecnico?.uf === "MA"
+                          ? "selected"
+                          : ""
+                      }>MA</option>
+                      <option value="MT" ${
+                        prescription?.responsavelTecnico?.uf === "MT"
+                          ? "selected"
+                          : ""
+                      }>MT</option>
+                      <option value="MS" ${
+                        prescription?.responsavelTecnico?.uf === "MS"
+                          ? "selected"
+                          : ""
+                      }>MS</option>
+                      <option value="MG" ${
+                        prescription?.responsavelTecnico?.uf === "MG"
+                          ? "selected"
+                          : ""
+                      }>MG</option>
+                      <option value="PA" ${
+                        prescription?.responsavelTecnico?.uf === "PA"
+                          ? "selected"
+                          : ""
+                      }>PA</option>
+                      <option value="PB" ${
+                        prescription?.responsavelTecnico?.uf === "PB"
+                          ? "selected"
+                          : ""
+                      }>PB</option>
+                      <option value="PR" ${
+                        prescription?.responsavelTecnico?.uf === "PR"
+                          ? "selected"
+                          : ""
+                      }>PR</option>
+                      <option value="PE" ${
+                        prescription?.responsavelTecnico?.uf === "PE"
+                          ? "selected"
+                          : ""
+                      }>PE</option>
+                      <option value="PI" ${
+                        prescription?.responsavelTecnico?.uf === "PI"
+                          ? "selected"
+                          : ""
+                      }>PI</option>
+                      <option value="RJ" ${
+                        prescription?.responsavelTecnico?.uf === "RJ"
+                          ? "selected"
+                          : ""
+                      }>RJ</option>
+                      <option value="RN" ${
+                        prescription?.responsavelTecnico?.uf === "RN"
+                          ? "selected"
+                          : ""
+                      }>RN</option>
+                      <option value="RS" ${
+                        prescription?.responsavelTecnico?.uf === "RS"
+                          ? "selected"
+                          : ""
+                      }>RS</option>
+                      <option value="RO" ${
+                        prescription?.responsavelTecnico?.uf === "RO"
+                          ? "selected"
+                          : ""
+                      }>RO</option>
+                      <option value="RR" ${
+                        prescription?.responsavelTecnico?.uf === "RR"
+                          ? "selected"
+                          : ""
+                      }>RR</option>
+                      <option value="SC" ${
+                        prescription?.responsavelTecnico?.uf === "SC"
+                          ? "selected"
+                          : ""
+                      }>SC</option>
+                      <option value="SP" ${
+                        prescription?.responsavelTecnico?.uf === "SP"
+                          ? "selected"
+                          : ""
+                      }>SP</option>
+                      <option value="SE" ${
+                        prescription?.responsavelTecnico?.uf === "SE"
+                          ? "selected"
+                          : ""
+                      }>SE</option>
+                      <option value="TO" ${
+                        prescription?.responsavelTecnico?.uf === "TO"
+                          ? "selected"
+                          : ""
+                      }>TO</option>
                     </select>
                   </div>
                   <div class="form-group">
                     <label>Especialidade</label>
                     <input type="text" id="vet-especialidade" name="vetEspecialidade" 
-                           value="${prescription?.responsavelTecnico?.especialidade || ''}" 
+                           value="${
+                             prescription?.responsavelTecnico?.especialidade ||
+                             ""
+                           }" 
                            placeholder="Ex: Dermatologia" class="form-input">
                   </div>
                 </div>
@@ -7754,8 +7931,10 @@ Entre em contato conosco para agendar o reforço!`;
               <button type="button" class="btn btn-secondary" onclick="app.savePrescriptionDraft('${petId}')">
                 Salvar Rascunho
               </button>
-              <button type="button" class="btn btn-primary" onclick="app.savePrescription('${petId}', '${prescriptionId || ''}')">
-                ${isEdit ? 'Atualizar' : 'Assinar e Finalizar'}
+              <button type="button" class="btn btn-primary" onclick="app.savePrescription('${petId}', '${
+      prescriptionId || ""
+    }')">
+                ${isEdit ? "Atualizar" : "Assinar e Finalizar"}
               </button>
             </div>
           </form>
@@ -7763,7 +7942,7 @@ Entre em contato conosco para agendar o reforço!`;
       </div>
     `;
 
-    document.body.insertAdjacentHTML('beforeend', content);
+    document.body.insertAdjacentHTML("beforeend", content);
     this.setupPrescriptionFormEvents();
   }
 
@@ -7772,20 +7951,24 @@ Entre em contato conosco para agendar o reforço!`;
       <div class="medication-form" data-index="${index}">
         <div class="medication-header">
           <h5>Medicamento ${index + 1}</h5>
-          ${index > 0 ? `<button type="button" class="btn btn-sm btn-danger" onclick="app.removeMedication(${index})">✕</button>` : ''}
+          ${
+            index > 0
+              ? `<button type="button" class="btn btn-sm btn-danger" onclick="app.removeMedication(${index})">✕</button>`
+              : ""
+          }
         </div>
         
         <div class="form-row">
           <div class="form-group">
             <label>Nome do Medicamento *</label>
             <input type="text" name="medicamento-nome-${index}" 
-                   value="${medication?.nome || ''}" 
+                   value="${medication?.nome || ""}" 
                    placeholder="Ex: Prednisolona" required class="form-input">
           </div>
           <div class="form-group">
             <label>Apresentação *</label>
             <input type="text" name="medicamento-apresentacao-${index}" 
-                   value="${medication?.apresentacao || ''}" 
+                   value="${medication?.apresentacao || ""}" 
                    placeholder="Ex: comprimido 5mg" required class="form-input">
           </div>
         </div>
@@ -7794,19 +7977,31 @@ Entre em contato conosco para agendar o reforço!`;
           <div class="form-group">
             <label>Dose *</label>
             <input type="number" name="medicamento-dose-${index}" 
-                   value="${medication?.dose || ''}" 
+                   value="${medication?.dose || ""}" 
                    step="0.1" min="0" required class="form-input">
           </div>
           <div class="form-group">
             <label>Unidade *</label>
             <select name="medicamento-unidade-${index}" required class="form-select">
               <option value="">Selecione</option>
-              <option value="mg/kg" ${medication?.unidade === 'mg/kg' ? 'selected' : ''}>mg/kg</option>
-              <option value="mg" ${medication?.unidade === 'mg' ? 'selected' : ''}>mg</option>
-              <option value="mL/kg" ${medication?.unidade === 'mL/kg' ? 'selected' : ''}>mL/kg</option>
-              <option value="mL" ${medication?.unidade === 'mL' ? 'selected' : ''}>mL</option>
-              <option value="gotas" ${medication?.unidade === 'gotas' ? 'selected' : ''}>gotas</option>
-              <option value="UI" ${medication?.unidade === 'UI' ? 'selected' : ''}>UI</option>
+              <option value="mg/kg" ${
+                medication?.unidade === "mg/kg" ? "selected" : ""
+              }>mg/kg</option>
+              <option value="mg" ${
+                medication?.unidade === "mg" ? "selected" : ""
+              }>mg</option>
+              <option value="mL/kg" ${
+                medication?.unidade === "mL/kg" ? "selected" : ""
+              }>mL/kg</option>
+              <option value="mL" ${
+                medication?.unidade === "mL" ? "selected" : ""
+              }>mL</option>
+              <option value="gotas" ${
+                medication?.unidade === "gotas" ? "selected" : ""
+              }>gotas</option>
+              <option value="UI" ${
+                medication?.unidade === "UI" ? "selected" : ""
+              }>UI</option>
             </select>
           </div>
         </div>
@@ -7815,13 +8010,13 @@ Entre em contato conosco para agendar o reforço!`;
           <div class="form-group">
             <label>Frequência *</label>
             <input type="text" name="medicamento-frequencia-${index}" 
-                   value="${medication?.frequencia || ''}" 
+                   value="${medication?.frequencia || ""}" 
                    placeholder="Ex: a cada 12h" required class="form-input">
           </div>
           <div class="form-group">
             <label>Duração (dias) *</label>
             <input type="number" name="medicamento-duracao-${index}" 
-                   value="${medication?.duracaoDias || ''}" 
+                   value="${medication?.duracaoDias || ""}" 
                    min="1" required class="form-input">
           </div>
         </div>
@@ -7831,21 +8026,39 @@ Entre em contato conosco para agendar o reforço!`;
             <label>Via de Administração *</label>
             <select name="medicamento-via-${index}" required class="form-select">
               <option value="">Selecione</option>
-              <option value="VO" ${medication?.via === 'VO' ? 'selected' : ''}>VO (Oral)</option>
-              <option value="SC" ${medication?.via === 'SC' ? 'selected' : ''}>SC (Subcutânea)</option>
-              <option value="IM" ${medication?.via === 'IM' ? 'selected' : ''}>IM (Intramuscular)</option>
-              <option value="IV" ${medication?.via === 'IV' ? 'selected' : ''}>IV (Intravenosa)</option>
-              <option value="ótica" ${medication?.via === 'ótica' ? 'selected' : ''}>Ótica</option>
-              <option value="auricular" ${medication?.via === 'auricular' ? 'selected' : ''}>Auricular</option>
-              <option value="tópica" ${medication?.via === 'tópica' ? 'selected' : ''}>Tópica</option>
-              <option value="retal" ${medication?.via === 'retal' ? 'selected' : ''}>Retal</option>
-              <option value="nasal" ${medication?.via === 'nasal' ? 'selected' : ''}>Nasal</option>
+              <option value="VO" ${
+                medication?.via === "VO" ? "selected" : ""
+              }>VO (Oral)</option>
+              <option value="SC" ${
+                medication?.via === "SC" ? "selected" : ""
+              }>SC (Subcutânea)</option>
+              <option value="IM" ${
+                medication?.via === "IM" ? "selected" : ""
+              }>IM (Intramuscular)</option>
+              <option value="IV" ${
+                medication?.via === "IV" ? "selected" : ""
+              }>IV (Intravenosa)</option>
+              <option value="ótica" ${
+                medication?.via === "ótica" ? "selected" : ""
+              }>Ótica</option>
+              <option value="auricular" ${
+                medication?.via === "auricular" ? "selected" : ""
+              }>Auricular</option>
+              <option value="tópica" ${
+                medication?.via === "tópica" ? "selected" : ""
+              }>Tópica</option>
+              <option value="retal" ${
+                medication?.via === "retal" ? "selected" : ""
+              }>Retal</option>
+              <option value="nasal" ${
+                medication?.via === "nasal" ? "selected" : ""
+              }>Nasal</option>
             </select>
           </div>
           <div class="form-group">
             <label class="checkbox-label">
               <input type="checkbox" name="medicamento-uso-clinica-${index}" 
-                     ${medication?.usoClinica ? 'checked' : ''}>
+                     ${medication?.usoClinica ? "checked" : ""}>
               <span class="checkmark"></span>
               Uso apenas na clínica
             </label>
@@ -7856,14 +8069,18 @@ Entre em contato conosco para agendar o reforço!`;
           <label>Instruções ao Tutor</label>
           <textarea name="medicamento-instrucoes-${index}" 
                     class="form-textarea" rows="2" 
-                    placeholder="Ex: Administrar com alimento, evitar sol...">${medication?.instrucoesTutor || ''}</textarea>
+                    placeholder="Ex: Administrar com alimento, evitar sol...">${
+                      medication?.instrucoesTutor || ""
+                    }</textarea>
         </div>
         
         <div class="form-group">
           <label>Contraindicações/Alertas</label>
           <textarea name="medicamento-contraindicacoes-${index}" 
                     class="form-textarea" rows="2" 
-                    placeholder="Ex: Evitar em gestantes, pode causar sonolência...">${medication?.contraindicacoes || ''}</textarea>
+                    placeholder="Ex: Evitar em gestantes, pode causar sonolência...">${
+                      medication?.contraindicacoes || ""
+                    }</textarea>
         </div>
       </div>
     `;
@@ -7872,38 +8089,42 @@ Entre em contato conosco para agendar o reforço!`;
   // Funções auxiliares para prescrições
   setupPrescriptionFormEvents() {
     // Event listener para medicamento controlado
-    const controladoCheckbox = document.getElementById('medicamento-controlado');
-    const justificativaDiv = document.getElementById('justificativa-controlado');
-    
+    const controladoCheckbox = document.getElementById(
+      "medicamento-controlado"
+    );
+    const justificativaDiv = document.getElementById(
+      "justificativa-controlado"
+    );
+
     if (controladoCheckbox && justificativaDiv) {
-      controladoCheckbox.addEventListener('change', (e) => {
-        justificativaDiv.style.display = e.target.checked ? 'block' : 'none';
-        const justificativaInput = document.getElementById('justificativa');
+      controladoCheckbox.addEventListener("change", (e) => {
+        justificativaDiv.style.display = e.target.checked ? "block" : "none";
+        const justificativaInput = document.getElementById("justificativa");
         if (e.target.checked) {
           justificativaInput.required = true;
         } else {
           justificativaInput.required = false;
-          justificativaInput.value = '';
+          justificativaInput.value = "";
         }
       });
     }
 
     // Event listener para cálculo de dose por peso
-    const pesoInput = document.getElementById('pet-peso');
+    const pesoInput = document.getElementById("pet-peso");
     if (pesoInput) {
-      pesoInput.addEventListener('input', () => {
+      pesoInput.addEventListener("input", () => {
         this.calculateMedicationDoses();
       });
     }
   }
 
   addMedication() {
-    const container = document.getElementById('medicamentos-container');
+    const container = document.getElementById("medicamentos-container");
     if (!container) return;
 
     const currentCount = container.children.length;
     const newMedication = this.renderMedicationForm(null, currentCount);
-    container.insertAdjacentHTML('beforeend', newMedication);
+    container.insertAdjacentHTML("beforeend", newMedication);
   }
 
   removeMedication(index) {
@@ -7914,22 +8135,26 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   calculateMedicationDoses() {
-    const peso = parseFloat(document.getElementById('pet-peso')?.value || 0);
+    const peso = parseFloat(document.getElementById("pet-peso")?.value || 0);
     if (!peso || peso <= 0) return;
 
-    const medicationForms = document.querySelectorAll('.medication-form');
-    medicationForms.forEach(form => {
+    const medicationForms = document.querySelectorAll(".medication-form");
+    medicationForms.forEach((form) => {
       const doseInput = form.querySelector('input[name*="medicamento-dose"]');
-      const unidadeSelect = form.querySelector('select[name*="medicamento-unidade"]');
-      
+      const unidadeSelect = form.querySelector(
+        'select[name*="medicamento-unidade"]'
+      );
+
       if (doseInput && unidadeSelect) {
         const dose = parseFloat(doseInput.value || 0);
         const unidade = unidadeSelect.value;
-        
-        if (dose > 0 && (unidade === 'mg/kg' || unidade === 'mL/kg')) {
+
+        if (dose > 0 && (unidade === "mg/kg" || unidade === "mL/kg")) {
           const doseCalculada = (dose * peso).toFixed(2);
           // Aqui você pode adicionar um campo para mostrar a dose calculada
-          console.log(`Dose calculada: ${doseCalculada} ${unidade.replace('/kg', '')}`);
+          console.log(
+            `Dose calculada: ${doseCalculada} ${unidade.replace("/kg", "")}`
+          );
         }
       }
     });
@@ -7943,13 +8168,13 @@ Entre em contato conosco para agendar o reforço!`;
       const prescriptionData = {
         ...formData,
         petId: petId,
-        status: 'rascunho',
+        status: "rascunho",
         numero: formData.numero || store.generatePrescriptionNumber(),
         auditoria: {
-          criadoPor: 'admin', // TODO: Pegar do usuário logado
+          criadoPor: "admin", // TODO: Pegar do usuário logado
           criadoEm: new Date().toISOString(),
-          origem: 'sistema'
-        }
+          origem: "sistema",
+        },
       };
 
       await store.savePrescription(prescriptionData);
@@ -7975,15 +8200,15 @@ Entre em contato conosco para agendar o reforço!`;
       const prescriptionData = {
         ...formData,
         petId: petId,
-        status: 'assinada',
+        status: "assinada",
         numero: formData.numero || store.generatePrescriptionNumber(),
         auditoria: {
-          criadoPor: 'admin', // TODO: Pegar do usuário logado
+          criadoPor: "admin", // TODO: Pegar do usuário logado
           criadoEm: new Date().toISOString(),
-          assinadoPor: 'admin',
+          assinadoPor: "admin",
           assinadoEm: new Date().toISOString(),
-          origem: 'sistema'
-        }
+          origem: "sistema",
+        },
       };
 
       if (prescriptionId) {
@@ -8001,31 +8226,31 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   collectPrescriptionFormData() {
-    const form = document.getElementById('prescription-form');
+    const form = document.getElementById("prescription-form");
     if (!form) return null;
 
     const formData = new FormData(form);
-    
+
     // Dados básicos
     const data = {
-      dataEmissao: formData.get('dataEmissao'),
-      validadeDias: parseInt(formData.get('validadeDias')),
-      diagnostico: formData.get('diagnostico'),
-      observacoesClinicas: formData.get('observacoesClinicas'),
-      medicamentoControlado: formData.get('medicamentoControlado') === 'on',
-      justificativaControlado: formData.get('justificativaControlado'),
+      dataEmissao: formData.get("dataEmissao"),
+      validadeDias: parseInt(formData.get("validadeDias")),
+      diagnostico: formData.get("diagnostico"),
+      observacoesClinicas: formData.get("observacoesClinicas"),
+      medicamentoControlado: formData.get("medicamentoControlado") === "on",
+      justificativaControlado: formData.get("justificativaControlado"),
       responsavelTecnico: {
-        nome: formData.get('vetNome'),
-        crmv: formData.get('vetCrmv'),
-        uf: formData.get('vetUf'),
-        especialidade: formData.get('vetEspecialidade')
-      }
+        nome: formData.get("vetNome"),
+        crmv: formData.get("vetCrmv"),
+        uf: formData.get("vetUf"),
+        especialidade: formData.get("vetEspecialidade"),
+      },
     };
 
     // Coletar medicamentos
     const medicamentos = [];
-    const medicationForms = document.querySelectorAll('.medication-form');
-    
+    const medicationForms = document.querySelectorAll(".medication-form");
+
     medicationForms.forEach((form, index) => {
       const medData = {
         id: `med_${Date.now()}_${index}`,
@@ -8038,13 +8263,16 @@ Entre em contato conosco para agendar o reforço!`;
         via: formData.get(`medicamento-via-${index}`),
         instrucoesTutor: formData.get(`medicamento-instrucoes-${index}`),
         contraindicacoes: formData.get(`medicamento-contraindicacoes-${index}`),
-        usoClinica: formData.get(`medicamento-uso-clinica-${index}`) === 'on',
-        ordem: index + 1
+        usoClinica: formData.get(`medicamento-uso-clinica-${index}`) === "on",
+        ordem: index + 1,
       };
 
       // Calcular dose por tomada se necessário
-      const peso = parseFloat(document.getElementById('pet-peso')?.value || 0);
-      if (peso > 0 && (medData.unidade === 'mg/kg' || medData.unidade === 'mL/kg')) {
+      const peso = parseFloat(document.getElementById("pet-peso")?.value || 0);
+      if (
+        peso > 0 &&
+        (medData.unidade === "mg/kg" || medData.unidade === "mL/kg")
+      ) {
         medData.dosePorTomada = (medData.dose * peso).toFixed(2);
       }
 
@@ -8064,11 +8292,11 @@ Entre em contato conosco para agendar o reforço!`;
     }
 
     // Validar peso para doses por kg
-    const peso = parseFloat(document.getElementById('pet-peso')?.value || 0);
-    const hasDosePerKg = data.medicamentos.some(med => 
-      med.unidade === 'mg/kg' || med.unidade === 'mL/kg'
+    const peso = parseFloat(document.getElementById("pet-peso")?.value || 0);
+    const hasDosePerKg = data.medicamentos.some(
+      (med) => med.unidade === "mg/kg" || med.unidade === "mL/kg"
     );
-    
+
     if (hasDosePerKg && (!peso || peso <= 0)) {
       ui.error("Peso do pet é obrigatório para medicamentos com dose por kg");
       return false;
@@ -8077,15 +8305,28 @@ Entre em contato conosco para agendar o reforço!`;
     // Validar medicamentos
     for (let i = 0; i < data.medicamentos.length; i++) {
       const med = data.medicamentos[i];
-      if (!med.nome || !med.apresentacao || !med.dose || !med.unidade || 
-          !med.frequencia || !med.duracaoDias || !med.via) {
-        ui.error(`Preencha todos os campos obrigatórios do medicamento ${i + 1}`);
+      if (
+        !med.nome ||
+        !med.apresentacao ||
+        !med.dose ||
+        !med.unidade ||
+        !med.frequencia ||
+        !med.duracaoDias ||
+        !med.via
+      ) {
+        ui.error(
+          `Preencha todos os campos obrigatórios do medicamento ${i + 1}`
+        );
         return false;
       }
     }
 
     // Validar responsável técnico
-    if (!data.responsavelTecnico.nome || !data.responsavelTecnico.crmv || !data.responsavelTecnico.uf) {
+    if (
+      !data.responsavelTecnico.nome ||
+      !data.responsavelTecnico.crmv ||
+      !data.responsavelTecnico.uf
+    ) {
       ui.error("Preencha todos os dados do responsável técnico");
       return false;
     }
@@ -8100,10 +8341,9 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   closeModal() {
-    const modal = document.getElementById('prescription-modal');
-    if (modal) {
-      modal.remove();
-    }
+    // Remover quaisquer overlays de modais abertas
+    const overlays = document.querySelectorAll(".modal-overlay");
+    overlays.forEach((el) => el.remove());
   }
 
   async viewPrescription(prescriptionId) {
@@ -8136,22 +8376,26 @@ Entre em contato conosco para agendar o reforço!`;
                   </div>
                   <div class="form-group">
                     <label>Espécie</label>
-                    <p>${pet.especie || '-'}</p>
+                    <p>${pet.especie || "-"}</p>
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group">
                     <label>Raça</label>
-                    <p>${pet.raca || '-'}</p>
+                    <p>${pet.raca || "-"}</p>
                   </div>
                   <div class="form-group">
                     <label>Peso</label>
-                    <p>${pet.pesoAproximadoKg ? pet.pesoAproximadoKg + ' kg' : '-'}</p>
+                    <p>${
+                      pet.pesoAproximadoKg ? pet.pesoAproximadoKg + " kg" : "-"
+                    }</p>
                   </div>
                 </div>
                 <div class="form-group">
                   <label>Tutor</label>
-                  <p>${client?.nomeCompleto || '-'} - ${client?.telefoneWhatsApp || '-'}</p>
+                  <p>${client?.nomeCompleto || "-"} - ${
+      client?.telefoneWhatsApp || "-"
+    }</p>
                 </div>
               </div>
 
@@ -8161,7 +8405,9 @@ Entre em contato conosco para agendar o reforço!`;
                 <div class="form-row">
                   <div class="form-group">
                     <label>Data de Emissão</label>
-                    <p>${new Date(prescription.dataEmissao).toLocaleDateString('pt-BR')}</p>
+                    <p>${new Date(prescription.dataEmissao).toLocaleDateString(
+                      "pt-BR"
+                    )}</p>
                   </div>
                   <div class="form-group">
                     <label>Validade</label>
@@ -8172,24 +8418,34 @@ Entre em contato conosco para agendar o reforço!`;
                   <label>Diagnóstico</label>
                   <p>${prescription.diagnostico}</p>
                 </div>
-                ${prescription.observacoesClinicas ? `
+                ${
+                  prescription.observacoesClinicas
+                    ? `
                   <div class="form-group">
                     <label>Observações Clínicas</label>
                     <p>${prescription.observacoesClinicas}</p>
                   </div>
-                ` : ''}
-                ${prescription.medicamentoControlado ? `
+                `
+                    : ""
+                }
+                ${
+                  prescription.medicamentoControlado
+                    ? `
                   <div class="form-group">
                     <label>Medicamento Controlado</label>
                     <p>Sim - ${prescription.justificativaControlado}</p>
                   </div>
-                ` : ''}
+                `
+                    : ""
+                }
               </div>
 
               <!-- Medicamentos -->
               <div class="form-section">
                 <h4>Medicamentos</h4>
-                ${prescription.medicamentos.map((med, index) => `
+                ${prescription.medicamentos
+                  .map(
+                    (med, index) => `
                   <div class="medication-view">
                     <h5>Medicamento ${index + 1}: ${med.nome}</h5>
                     <div class="form-row">
@@ -8199,7 +8455,14 @@ Entre em contato conosco para agendar o reforço!`;
                       </div>
                       <div class="form-group">
                         <label>Dose</label>
-                        <p>${med.dose} ${med.unidade}${med.dosePorTomada ? ` (${med.dosePorTomada} ${med.unidade.replace('/kg', '')} por tomada)` : ''}</p>
+                        <p>${med.dose} ${med.unidade}${
+                      med.dosePorTomada
+                        ? ` (${med.dosePorTomada} ${med.unidade.replace(
+                            "/kg",
+                            ""
+                          )} por tomada)`
+                        : ""
+                    }</p>
                       </div>
                     </div>
                     <div class="form-row">
@@ -8219,23 +8482,33 @@ Entre em contato conosco para agendar o reforço!`;
                       </div>
                       <div class="form-group">
                         <label>Uso na Clínica</label>
-                        <p>${med.usoClinica ? 'Sim' : 'Não'}</p>
+                        <p>${med.usoClinica ? "Sim" : "Não"}</p>
                       </div>
                     </div>
-                    ${med.instrucoesTutor ? `
+                    ${
+                      med.instrucoesTutor
+                        ? `
                       <div class="form-group">
                         <label>Instruções ao Tutor</label>
                         <p>${med.instrucoesTutor}</p>
                       </div>
-                    ` : ''}
-                    ${med.contraindicacoes ? `
+                    `
+                        : ""
+                    }
+                    ${
+                      med.contraindicacoes
+                        ? `
                       <div class="form-group">
                         <label>Contraindicações</label>
                         <p>${med.contraindicacoes}</p>
                       </div>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                   </div>
-                `).join('')}
+                `
+                  )
+                  .join("")}
               </div>
 
               <!-- Responsável Técnico -->
@@ -8248,15 +8521,21 @@ Entre em contato conosco para agendar o reforço!`;
                   </div>
                   <div class="form-group">
                     <label>CRMV</label>
-                    <p>${prescription.responsavelTecnico.crmv}/${prescription.responsavelTecnico.uf}</p>
+                    <p>${prescription.responsavelTecnico.crmv}/${
+      prescription.responsavelTecnico.uf
+    }</p>
                   </div>
                 </div>
-                ${prescription.responsavelTecnico.especialidade ? `
+                ${
+                  prescription.responsavelTecnico.especialidade
+                    ? `
                   <div class="form-group">
                     <label>Especialidade</label>
                     <p>${prescription.responsavelTecnico.especialidade}</p>
                   </div>
-                ` : ''}
+                `
+                    : ""
+                }
               </div>
             </div>
           </div>
@@ -8265,24 +8544,28 @@ Entre em contato conosco para agendar o reforço!`;
             <button type="button" class="btn btn-outline" onclick="app.closeModal()">
               Fechar
             </button>
-            ${prescription.status === 'assinada' ? `
+            ${
+              prescription.status === "assinada"
+                ? `
               <button type="button" class="btn btn-success" onclick="app.generatePrescriptionPDF('${prescriptionId}')">
                 <i class="icon-download"></i> Gerar PDF
               </button>
               <button type="button" class="btn btn-whatsapp" onclick="app.sendPrescriptionWhatsApp('${prescriptionId}')">
                 <i class="icon-whatsapp"></i> Enviar WhatsApp
               </button>
-            ` : `
+            `
+                : `
               <button type="button" class="btn btn-primary" onclick="app.editPrescription('${prescriptionId}')">
                 <i class="icon-edit"></i> Editar
               </button>
-            `}
+            `
+            }
           </div>
         </div>
       </div>
     `;
 
-    document.body.insertAdjacentHTML('beforeend', content);
+    document.body.insertAdjacentHTML("beforeend", content);
   }
 
   async editPrescription(prescriptionId) {
@@ -8292,7 +8575,7 @@ Entre em contato conosco para agendar o reforço!`;
       return;
     }
 
-    if (prescription.status === 'assinada') {
+    if (prescription.status === "assinada") {
       ui.error("Prescrições assinadas não podem ser editadas");
       return;
     }
@@ -8321,7 +8604,9 @@ Entre em contato conosco para agendar o reforço!`;
 
   // Placeholder functions para funcionalidades futuras
   async duplicatePrescription(prescriptionId) {
-    ui.info("Funcionalidade de duplicar prescrição será implementada na Fase 5");
+    ui.info(
+      "Funcionalidade de duplicar prescrição será implementada na Fase 5"
+    );
   }
 
   async generatePrescriptionPDF(prescriptionId) {
