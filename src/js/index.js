@@ -7548,6 +7548,27 @@ Entre em contato conosco para agendar o reforço!`;
       `;
     }
 
+    // Normalizar: garantir que cada prescrição tenha um ID persistido
+    for (const p of prescriptions) {
+      if (!p.id) {
+        p.id =
+          (typeof store.generateId === "function"
+            ? store.generateId("presc")
+            : `presc_${Date.now()}_${Math.random()
+                .toString(36)
+                .slice(2, 6)}`);
+        try {
+          if (typeof store.savePrescription === "function") {
+            await store.savePrescription(p);
+          } else if (typeof store.save === "function") {
+            await store.save("prescriptions", p);
+          }
+        } catch (e) {
+          console.warn("Falha ao normalizar ID da prescrição", e);
+        }
+      }
+    }
+
     // Ordenar por data de criação (mais recentes primeiro)
     const sortedPrescriptions = prescriptions.sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
