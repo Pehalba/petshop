@@ -8261,7 +8261,9 @@ Entre em contato conosco para agendar o reforço!`;
       const numeroPrescricao =
         typeof store.generatePrescriptionNumber === "function"
           ? store.generatePrescriptionNumber()
-          : `PR-${new Date().getFullYear()}-${String(Date.now() % 1000).padStart(3, "0")}`;
+          : `PR-${new Date().getFullYear()}-${String(
+              Date.now() % 1000
+            ).padStart(3, "0")}`;
       const prescriptionData = {
         ...formData,
         petId: petId,
@@ -8274,7 +8276,11 @@ Entre em contato conosco para agendar o reforço!`;
         },
       };
 
-      await store.savePrescription(prescriptionData);
+      if (typeof store.savePrescription === "function") {
+        await store.savePrescription(prescriptionData);
+      } else {
+        await store.save("prescriptions", prescriptionData);
+      }
       ui.success("Prescrição salva como rascunho!");
       this.closeModal();
       this.viewPet(petId); // Recarregar a página do pet
@@ -8297,7 +8303,9 @@ Entre em contato conosco para agendar o reforço!`;
       const numeroPrescricao =
         typeof store.generatePrescriptionNumber === "function"
           ? store.generatePrescriptionNumber()
-          : `PR-${new Date().getFullYear()}-${String(Date.now() % 1000).padStart(3, "0")}`;
+          : `PR-${new Date().getFullYear()}-${String(
+              Date.now() % 1000
+            ).padStart(3, "0")}`;
       const prescriptionData = {
         ...formData,
         petId: petId,
@@ -8316,7 +8324,11 @@ Entre em contato conosco para agendar o reforço!`;
         prescriptionData.id = prescriptionId;
       }
 
-      await store.savePrescription(prescriptionData);
+      if (typeof store.savePrescription === "function") {
+        await store.savePrescription(prescriptionData);
+      } else {
+        await store.save("prescriptions", prescriptionData);
+      }
       ui.success("Prescrição assinada e finalizada!");
       this.closeModal();
       this.viewPet(petId); // Recarregar a página do pet
