@@ -7517,25 +7517,23 @@ Entre em contato conosco para agendar o reforço!`;
   // ===== PRESCRIÇÕES =====
 
   async renderPetPrescriptions(petId) {
-    // Compat: versões antigas online podem não ter o store de prescrições ainda
-    if (!store || typeof store.getPrescriptionsByPet !== "function") {
-      return `
-        <div class="empty-state">
-          <div class="empty-icon">💊</div>
-          <p>Prescrições indisponíveis nesta versão.</p>
-          <button class="btn btn-primary btn-sm" onclick="app.showPrescriptionForm('${petId}')">
-            <i class="icon-plus"></i> Nova Prescrição
-          </button>
-        </div>
-      `;
-    }
-
     let prescriptions = [];
     try {
-      prescriptions = await store.getPrescriptionsByPet(petId);
+      if (store && typeof store.getPrescriptionsByPet === "function") {
+        prescriptions = await store.getPrescriptionsByPet(petId);
+      } else {
+        // Fallback: buscar todas e filtrar por petId
+        const all = await store.getAll("prescriptions");
+        prescriptions = (all || []).filter((p) => p.petId === petId);
+      }
     } catch (err) {
       console.warn("Prescriptions load failed, rendering empty section:", err);
-      prescriptions = [];
+      try {
+        const all = await store.getAll("prescriptions");
+        prescriptions = (all || []).filter((p) => p.petId === petId);
+      } catch (_) {
+        prescriptions = [];
+      }
     }
 
     if (prescriptions.length === 0) {
