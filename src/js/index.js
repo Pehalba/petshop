@@ -3966,7 +3966,30 @@ class PetShopApp {
     const container = document.querySelector(".data-container");
     if (container) {
       container.addEventListener("click", (e) => {
-        const el = e.target.closest("[data-action]");
+        // Prefer elementos com data-action
+        let el = e.target.closest("[data-action]");
+
+        // Se não encontrar, tentar mapear por ícones dentro dos botões de ação
+        if (!el) {
+          const btn = e.target.closest(".data-table-actions .btn");
+          if (btn) {
+            const row = btn.closest("tr");
+            // Tentar obter petId da própria célula de ações
+            const inferredPetId = btn.getAttribute("data-pet-id") || row?.querySelector('[data-action="view-pet"]').getAttribute("data-pet-id");
+            if (btn.querySelector('.icon-eye')) {
+              e.preventDefault();
+              if (inferredPetId) this.viewPet(inferredPetId);
+              return;
+            }
+            if (btn.querySelector('.icon-edit')) {
+              e.preventDefault();
+              if (inferredPetId) this.editPet(inferredPetId);
+              return;
+            }
+            // Botão excluir tem texto ✕ (sem ícone), manter fluxo normal
+          }
+        }
+
         if (!el) return;
         const action = el.getAttribute("data-action");
         const petId = el.getAttribute("data-pet-id");
@@ -3996,10 +4019,18 @@ class PetShopApp {
           });
         });
       };
-      bindDirect('[data-action="view-pet"]', (el) => this.viewPet(el.dataset.petId));
-      bindDirect('[data-action="edit-pet"]', (el) => this.editPet(el.dataset.petId));
-      bindDirect('[data-action="delete-pet"]', (el) => this.deletePet(el.dataset.petId));
-      bindDirect('[data-action="view-client"]', (el) => this.viewClient(el.dataset.clientId));
+      bindDirect('[data-action="view-pet"]', (el) =>
+        this.viewPet(el.dataset.petId)
+      );
+      bindDirect('[data-action="edit-pet"]', (el) =>
+        this.editPet(el.dataset.petId)
+      );
+      bindDirect('[data-action="delete-pet"]', (el) =>
+        this.deletePet(el.dataset.petId)
+      );
+      bindDirect('[data-action="view-client"]', (el) =>
+        this.viewClient(el.dataset.clientId)
+      );
     }
   }
 
