@@ -8274,6 +8274,14 @@ Entre em contato conosco para agendar o reforço!`;
         },
       };
 
+      // Garantir ID mesmo em fallback
+      if (!prescriptionData.id) {
+        prescriptionData.id =
+          typeof store.generateId === "function"
+            ? store.generateId("presc")
+            : `presc_${Date.now()}`;
+      }
+
       if (typeof store.savePrescription === "function") {
         await store.savePrescription(prescriptionData);
       } else {
@@ -8320,6 +8328,13 @@ Entre em contato conosco para agendar o reforço!`;
 
       if (prescriptionId) {
         prescriptionData.id = prescriptionId;
+      }
+      // Garantir ID mesmo em fallback
+      if (!prescriptionData.id) {
+        prescriptionData.id =
+          typeof store.generateId === "function"
+            ? store.generateId("presc")
+            : `presc_${Date.now()}`;
       }
 
       if (typeof store.savePrescription === "function") {
