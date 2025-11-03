@@ -3975,13 +3975,17 @@ class PetShopApp {
           if (btn) {
             const row = btn.closest("tr");
             // Tentar obter petId da própria célula de ações
-            const inferredPetId = btn.getAttribute("data-pet-id") || row?.querySelector('[data-action="view-pet"]').getAttribute("data-pet-id");
-            if (btn.querySelector('.icon-eye')) {
+            const inferredPetId =
+              btn.getAttribute("data-pet-id") ||
+              row
+                ?.querySelector('[data-action="view-pet"]')
+                .getAttribute("data-pet-id");
+            if (btn.querySelector(".icon-eye")) {
               e.preventDefault();
               if (inferredPetId) this.viewPet(inferredPetId);
               return;
             }
-            if (btn.querySelector('.icon-edit')) {
+            if (btn.querySelector(".icon-edit")) {
               e.preventDefault();
               if (inferredPetId) this.editPet(inferredPetId);
               return;
@@ -7513,7 +7517,26 @@ Entre em contato conosco para agendar o reforço!`;
   // ===== PRESCRIÇÕES =====
 
   async renderPetPrescriptions(petId) {
-    const prescriptions = await store.getPrescriptionsByPet(petId);
+    // Compat: versões antigas online podem não ter o store de prescrições ainda
+    if (!store || typeof store.getPrescriptionsByPet !== "function") {
+      return `
+        <div class="empty-state">
+          <div class="empty-icon">💊</div>
+          <p>Prescrições indisponíveis nesta versão.</p>
+          <button class="btn btn-primary btn-sm" onclick="app.showPrescriptionForm('${petId}')">
+            <i class="icon-plus"></i> Nova Prescrição
+          </button>
+        </div>
+      `;
+    }
+
+    let prescriptions = [];
+    try {
+      prescriptions = await store.getPrescriptionsByPet(petId);
+    } catch (err) {
+      console.warn("Prescriptions load failed, rendering empty section:", err);
+      prescriptions = [];
+    }
 
     if (prescriptions.length === 0) {
       return `
