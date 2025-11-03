@@ -7567,6 +7567,24 @@ Entre em contato conosco para agendar o reforço!`;
       }
     }
 
+    // Remover duplicados (mesmo id ou mesmo numero) mantendo a mais recente
+    const byKey = new Map();
+    for (const p of prescriptions) {
+      const key = p.id || p.numero || `${p.petId}-${p.createdAt}`;
+      const existing = byKey.get(key);
+      if (!existing) {
+        byKey.set(key, p);
+      } else {
+        const newer =
+          new Date(p.updatedAt || p.createdAt || 0) >
+          new Date(existing.updatedAt || existing.createdAt || 0)
+            ? p
+            : existing;
+        byKey.set(key, newer);
+      }
+    }
+    prescriptions = Array.from(byKey.values());
+
     // Ordenar por data de criação (mais recentes primeiro)
     const sortedPrescriptions = prescriptions.sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
@@ -8972,10 +8990,9 @@ Entre em contato conosco para agendar o reforço!`;
         })
         .join("\n\n");
 
-      const header =
-        `Olá ${client?.nomeCompleto || ""}! Seguem os detalhes da prescrição do(a) ${
-          pet?.nome || "seu pet"
-        }.\n\n`;
+      const header = `Olá ${
+        client?.nomeCompleto || ""
+      }! Seguem os detalhes da prescrição do(a) ${pet?.nome || "seu pet"}.\n\n`;
 
       const corpo =
         `Prescrição nº ${prescription.numero || "-"} — Emissão: ${formatDate(
@@ -9001,9 +9018,9 @@ Entre em contato conosco para agendar o reforço!`;
       const footer =
         `\nResponsável técnico: ${
           prescription.responsavelTecnico?.nome || ""
-        } — CRMV ${
-          prescription.responsavelTecnico?.crmv || ""
-        }/${prescription.responsavelTecnico?.uf || ""}\n` +
+        } — CRMV ${prescription.responsavelTecnico?.crmv || ""}/${
+          prescription.responsavelTecnico?.uf || ""
+        }\n` +
         `\nUso veterinário. Siga estritamente as orientações do médico-veterinário.`;
 
       const message = `${header}${corpo}${medsBlock}${footer}`.trim();
