@@ -7548,24 +7548,24 @@ Entre em contato conosco para agendar o reforço!`;
       `;
     }
 
-    // Normalizar: garantir que cada prescrição tenha um ID persistido
+    // Remover duplicados apenas em memória (sem gravar durante renderização)
+    // Preferimos usar o número (se existir), senão o id
+    const seen = new Map();
     for (const p of prescriptions) {
-      if (!p.id) {
-        p.id =
-          typeof store.generateId === "function"
-            ? store.generateId("presc")
-            : `presc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-        try {
-          if (typeof store.savePrescription === "function") {
-            await store.savePrescription(p);
-          } else if (typeof store.save === "function") {
-            await store.save("prescriptions", p);
-          }
-        } catch (e) {
-          console.warn("Falha ao normalizar ID da prescrição", e);
-        }
+      const key = p.numero || p.id || `${p.petId}-${p.createdAt}`;
+      const existing = seen.get(key);
+      if (!existing) {
+        seen.set(key, p);
+      } else {
+        const newer =
+          new Date(p.updatedAt || p.createdAt || 0) >
+          new Date(existing.updatedAt || existing.createdAt || 0)
+            ? p
+            : existing;
+        seen.set(key, newer);
       }
     }
+    prescriptions = Array.from(seen.values());
 
     // Remover duplicados (mesmo id ou mesmo numero) mantendo a mais recente
     const byKey = new Map();
@@ -7661,9 +7661,7 @@ Entre em contato conosco para agendar o reforço!`;
                 </button>
               `
                   : `
-                <button class="btn btn-sm btn-outline" onclick="app.duplicatePrescription('${prescription.id}')" title="Duplicar prescrição">
-                  <i class="icon-copy"></i> Duplicar
-                </button>
+                
                 <button class="btn btn-sm btn-success" onclick="app.generatePrescriptionPDF('${prescription.id}')" title="Gerar PDF">
                   <i class="icon-download"></i> PDF
                 </button>
@@ -9028,7 +9026,12 @@ Entre em contato conosco para agendar o reforço!`;
       // Tentar gerar página (HTML) e subir no Firebase Storage para link público
       try {
         const settings = store.getSettings ? store.getSettings() : null;
-        const html = await this.buildPrescriptionHTML(prescription, pet, client, settings);
+        const html = await this.buildPrescriptionHTML(
+          prescription,
+          pet,
+          client,
+          settings
+        );
         const publicUrl = await this.uploadPrescriptionHTML(
           prescription,
           pet,
@@ -9041,7 +9044,8 @@ Entre em contato conosco para agendar o reforço!`;
         console.warn("Falha ao publicar HTML no Storage:", e);
       }
 
-      const message = `${header}${corpo}${medsBlock}${footer}${linkBloco}`.trim();
+      const message =
+        `${header}${corpo}${medsBlock}${footer}${linkBloco}`.trim();
 
       // Obter telefone do cliente e formatar para E.164 (Brasil)
       const raw = client?.telefoneWhatsApp || "";
@@ -9162,20 +9166,42 @@ Entre em contato conosco para agendar o reforço!`;
     <div class="clinic">
       <div class="label">Prescrição Nº</div>
       <div>${prescription.numero || "-"}</div>
-      <div>Emissão: ${new Date(prescription.dataEmissao).toLocaleDateString("pt-BR")}</div>
+      <div>Emissão: ${new Date(prescription.dataEmissao).toLocaleDateString(
+        "pt-BR"
+      )}</div>
     </div>
   </div>
   <h1>Prescrição Médica Veterinária</h1>
   <div class="block">
-    <div><span class="label">Paciente:</span> ${pet?.nome || "-"} (${pet?.especie || "-"}, ${pet?.raca || "-"})</div>
-    <div><span class="label">Tutor:</span> ${client?.nomeCompleto || "-"} ${client?.telefoneWhatsApp ? `- ${client.telefoneWhatsApp}` : ""}</div>
-    <div><span class="label">Peso:</span> ${pet?.pesoAproximadoKg ? pet.pesoAproximadoKg + " kg" : "-"}</div>
+    <div><span class="label">Paciente:</span> ${pet?.nome || "-"} (${
+      pet?.especie || "-"
+    }, ${pet?.raca || "-"})</div>
+    <div><span class="label">Tutor:</span> ${client?.nomeCompleto || "-"} ${
+      client?.telefoneWhatsApp ? `- ${client.telefoneWhatsApp}` : ""
+    }</div>
+    <div><span class="label">Peso:</span> ${
+      pet?.pesoAproximadoKg ? pet.pesoAproximadoKg + " kg" : "-"
+    }</div>
   </div>
   <div class="block">
-    <div><span class="label">Diagnóstico/Motivo:</span> ${prescription.diagnostico || "-"}</div>
-    ${prescription.observacoesClinicas ? `<div><span class="label">Observações:</span> ${prescription.observacoesClinicas}</div>` : ""}
-    <div><span class="label">Validade:</span> ${prescription.validadeDias || "-"} dias</div>
-    ${prescription.medicamentoControlado ? `<div><span class="label">Medicamento controlado:</span> Sim — ${prescription.justificativaControlado || ""}</div>` : ""}
+    <div><span class="label">Diagnóstico/Motivo:</span> ${
+      prescription.diagnostico || "-"
+    }</div>
+    ${
+      prescription.observacoesClinicas
+        ? `<div><span class="label">Observações:</span> ${prescription.observacoesClinicas}</div>`
+        : ""
+    }
+    <div><span class="label">Validade:</span> ${
+      prescription.validadeDias || "-"
+    } dias</div>
+    ${
+      prescription.medicamentoControlado
+        ? `<div><span class="label">Medicamento controlado:</span> Sim — ${
+            prescription.justificativaControlado || ""
+          }</div>`
+        : ""
+    }
   </div>
   <div class="block">
     <table>
@@ -9197,7 +9223,9 @@ Entre em contato conosco para agendar o reforço!`;
   </div>
   <div class="sign">
     <div>${prescription.responsavelTecnico?.nome || ""}</div>
-    <div>CRMV ${prescription.responsavelTecnico?.crmv || ""}/${prescription.responsavelTecnico?.uf || ""}</div>
+    <div>CRMV ${prescription.responsavelTecnico?.crmv || ""}/${
+      prescription.responsavelTecnico?.uf || ""
+    }</div>
   </div>
   <div class="footer">Uso veterinário. Siga estritamente as orientações do médico-veterinário.</div>
 </body>
