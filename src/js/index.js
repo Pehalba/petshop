@@ -8458,7 +8458,19 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   async viewPrescription(prescriptionId) {
-    const prescription = await store.getPrescription(prescriptionId);
+    let prescription = null;
+    if (typeof store.getPrescription === "function") {
+      prescription = await store.getPrescription(prescriptionId);
+    } else {
+      // Fallback: tentar via getById ou getAll
+      if (typeof store.getById === "function") {
+        prescription = await store.getById("prescriptions", prescriptionId);
+      }
+      if (!prescription && typeof store.getAll === "function") {
+        const all = await store.getAll("prescriptions");
+        prescription = (all || []).find((p) => p.id === prescriptionId) || null;
+      }
+    }
     if (!prescription) {
       ui.error("Prescrição não encontrada");
       return;
@@ -8722,7 +8734,15 @@ Entre em contato conosco para agendar o reforço!`;
 
   async generatePrescriptionPDF(prescriptionId) {
     try {
-      const prescription = await store.getPrescription(prescriptionId);
+      let prescription = null;
+      if (typeof store.getPrescription === "function") {
+        prescription = await store.getPrescription(prescriptionId);
+      } else if (typeof store.getById === "function") {
+        prescription = await store.getById("prescriptions", prescriptionId);
+      } else if (typeof store.getAll === "function") {
+        const all = await store.getAll("prescriptions");
+        prescription = (all || []).find((p) => p.id === prescriptionId) || null;
+      }
       if (!prescription) {
         ui.error("Prescrição não encontrada");
         return;
