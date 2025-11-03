@@ -7552,11 +7552,9 @@ Entre em contato conosco para agendar o reforço!`;
     for (const p of prescriptions) {
       if (!p.id) {
         p.id =
-          (typeof store.generateId === "function"
+          typeof store.generateId === "function"
             ? store.generateId("presc")
-            : `presc_${Date.now()}_${Math.random()
-                .toString(36)
-                .slice(2, 6)}`);
+            : `presc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         try {
           if (typeof store.savePrescription === "function") {
             await store.savePrescription(p);
@@ -8934,7 +8932,145 @@ Entre em contato conosco para agendar o reforço!`;
   }
 
   async sendPrescriptionWhatsApp(prescriptionId) {
-    ui.info("Envio por WhatsApp será implementado na Fase 4");
+    try {
+      // Resolver prescrição (com fallbacks para versão online)
+      let prescription = null;
+      if (typeof store.getPrescription === "function") {
+        prescription = await store.getPrescription(prescriptionId);
+      } else if (typeof store.getById === "function") {
+        prescription = await store.getById("prescriptions", prescriptionId);
+      } else if (typeof store.getAll === "function") {
+        const all = await store.getAll("prescriptions");
+        prescription = (all || []).find((p) => p.id === prescriptionId) || null;
+      }
+      if (!prescription) {
+        ui.error("Prescrição não encontrada");
+        return;
+      }
+
+      // Buscar dados do pet/cliente
+      const pet = await store.getPet(prescription.petId);
+      const client = pet ? await store.getClient(pet.clienteId) : null;
+
+      // Montar mensagem
+      const formatDate = (d) =>
+        d ? new Date(d).toLocaleDateString("pt-BR") : "-";
+
+      const medicamentos = (prescription.medicamentos || [])
+        .map((m, i) => {
+          const doseTxt = m.dosePorTomada
+            ? `${m.dosePorTomada} ${(m.unidade || "").replace("/kg", "")}`
+            : `${m.dose || ""} ${m.unidade || ""}`;
+          return (
+            `${i + 1}) ${m.nome || ""} — ${m.apresentacao || ""}\n` +
+            `   Dose por tomada: ${doseTxt}\n` +
+            `   Via: ${m.via || ""} | Freq.: ${m.frequencia || ""} | Duração: ${
+              m.duracaoDias || ""
+            } dias` +
+            (m.instrucoesTutor ? `\n   Instruções: ${m.instrucoesTutor}` : "")
+          );
+        })
+        .join("\n\n");
+
+      const header =
+        `Olá ${client?.nomeCompleto || ""}! Seguem os detalhes da prescrição do(a) ${
+          pet?.nome || "seu pet"
+        }.\n\n`;
+
+      const corpo =
+        `Prescrição nº ${prescription.numero || "-"} — Emissão: ${formatDate(
+          prescription.dataEmissao
+        )}\n` +
+        `Diagnóstico/Motivo: ${prescription.diagnostico || "-"}\n` +
+        (prescription.observacoesClinicas
+          ? `Obs. clínicas: ${prescription.observacoesClinicas}\n`
+          : "") +
+        `Validade: ${prescription.validadeDias || "-"} dias\n` +
+        (prescription.medicamentoControlado
+          ? `Controlado: SIM${
+              prescription.justificativaControlado
+                ? ` — ${prescription.justificativaControlado}`
+                : ""
+            }\n`
+          : "");
+
+      const medsBlock = medicamentos
+        ? `\nMedicamentos:\n${medicamentos}\n`
+        : "";
+
+      const footer =
+        `\nResponsável técnico: ${
+          prescription.responsavelTecnico?.nome || ""
+        } — CRMV ${
+          prescription.responsavelTecnico?.crmv || ""
+        }/${prescription.responsavelTecnico?.uf || ""}\n` +
+        `\nUso veterinário. Siga estritamente as orientações do médico-veterinário.`;
+
+      const message = `${header}${corpo}${medsBlock}${footer}`.trim();
+
+      // Obter telefone do cliente e formatar para E.164 (Brasil)
+      const raw = client?.telefoneWhatsApp || "";
+      const digits = (raw || "").replace(/\D/g, "");
+      let phone = digits;
+      if (digits.startsWith("55")) {
+        phone = digits;
+      } else if (digits.length === 10 || digits.length === 11) {
+        phone = `55${digits}`;
+      }
+
+      // Pré-visualização e envio
+      const preview = document.createElement("div");
+      preview.className = "modal-overlay";
+      preview.innerHTML = `
+        <div class="modal" style="max-width: 720px;">
+          <div class="modal-header">
+            <h3>Enviar por WhatsApp</h3>
+            <button class="btn btn-outline btn-sm" onclick="app.closeModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Destino</label>
+              <input type="text" id="waPhone" class="form-input" value="${
+                client?.telefoneWhatsApp || ""
+              }" placeholder="(DDD) 9XXXX-XXXX" />
+            </div>
+            <div class="form-group">
+              <label>Mensagem</label>
+              <textarea id="waMessage" class="form-textarea" rows="12">${message}</textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" onclick="app.closeModal()">Cancelar</button>
+            <button class="btn btn-primary" id="waSendBtn">Enviar no WhatsApp</button>
+          </div>
+        </div>`;
+
+      document.body.appendChild(preview);
+
+      const sendBtn = preview.querySelector("#waSendBtn");
+      sendBtn.addEventListener("click", () => {
+        const uiPhone = preview.querySelector("#waPhone").value || "";
+        const uiDigits = uiPhone.replace(/\D/g, "");
+        const finalPhone = uiDigits.startsWith("55")
+          ? uiDigits
+          : uiDigits.length === 10 || uiDigits.length === 11
+          ? `55${uiDigits}`
+          : uiDigits;
+        const text = preview.querySelector("#waMessage").value || message;
+        if (!finalPhone || finalPhone.length < 12) {
+          ui.error("Número de WhatsApp inválido");
+          return;
+        }
+        const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(
+          text
+        )}`;
+        window.open(url, "_blank");
+        this.closeModal();
+      });
+    } catch (error) {
+      console.error("Erro ao preparar WhatsApp:", error);
+      ui.error("Erro ao preparar mensagem do WhatsApp");
+    }
   }
 
   // Formulário de cliente a partir de agendamento
