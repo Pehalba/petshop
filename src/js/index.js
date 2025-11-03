@@ -9237,10 +9237,14 @@ Entre em contato conosco para agendar o reforço!`;
       // Verificar Storage compat
       if (!window.firebase || !window.firebase.storage) return null;
       const storage = window.firebase.storage();
+      const bucket =
+        (window.firebase.app && window.firebase.app().options?.storageBucket) ||
+        'petshop-8dab6.appspot.com'; // fallback explícito
       const path = `prescricoes/${pet?.id || prescription.petId}/${
         prescription.numero || prescription.id || Date.now()
       }.html`;
-      const ref = storage.ref().child(path);
+      // Forçar referência ao bucket gs:// correto (evita domínio *.firebasestorage.app)
+      const ref = storage.refFromURL(`gs://${bucket}`).child(path);
       const metadata = { contentType: "text/html; charset=utf-8" };
       // putString com formato RAW
       await ref.putString(html, "raw", metadata);
