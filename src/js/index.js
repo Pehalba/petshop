@@ -8818,7 +8818,9 @@ Entre em contato conosco para agendar o reforço!`;
       const basePath =
         pathParts[0] ||
         (window.location.hostname.includes("github.io") ? "petshop" : "");
-      const logoPath = basePath ? `/${basePath}/logo.jpg` : "/logo.jpg";
+      // Preferir logo-prescricao.png; fallback para logo.jpg (evita cache antigo)
+      const logoPrimary = basePath ? `/${basePath}/logo-prescricao.png` : "/logo-prescricao.png";
+      const logoFallback = basePath ? `/${basePath}/logo.jpg` : "/logo.jpg";
 
       // Formatar medicamentos em lista numerada
       const itemsHtml = (prescription.medicamentos || [])
@@ -9066,16 +9068,12 @@ Entre em contato conosco para agendar o reforço!`;
 </head>
 <body>
   <div class="watermark">
-    <img src="${
-      location.origin + logoPath
-    }" alt="Watermark" onerror="this.style.display='none'" />
+    <img src="${location.origin + logoPrimary}" alt="Watermark" onerror="this.onerror=null;this.src='${location.origin + logoFallback}';" />
   </div>
   
   <div class="content-wrapper">
     <div class="header">
-      <img class="header-logo" src="${
-        location.origin + logoPath
-      }" alt="Logo" onerror="this.style.display='none'" />
+      <img class="header-logo" src="${location.origin + logoPrimary}" alt="Logo" onerror="this.onerror=null;this.src='${location.origin + logoFallback}';" />
       <div class="header-text">
         <div class="title">${clinicName}</div>
         <div class="subtitle">${clinicTagline}</div>
