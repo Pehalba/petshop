@@ -8818,9 +8818,16 @@ Entre em contato conosco para agendar o reforço!`;
       const basePath =
         pathParts[0] ||
         (window.location.hostname.includes("github.io") ? "petshop" : "");
-      // Preferir logo-prescricao.png; fallback para logo.jpg (evita cache antigo)
-      const logoPrimary = basePath ? `/${basePath}/logo-prescricao.png` : "/logo-prescricao.png";
-      const logoFallback = basePath ? `/${basePath}/logo.jpg` : "/logo.jpg";
+      // Usar "Logotipo (600 x 600 px)" como logo principal, com fallbacks
+      const logoFileName = "Logotipo (600 x 600 px)";
+      // Tenta diferentes extensões comuns
+      const logoPrimary = basePath
+        ? `/${basePath}/${logoFileName}.png`
+        : `/${logoFileName}.png`;
+      const logoFallback1 = basePath
+        ? `/${basePath}/${logoFileName}.jpg`
+        : `/${logoFileName}.jpg`;
+      const logoFallback2 = basePath ? `/${basePath}/logo.jpg` : "/logo.jpg";
 
       // Formatar medicamentos em lista numerada
       const itemsHtml = (prescription.medicamentos || [])
@@ -9064,16 +9071,41 @@ Entre em contato conosco para agendar o reforço!`;
   <meta http-equiv="Cache-Control" content="no-store" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <script>window.onload = () => { setTimeout(() => window.print(), 250); };</script>
+  <script>
+    window.onload = function() {
+      var logoPrimary = '${location.origin + logoPrimary}';
+      var logoFallback1 = '${location.origin + logoFallback1}';
+      var logoFallback2 = '${location.origin + logoFallback2}';
+      
+      var watermarkImg = document.querySelector('.watermark img');
+      var headerImg = document.querySelector('.header-logo');
+      
+      function setLogo(img, primary, fallback1, fallback2) {
+        img.src = primary;
+        img.onerror = function() {
+          img.src = fallback1;
+          img.onerror = function() {
+            img.src = fallback2;
+            img.onerror = null;
+          };
+        };
+      }
+      
+      if (watermarkImg) setLogo(watermarkImg, logoPrimary, logoFallback1, logoFallback2);
+      if (headerImg) setLogo(headerImg, logoPrimary, logoFallback1, logoFallback2);
+      
+      setTimeout(function() { window.print(); }, 250);
+    };
+  </script>
 </head>
 <body>
   <div class="watermark">
-    <img src="${location.origin + logoPrimary}" alt="Watermark" onerror="this.onerror=null;this.src='${location.origin + logoFallback}';" />
+    <img alt="Watermark" />
   </div>
   
   <div class="content-wrapper">
     <div class="header">
-      <img class="header-logo" src="${location.origin + logoPrimary}" alt="Logo" onerror="this.onerror=null;this.src='${location.origin + logoFallback}';" />
+      <img class="header-logo" alt="Logo" />
       <div class="header-text">
         <div class="title">${clinicName}</div>
         <div class="subtitle">${clinicTagline}</div>
