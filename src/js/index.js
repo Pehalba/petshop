@@ -8820,13 +8820,15 @@ Entre em contato conosco para agendar o reforço!`;
         (window.location.hostname.includes("github.io") ? "petshop" : "");
       // Usar "Logotipo (600 x 600 px)" como logo principal, com fallbacks
       const logoFileName = "Logotipo (600 x 600 px)";
+      // Codificar o nome do arquivo para URL (espaços viram %20, etc)
+      const logoFileNameEncoded = encodeURIComponent(logoFileName);
       // Tenta diferentes extensões comuns
       const logoPrimary = basePath
-        ? `/${basePath}/${logoFileName}.png`
-        : `/${logoFileName}.png`;
+        ? `/${basePath}/${logoFileNameEncoded}.png`
+        : `/${logoFileNameEncoded}.png`;
       const logoFallback1 = basePath
-        ? `/${basePath}/${logoFileName}.jpg`
-        : `/${logoFileName}.jpg`;
+        ? `/${basePath}/${logoFileNameEncoded}.jpg`
+        : `/${logoFileNameEncoded}.jpg`;
       const logoFallback2 = basePath ? `/${basePath}/logo.jpg` : "/logo.jpg";
 
       // Formatar medicamentos em lista numerada
