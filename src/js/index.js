@@ -8811,12 +8811,14 @@ Entre em contato conosco para agendar o reforço!`;
       const emissionDate = new Date(
         prescription.dataEmissao
       ).toLocaleDateString("pt-BR");
-      
+
       // Detectar caminho base do projeto (petshop ou raiz)
       // Tenta pegar do pathname atual ou usar 'petshop' como padrão para GitHub Pages
-      const pathParts = window.location.pathname.split('/').filter(Boolean);
-      const basePath = pathParts[0] || (window.location.hostname.includes('github.io') ? 'petshop' : '');
-      const logoPath = basePath ? `/${basePath}/logo.jpg` : '/logo.jpg';
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      const basePath =
+        pathParts[0] ||
+        (window.location.hostname.includes("github.io") ? "petshop" : "");
+      const logoPath = basePath ? `/${basePath}/logo.jpg` : "/logo.jpg";
 
       // Formatar medicamentos em lista numerada
       const itemsHtml = (prescription.medicamentos || [])
@@ -8856,7 +8858,7 @@ Entre em contato conosco para agendar o reforço!`;
       --rose: #D79B91;
       --rose-light: #E2AFA1;
       --rose-line: #CFA79E;
-      --bg: #F5E8E6;
+      --bg: #D79B91;
       --brown: #4D3D38;
       --white: #FFFFFF;
     }
@@ -8879,9 +8881,9 @@ Entre em contato conosco para agendar o reforço!`;
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) rotate(-5deg);
-      opacity: 0.1;
-      z-index: 0;
+      transform: translate(-50%, -50%);
+      opacity: 0.15;
+      z-index: 999;
       pointer-events: none;
       width: 500px;
       height: 500px;
@@ -8893,7 +8895,6 @@ Entre em contato conosco para agendar o reforço!`;
       width: 100%;
       height: 100%;
       object-fit: contain;
-      filter: grayscale(100%);
     }
     .content-wrapper {
       position: relative;
@@ -9042,9 +9043,9 @@ Entre em contato conosco para agendar o reforço!`;
         position: fixed;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%) rotate(-5deg);
-        opacity: 0.1;
-        z-index: 0;
+        transform: translate(-50%, -50%);
+        opacity: 0.15;
+        z-index: 999;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
