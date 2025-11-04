@@ -8811,6 +8811,12 @@ Entre em contato conosco para agendar o reforço!`;
       const emissionDate = new Date(
         prescription.dataEmissao
       ).toLocaleDateString("pt-BR");
+      
+      // Detectar caminho base do projeto (petshop ou raiz)
+      // Tenta pegar do pathname atual ou usar 'petshop' como padrão para GitHub Pages
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      const basePath = pathParts[0] || (window.location.hostname.includes('github.io') ? 'petshop' : '');
+      const logoPath = basePath ? `/${basePath}/logo.jpg` : '/logo.jpg';
 
       // Formatar medicamentos em lista numerada
       const itemsHtml = (prescription.medicamentos || [])
@@ -9059,13 +9065,15 @@ Entre em contato conosco para agendar o reforço!`;
 </head>
 <body>
   <div class="watermark">
-    <img src="${location.origin + "/logo.jpg"}" alt="Watermark" onerror="this.style.display='none'" />
+    <img src="${
+      location.origin + logoPath
+    }" alt="Watermark" onerror="this.style.display='none'" />
   </div>
   
   <div class="content-wrapper">
     <div class="header">
       <img class="header-logo" src="${
-        location.origin + "/logo.jpg"
+        location.origin + logoPath
       }" alt="Logo" onerror="this.style.display='none'" />
       <div class="header-text">
         <div class="title">${clinicName}</div>
